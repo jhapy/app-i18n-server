@@ -3,9 +3,9 @@
 <settings>
   <servers>
     <server>
-	<id>ossrh</id>
-	<username>${ossrh_username}</username>
-	<password>${ossrh_password}</password>
+	    <id>ossrh</id>
+      <username>${ossrh_username}</username>
+	    <password>${ossrh_password}</password>
     </server>
   </servers>
 </settings>

@@ -32,7 +32,7 @@ jobs:
       run: docker build . --file Dockerfile --tag image
 
     - name: Log into Docker Hub Registry
-      run: echo "${{ secrets.dockerhub_password }}" | docker login --username jhapy  --password-stdin
+      run: echo "${{ secrets.dockerhub_password }}" | docker login --username ${{ secrets.dockerhub_username }}  --password-stdin
 
     - name: Push image to Docker Hub Registry
       run: |
@@ -55,3 +55,10 @@ jobs:
 
         docker tag image $IMAGE_ID:$VERSION
         docker push $IMAGE_ID:$VERSION
+    - name: Slack Success
+      if: always()
+      uses: kpritam/slack-job-status-action@v1
+      with:
+        job-status: ${{ job.status }}
+        slack-bot-token: ${{ secrets.slack_bot_token }}
+        channel: framework-builds

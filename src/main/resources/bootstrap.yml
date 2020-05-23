@@ -1,0 +1,12 @@
+spring:
+  application.name: app-i18n-server
+  cloud:
+    config:
+      uri: http://utils-config-server:8888
+      fail-fast: true
+      username: user
+      password: none
+    refresh:
+      enabled: false
+  main:
+    allow-bean-definition-overriding: true

@@ -44,7 +44,7 @@
 
   <springProfile name="local">
     <logger level="DEBUG" name="org.jhapy"/>
-
+    <logger level="INFO" name="org.springframework"/>
     <root level="INFO">
       <appender-ref ref="CONSOLE"/>
     </root>

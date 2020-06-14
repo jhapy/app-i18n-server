@@ -1,18 +1,34 @@
+/*
+ * Copyright 2020-2020 the original author or authors from the JHapy project.
+ *
+ * This file is part of the JHapy project, see https://www.jhapy.org/ for more information.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jhapy.i18n.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.TableGenerator;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.jhapy.i18n.listeners.ActionTrlListener;
+import org.javers.core.metamodel.annotation.ShallowReference;
+import org.javers.core.metamodel.annotation.TypeName;
 import org.jhapy.i18n.listeners.ElementTrlListener;
 
 /**
@@ -24,16 +40,13 @@ import org.jhapy.i18n.listeners.ElementTrlListener;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-@TableGenerator(name = "ElementTrlKeyGen", table = "Sequence", pkColumnName = "COLUMN_NAME", pkColumnValue = "ELEMENT_TRL_ID", valueColumnName = "SEQ_VAL", initialValue = 0, allocationSize = 1)
 @EntityListeners(ElementTrlListener.class)
+@TypeName("ElementTrl")
 public class ElementTrl extends EntityTranslation {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.TABLE, generator = "ElementTrlKeyGen")
-  private Long id;
 
   @ManyToOne
   @JoinColumn(name = "ELEMENT_ID", nullable = false)
+  @ShallowReference
   private Element element;
   /**
    * Element Value
@@ -41,4 +54,10 @@ public class ElementTrl extends EntityTranslation {
   private String value;
 
   private String tooltip;
+
+  @EqualsAndHashCode.Include
+  @ToString.Include
+  private String element() {
+    return (element != null && element.getId() != null) ? element.getId().toString() : null;
+  }
 }

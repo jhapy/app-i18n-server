@@ -2,10 +2,10 @@ spring:
   application.name: app-i18n-server
   cloud:
     config:
-      uri: http://utils-config-server:8888
+      uri: http://utils-config-server:8888/config
       fail-fast: true
-      username: user
-      password: none
+      username: admin
+      password: ${jhapy.registry.password}
     refresh:
       enabled: false
   main:

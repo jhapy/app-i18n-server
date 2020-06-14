@@ -1,3 +1,21 @@
+/*
+ * Copyright 2020-2020 the original author or authors from the JHapy project.
+ *
+ * This file is part of the JHapy project, see https://www.jhapy.org/ for more information.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jhapy.i18n.service;
 
 import java.io.ByteArrayInputStream;
@@ -13,6 +31,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.jhapy.commons.utils.HasLogger;
+import org.jhapy.i18n.domain.Action;
+import org.jhapy.i18n.domain.ActionTrl;
+import org.jhapy.i18n.repository.ActionRepository;
+import org.jhapy.i18n.repository.ActionTrlRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -20,11 +43,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.jhapy.commons.utils.HasLogger;
-import org.jhapy.i18n.domain.Action;
-import org.jhapy.i18n.domain.ActionTrl;
-import org.jhapy.i18n.repository.ActionRepository;
-import org.jhapy.i18n.repository.ActionTrlRepository;
 
 /**
  * @author jHapy Lead Dev.
@@ -157,13 +175,12 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
         break;
       }
     }
-    if ( isAllTranslated && ! action.getIsTranslated() ) {
+    if (isAllTranslated && !action.getIsTranslated()) {
       action.setIsTranslated(true);
-      actionRepository.save(action );
-    }
-     else if ( ! isAllTranslated && action.getIsTranslated()  ) {
+      actionRepository.save(action);
+    } else if (!isAllTranslated && action.getIsTranslated()) {
       action.setIsTranslated(false);
-      actionRepository.save(action );
+      actionRepository.save(action);
     }
   }
 
@@ -275,7 +292,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
           actionTrlRepository.save(actionTrl);
         } else {
           actionTrl = _actionTrl.get();
-          if ( ! actionTrl.getIsTranslated() ) {
+          if (!actionTrl.getIsTranslated()) {
             actionTrl.setValue(valueCell == null ? "" : valueCell.getStringCellValue());
             actionTrl.setTooltip(tooltipCell == null ? null : tooltipCell.getStringCellValue());
             actionTrl.setIso3Language(language);

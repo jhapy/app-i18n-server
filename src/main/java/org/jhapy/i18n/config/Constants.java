@@ -16,33 +16,20 @@
  * limitations under the License.
  */
 
-package org.jhapy.i18n.domain;
-
-import javax.persistence.MappedSuperclass;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+package org.jhapy.i18n.config;
 
 /**
- * Base class for all translations
- *
- * @author jHapy Lead Dev.
- * @version 1.0
- * @since 2019-03-12
+ * Application constants.
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-@MappedSuperclass
-public abstract class EntityTranslation extends BaseEntity {
+public final class Constants {
 
-  /**
-   * Is default translation
-   */
-  private Boolean isDefault;
+  // Regex for acceptable logins
+  public static final String LOGIN_REGEX = "^[_.@A-Za-z0-9-]*$";
 
-  /**
-   * Language
-   */
-  private String iso3Language;
+  public static final String SYSTEM_ACCOUNT = "system";
+  public static final String DEFAULT_LANGUAGE = "fr";
+  public static final String ANONYMOUS_USER = "anonymoususer";
 
-  private Boolean isTranslated;
+  private Constants() {
+  }
 }

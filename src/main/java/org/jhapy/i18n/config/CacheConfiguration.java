@@ -29,9 +29,8 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import org.apache.commons.lang3.StringUtils;
 import org.jhapy.commons.config.AppProperties;
+import org.jhapy.commons.utils.HasLogger;
 import org.jhapy.commons.utils.SpringProfileConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -47,9 +46,7 @@ import org.springframework.core.env.Profiles;
 
 @Configuration
 @EnableCaching
-public class CacheConfiguration implements DisposableBean {
-
-  private final Logger log = LoggerFactory.getLogger(CacheConfiguration.class);
+public class CacheConfiguration implements DisposableBean, HasLogger {
 
   private final Environment env;
 
@@ -77,23 +74,26 @@ public class CacheConfiguration implements DisposableBean {
 
   @Override
   public void destroy() throws Exception {
-    log.info("Closing Cache Manager");
+    String loggerPrefix = getLoggerPrefix("destroy");
+    logger().info(loggerPrefix+"Closing Cache Manager");
     Hazelcast.shutdownAll();
   }
 
   @Bean
   public CacheManager cacheManager(HazelcastInstance hazelcastInstance) {
-    log.debug("Starting HazelcastCacheManager");
+    String loggerPrefix = getLoggerPrefix("cacheManager");
+    logger().info(loggerPrefix+"Starting HazelcastCacheManager");
     return new com.hazelcast.spring.cache.HazelcastCacheManager(hazelcastInstance);
   }
 
   @Bean
   public HazelcastInstance hazelcastInstance(AppProperties appProperties) {
-    log.debug("Configuring Hazelcast");
-    HazelcastInstance hazelCastInstance = Hazelcast
-        .getHazelcastInstanceByName("app-i18n-server");
+    String loggerPrefix = getLoggerPrefix("hazelcastInstance");
+
+    logger().info(loggerPrefix+"Configuring Hazelcast");
+    HazelcastInstance hazelCastInstance = Hazelcast.getHazelcastInstanceByName(env.getProperty("spring.application.name"));
     if (hazelCastInstance != null) {
-      log.debug("Hazelcast already initialized");
+      logger().info(loggerPrefix+"Hazelcast already initialized");
       return hazelCastInstance;
     }
     Config config = new Config();
@@ -105,17 +105,17 @@ public class CacheConfiguration implements DisposableBean {
 
     config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
     if (this.registration == null) {
-      log.warn("No discovery service is set up, Hazelcast cannot create a cluster.");
+      logger().warn(loggerPrefix+"No discovery service is set up, Hazelcast cannot create a cluster.");
     } else {
       // The serviceId is by default the application's name,
       // see the "spring.application.name" standard Spring property
       String serviceId = registration.getServiceId();
-      log.debug("Configuring Hazelcast clustering for instanceId: {}", serviceId);
+      logger().debug(loggerPrefix+"Configuring Hazelcast clustering for instanceId: {}", serviceId);
       // In development, everything goes through 127.0.0.1, with a different port
       if (env
-          .acceptsProfiles(Profiles.of(SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT_EUREKA))) {
-        log.debug(
-            "Application is running with the \"eureka\" profile, Hazelcast cluster will use Eureka Client");
+          .acceptsProfiles(Profiles.of(SpringProfileConstants.SPRING_PROFILE_TEST,SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT,
+              SpringProfileConstants.SPRING_PROFILE_STAGING,SpringProfileConstants.SPRING_PROFILE_PRODUCTION))) {
+        logger().debug("Application is running with the \"docker swarm\" profile, Hazelcast cluster will use Eureka Client");
 
         config.setProperty("hazelcast.discovery.enabled", "true");
         config.setProperty("hazelcast.shutdownhook.enabled", "true");
@@ -127,20 +127,11 @@ public class CacheConfiguration implements DisposableBean {
 
         if (StringUtils.isNotBlank(appProperties.getHazelcast().getInterfaces())) {
           InterfacesConfig interfaceConfig = config.getNetworkConfig().getInterfaces();
-          interfaceConfig.setEnabled(true)
-              .addInterface(appProperties.getHazelcast().getInterfaces());
+          logger().info(loggerPrefix+"Use specific address : " + config.getNetworkConfig().getInterfaces().toString());
+          interfaceConfig.setEnabled(true).addInterface(appProperties.getHazelcast().getInterfaces());
         }
-/*
-        EurekaOneDiscoveryStrategyFactory.setEurekaClient(eurekaClient);
-
-        config.getNetworkConfig().getJoin().getEurekaConfig().setEnabled(true)
-            .setProperty("self-registration", "true")
-            .setProperty("namespace", "hazelcast")
-            .setProperty("use-metadata-for-host-and-port", "true");
- */
-      } else if (env
-          .acceptsProfiles(Profiles.of(SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT_LOCAL))) {
-        log.debug("Application is running with the \"local\" profile, Hazelcast " +
+      }else {
+        logger().debug(loggerPrefix+"Application is running with the \"local\" profile, Hazelcast " +
             "cluster will only work with localhost instances");
 
         System.setProperty("hazelcast.local.localAddress", "127.0.0.1");
@@ -148,15 +139,7 @@ public class CacheConfiguration implements DisposableBean {
         config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
         for (ServiceInstance instance : discoveryClient.getInstances(serviceId)) {
           String clusterMember = "127.0.0.1:" + (instance.getPort() + 5701);
-          log.debug("Adding Hazelcast (dev) cluster member {}", clusterMember);
-          config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(clusterMember);
-        }
-      } else { // Production configuration, one host per instance all using port 5701
-        config.getNetworkConfig().setPort(5701);
-        config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
-        for (ServiceInstance instance : discoveryClient.getInstances(serviceId)) {
-          String clusterMember = instance.getHost() + ":5701";
-          log.debug("Adding Hazelcast (prod) cluster member {}", clusterMember);
+          logger().debug("Adding Hazelcast (dev) cluster member {}", clusterMember);
           config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(clusterMember);
         }
       }
@@ -182,7 +165,7 @@ public class CacheConfiguration implements DisposableBean {
 
   private MapConfig initializeDefaultMapConfig(AppProperties appProperties) {
     MapConfig mapConfig = new MapConfig();
-
+    mapConfig.setStatisticsEnabled(true);
         /*
         Number of backups. If 1 is set as the backup-count for example,
         then all entries of the map will be copied to another JVM for

@@ -99,7 +99,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
   @Transactional
   @Override
   public ElementTrl getByNameAndIso3Language(String name, String iso3Language) {
-    String loggerPrefix = getLoggerPrefix("getByNameAndIso3Language");
+    String loggerPrefix = getLoggerPrefix("getByNameAndIso3Language", name, iso3Language);
 
     Assert.notNull(name, "Name mandatory");
     Assert.notNull(iso3Language, "ISO3 language is mandatory");

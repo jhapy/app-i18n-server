@@ -127,8 +127,11 @@ public class CacheConfiguration implements DisposableBean, HasLogger {
 
         if (StringUtils.isNotBlank(appProperties.getHazelcast().getInterfaces())) {
           InterfacesConfig interfaceConfig = config.getNetworkConfig().getInterfaces();
-          logger().info(loggerPrefix+"Use specific address : " + config.getNetworkConfig().getInterfaces().toString());
-          interfaceConfig.setEnabled(true).addInterface(appProperties.getHazelcast().getInterfaces());
+          interfaceConfig.setEnabled(true)
+              .addInterface(appProperties.getHazelcast().getInterfaces());
+          logger().info(
+              loggerPrefix + "Use specific address : " + config.getNetworkConfig().getInterfaces()
+                  .toString());
         }
       }else {
         logger().debug(loggerPrefix+"Application is running with the \"local\" profile, Hazelcast " +

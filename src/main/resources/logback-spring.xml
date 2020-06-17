@@ -26,8 +26,10 @@
     </appender>
   </springProfile>
 
-  <springProfile name="dev,staging">
+  <springProfile name="dev,test,staging">
     <logger level="DEBUG" name="org.jhapy"/>
+    <logger level="INFO" name="org.springframework"/>
+    <logger level="WARN" name="org.hibernate.engine.internal"/>
 
     <root level="INFO">
       <appender-ref ref="CONSOLE"/>
@@ -36,6 +38,10 @@
   </springProfile>
 
   <springProfile name="prod">
+    <logger level="INFO" name="org.jhapy"/>
+    <logger level="INFO" name="org.springframework"/>
+    <logger level="WARN" name="org.hibernate.engine.internal"/>
+
     <root level="INFO">
       <appender-ref ref="CONSOLE"/>
       <appender-ref ref="GELF"/>
@@ -45,6 +51,8 @@
   <springProfile name="local">
     <logger level="DEBUG" name="org.jhapy"/>
     <logger level="INFO" name="org.springframework"/>
+    <logger level="WARN" name="org.hibernate.engine.internal"/>
+
     <root level="INFO">
       <appender-ref ref="CONSOLE"/>
     </root>

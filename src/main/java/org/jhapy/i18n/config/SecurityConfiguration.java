@@ -18,9 +18,11 @@
 
 package org.jhapy.i18n.config;
 
+import java.util.Arrays;
 import org.jhapy.commons.config.AppProperties;
 import org.jhapy.commons.security.oauth2.AudienceValidator;
 import org.jhapy.commons.security.oauth2.JwtGrantedAuthorityConverter;
+import org.jhapy.commons.utils.HasLogger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -40,12 +42,15 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Import(SecurityProblemSupport.class)
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter implements HasLogger {
 
   @Value("${spring.security.oauth2.client.provider.oidc.issuer-uri}")
   private String issuerUri;
@@ -64,6 +69,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     http
         .csrf()
         .disable()
+        .cors().configurationSource(corsConfigurationSource())
+        .and()
         .exceptionHandling()
         .authenticationEntryPoint(problemSupport)
         .accessDeniedHandler(problemSupport)
@@ -120,5 +127,25 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     jwtDecoder.setJwtValidator(withAudience);
 
     return jwtDecoder;
+  }
+
+  @Bean
+  CorsConfigurationSource corsConfigurationSource() {
+    String loggerPrefix = getLoggerPrefix("corsConfigurationSource");
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    CorsConfiguration config = appProperties.getCors();
+    config.applyPermitDefaultValues();
+
+    if (config.getAllowedOrigins() != null && !config.getAllowedOrigins().isEmpty()) {
+      logger().debug(loggerPrefix + "Registering CORS filter");
+      source.registerCorsConfiguration("/config/**", config);
+      source.registerCorsConfiguration("/eureka/**", config);
+      source.registerCorsConfiguration("/api/**", config);
+      source.registerCorsConfiguration("/management/**", config);
+      source.registerCorsConfiguration("/v2/api-docs", config);
+      source.registerCorsConfiguration("/swagger-ui.html**", config);
+    }
+
+    return source;
   }
 }

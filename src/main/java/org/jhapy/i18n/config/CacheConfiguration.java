@@ -75,14 +75,14 @@ public class CacheConfiguration implements DisposableBean, HasLogger {
   @Override
   public void destroy() throws Exception {
     String loggerPrefix = getLoggerPrefix("destroy");
-    logger().info(loggerPrefix+"Closing Cache Manager");
+    logger().info(loggerPrefix + "Closing Cache Manager");
     Hazelcast.shutdownAll();
   }
 
   @Bean
   public CacheManager cacheManager(HazelcastInstance hazelcastInstance) {
     String loggerPrefix = getLoggerPrefix("cacheManager");
-    logger().info(loggerPrefix+"Starting HazelcastCacheManager");
+    logger().info(loggerPrefix + "Starting HazelcastCacheManager");
     return new com.hazelcast.spring.cache.HazelcastCacheManager(hazelcastInstance);
   }
 
@@ -90,10 +90,11 @@ public class CacheConfiguration implements DisposableBean, HasLogger {
   public HazelcastInstance hazelcastInstance(AppProperties appProperties) {
     String loggerPrefix = getLoggerPrefix("hazelcastInstance");
 
-    logger().info(loggerPrefix+"Configuring Hazelcast");
-    HazelcastInstance hazelCastInstance = Hazelcast.getHazelcastInstanceByName(env.getProperty("spring.application.name"));
+    logger().info(loggerPrefix + "Configuring Hazelcast");
+    HazelcastInstance hazelCastInstance = Hazelcast
+        .getHazelcastInstanceByName(env.getProperty("spring.application.name"));
     if (hazelCastInstance != null) {
-      logger().info(loggerPrefix+"Hazelcast already initialized");
+      logger().info(loggerPrefix + "Hazelcast already initialized");
       return hazelCastInstance;
     }
     Config config = new Config();
@@ -105,17 +106,22 @@ public class CacheConfiguration implements DisposableBean, HasLogger {
 
     config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
     if (this.registration == null) {
-      logger().warn(loggerPrefix+"No discovery service is set up, Hazelcast cannot create a cluster.");
+      logger().warn(
+          loggerPrefix + "No discovery service is set up, Hazelcast cannot create a cluster.");
     } else {
       // The serviceId is by default the application's name,
       // see the "spring.application.name" standard Spring property
       String serviceId = registration.getServiceId();
-      logger().debug(loggerPrefix+"Configuring Hazelcast clustering for instanceId: {}", serviceId);
+      logger()
+          .debug(loggerPrefix + "Configuring Hazelcast clustering for instanceId: {}", serviceId);
       // In development, everything goes through 127.0.0.1, with a different port
       if (env
-          .acceptsProfiles(Profiles.of(SpringProfileConstants.SPRING_PROFILE_TEST,SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT,
-              SpringProfileConstants.SPRING_PROFILE_STAGING,SpringProfileConstants.SPRING_PROFILE_PRODUCTION))) {
-        logger().debug("Application is running with the \"docker swarm\" profile, Hazelcast cluster will use Eureka Client");
+          .acceptsProfiles(Profiles.of(SpringProfileConstants.SPRING_PROFILE_TEST,
+              SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT,
+              SpringProfileConstants.SPRING_PROFILE_STAGING,
+              SpringProfileConstants.SPRING_PROFILE_PRODUCTION))) {
+        logger().debug(
+            "Application is running with the \"docker swarm\" profile, Hazelcast cluster will use Eureka Client");
 
         config.setProperty("hazelcast.discovery.enabled", "true");
         config.setProperty("hazelcast.shutdownhook.enabled", "true");
@@ -133,9 +139,10 @@ public class CacheConfiguration implements DisposableBean, HasLogger {
               loggerPrefix + "Use specific address : " + config.getNetworkConfig().getInterfaces()
                   .toString());
         }
-      }else {
-        logger().debug(loggerPrefix+"Application is running with the \"local\" profile, Hazelcast " +
-            "cluster will only work with localhost instances");
+      } else {
+        logger()
+            .debug(loggerPrefix + "Application is running with the \"local\" profile, Hazelcast " +
+                "cluster will only work with localhost instances");
 
         System.setProperty("hazelcast.local.localAddress", "127.0.0.1");
         config.getNetworkConfig().setPort(serverProperties.getPort() + 5701);

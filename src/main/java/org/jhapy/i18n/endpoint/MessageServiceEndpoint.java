@@ -18,6 +18,8 @@
 
 package org.jhapy.i18n.endpoint;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.jhapy.commons.endpoint.BaseEndpoint;
 import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.serviceQuery.ServiceResult;
@@ -54,6 +56,10 @@ public class MessageServiceEndpoint extends BaseEndpoint {
     this.messageService = messageService;
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findAnyMatching")
   public ResponseEntity<ServiceResult> findAnyMatching(@RequestBody FindAnyMatchingQuery query) {
@@ -69,6 +75,10 @@ public class MessageServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/countAnyMatching")
   public ResponseEntity<ServiceResult> countAnyMatching(@RequestBody CountAnyMatchingQuery query) {
@@ -81,6 +91,10 @@ public class MessageServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
@@ -93,6 +107,9 @@ public class MessageServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAuthority('ROLE_I18N_WRITE')")
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
@@ -108,6 +125,9 @@ public class MessageServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAuthority('ROLE_I18N_WRITE')")
   @PostMapping(value = "/delete")
   public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByIdQuery query) {

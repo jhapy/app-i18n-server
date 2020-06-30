@@ -18,11 +18,9 @@
 
 package org.jhapy.i18n.endpoint;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.jhapy.commons.endpoint.BaseEndpoint;
 import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.domain.i18n.Action;
@@ -60,9 +58,14 @@ public class ActionServiceEndpoint extends BaseEndpoint {
     this.actionService = actionService;
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findAnyMatching")
-  public ResponseEntity<ServiceResult> findAnyMatching(@ApiParam(value = "Query parameter", required = true) @RequestBody FindAnyMatchingQuery query) {
+  public ResponseEntity<ServiceResult> findAnyMatching(
+      @Parameter(name = "Query parameter", required = true) @RequestBody FindAnyMatchingQuery query) {
     String loggerPrefix = getLoggerPrefix("findAnyMatching");
     try {
       Page<org.jhapy.i18n.domain.Action> result = actionService
@@ -75,6 +78,10 @@ public class ActionServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/countAnyMatching")
   public ResponseEntity<ServiceResult> countAnyMatching(@RequestBody CountAnyMatchingQuery query) {
@@ -87,6 +94,10 @@ public class ActionServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
@@ -99,6 +110,9 @@ public class ActionServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAuthority('ROLE_I18N_WRITE')")
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(

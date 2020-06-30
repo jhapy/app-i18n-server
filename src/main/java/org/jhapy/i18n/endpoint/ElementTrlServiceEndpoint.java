@@ -18,6 +18,8 @@
 
 package org.jhapy.i18n.endpoint;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.List;
 import org.jhapy.commons.endpoint.BaseEndpoint;
 import org.jhapy.commons.utils.OrikaBeanMapper;
@@ -33,6 +35,7 @@ import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.service.ElementTrlService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,6 +59,10 @@ public class ElementTrlServiceEndpoint extends BaseEndpoint {
     this.elementTrlService = elementTrlService;
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findByElement")
   public ResponseEntity<ServiceResult> findByElement(@RequestBody FindByElementQuery query) {
@@ -70,6 +77,10 @@ public class ElementTrlServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/countByElement")
   public ResponseEntity<ServiceResult> countByElement(@RequestBody CountByElementQuery query) {
@@ -82,6 +93,10 @@ public class ElementTrlServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findByIso3")
   public ResponseEntity<ServiceResult> findByIso3(@RequestBody FindByIso3Query query) {
@@ -96,6 +111,11 @@ public class ElementTrlServiceEndpoint extends BaseEndpoint {
       return handleResult(loggerPrefix, t);
     }
   }
+
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
 
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getByNameAndIso3")
@@ -112,6 +132,10 @@ public class ElementTrlServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
+          "ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
@@ -125,6 +149,9 @@ public class ElementTrlServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAuthority('ROLE_I18N_WRITE')")
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
@@ -140,6 +167,9 @@ public class ElementTrlServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
+  )
   @PreAuthorize("hasAuthority('ROLE_I18N_WRITE')")
   @PostMapping(value = "/delete")
   public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByIdQuery query) {

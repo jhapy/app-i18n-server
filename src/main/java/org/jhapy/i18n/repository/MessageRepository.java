@@ -42,9 +42,9 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
   long countByNameLike(String name);
 
-  @Query("SELECT DISTINCT a FROM Message a INNER JOIN MessageTrl t ON a.id = t.message.id WHERE a.name like :filter or t.value like :filter")
+  @Query("SELECT DISTINCT a FROM Message a INNER JOIN MessageTrl t ON a.id = t.message.id WHERE a.category like :filter or a.name like :filter or t.value like :filter")
   Page<Message> findAnyMatching(String filter, Pageable pageable);
 
-  @Query("SELECT COUNT(DISTINCT a) FROM Message a INNER JOIN MessageTrl t ON a.id = t.message.id WHERE a.name like :filter or t.value like :filter")
+  @Query("SELECT COUNT(DISTINCT a) FROM Message a INNER JOIN MessageTrl t ON a.id = t.message.id WHERE a.category like :filter or a.name like :filter or t.value like :filter")
   long countAnyMatching(String filter);
 }

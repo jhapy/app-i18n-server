@@ -64,10 +64,14 @@ public class MessageServiceEndpoint extends BaseEndpoint {
   @PostMapping(value = "/findAnyMatching")
   public ResponseEntity<ServiceResult> findAnyMatching(@RequestBody FindAnyMatchingQuery query) {
     String loggerPrefix = getLoggerPrefix("findAnyMatching");
+
+    logger().debug(loggerPrefix + "Query = " + query);
     try {
       Page<Message> result = messageService
           .findAnyMatching(query.getFilter(), mapperFacade.map(query.getPageable(),
               Pageable.class, getOrikaContext(query)));
+
+      logger().debug(loggerPrefix + "Result size = " + result.getContent().size());
       return handleResult(loggerPrefix,
           mapperFacade.map(result, org.jhapy.dto.utils.Page.class, getOrikaContext(query)));
     } catch (Throwable t) {

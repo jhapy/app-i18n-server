@@ -50,6 +50,7 @@
 
   <springProfile name="local">
     <logger level="DEBUG" name="org.jhapy"/>
+    <logger level="DEBUG" name="org.springframework"/>
     <logger level="WARN" name="org.hibernate.engine.internal"/>
 
     <root level="INFO">

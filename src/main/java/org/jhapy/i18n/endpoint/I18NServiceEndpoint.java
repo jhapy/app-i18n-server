@@ -49,7 +49,7 @@ public class I18NServiceEndpoint extends BaseEndpoint {
     this.i18nService = i18nService;
   }
 
-  @PreAuthorize("hasAuthority('ROLE_I18N_READ')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getI18NFile")
   public ResponseEntity<ServiceResult> getI18NFile(@RequestBody BaseRemoteQuery query) {
     String loggerPrefix = getLoggerPrefix("getI18NFile");

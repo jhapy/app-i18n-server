@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -247,13 +248,13 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
         String category = categoryCell == null ? null : categoryCell.getStringCellValue();
 
         String name = name0Cell.getStringCellValue();
-        if (name1Cell != null) {
+        if (name1Cell != null && StringUtils.isNotBlank(name1Cell.getStringCellValue())) {
           name += "." + name1Cell.getStringCellValue();
         }
-        if (name2Cell != null) {
+        if (name2Cell != null && StringUtils.isNotBlank(name2Cell.getStringCellValue())) {
           name += "." + name2Cell.getStringCellValue();
         }
-        if (name3Cell != null) {
+        if (name3Cell != null && StringUtils.isNotBlank(name3Cell.getStringCellValue())) {
           name += "." + name3Cell.getStringCellValue();
         }
 

@@ -55,7 +55,7 @@ steps:
     args: ['push', 'eu.gcr.io/$PROJECT_ID/${_ARTIFACT_ID}:latest']
   - id: 'Update the image'
     name: 'gcr.io/cloud-builders/gcloud'
-    args: ['beta', 'compute', '--project', '$PROJECT_ID', 'ssh', '--zone', "$_CLOUDSDK_COMPUTE_ZONE", "jhapy@$_REMOTE_SERVER", "--command", "docker service update --force --with-registry-auth --image eu.gcr.io/$PROJECT_ID/${_ARTIFACT_ID}:latest jhapy_${_ARTIFACT_ID}"]
+            args: ['beta', 'compute', '--project', '$PROJECT_ID', 'ssh', '--zone', "$_CLOUDSDK_COMPUTE_ZONE", "jhapy@$_REMOTE_SERVER", "--command", "docker service update --force --with-registry-auth --image eu.gcr.io/$PROJECT_ID/${_ARTIFACT_ID}:latest jhapy_${_ARTIFACT_ID}"]
 
 images:
   - 'eu.gcr.io/$PROJECT_ID/${_ARTIFACT_ID}:latest'

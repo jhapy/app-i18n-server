@@ -272,7 +272,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
           action.setCategory(category);
           action.setIsTranslated(true);
 
-          logger().debug(loggerPrefix+"Create : " + action );
+          logger().debug(loggerPrefix + "Create : " + action);
 
           action = actionRepository.save(action);
         } else {
@@ -280,7 +280,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
           action.setCategory(category);
           action.setIsTranslated(true);
 
-          logger().debug(loggerPrefix+"Update : " + action );
+          logger().debug(loggerPrefix + "Update : " + action);
 
           action = actionRepository.save(action);
         }
@@ -296,7 +296,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
           actionTrl.setAction(action);
           actionTrl.setIsTranslated(true);
 
-          logger().debug(loggerPrefix+"Create : " + actionTrl );
+          logger().debug(loggerPrefix + "Create : " + actionTrl);
 
           actionTrlRepository.save(actionTrl);
         } else {
@@ -308,7 +308,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
             actionTrl.setAction(action);
             actionTrl.setIsTranslated(true);
 
-            logger().debug(loggerPrefix+"Update : " + actionTrl );
+            logger().debug(loggerPrefix + "Update : " + actionTrl);
 
             actionTrlRepository.save(actionTrl);
           }

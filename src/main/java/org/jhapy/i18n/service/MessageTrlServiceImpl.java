@@ -265,7 +265,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
           message.setCategory(category);
           message.setIsTranslated(true);
 
-          logger().debug(loggerPrefix+"Create : " + message );
+          logger().debug(loggerPrefix + "Create : " + message);
 
           message = messageRepository.save(message);
         } else {
@@ -273,7 +273,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
           message.setCategory(category);
           message.setIsTranslated(true);
 
-          logger().debug(loggerPrefix+"Update : " + message );
+          logger().debug(loggerPrefix + "Update : " + message);
 
           message = messageRepository.save(message);
         }
@@ -288,7 +288,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
           messageTrl.setMessage(message);
           messageTrl.setIsTranslated(true);
 
-          logger().debug(loggerPrefix+"Create Trl : " + messageTrl );
+          logger().debug(loggerPrefix + "Create Trl : " + messageTrl);
 
           messageTrlRepository.save(messageTrl);
         } else {
@@ -299,7 +299,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
             messageTrl.setMessage(message);
             messageTrl.setIsTranslated(true);
 
-            logger().debug(loggerPrefix+"Update Trl : " + messageTrl );
+            logger().debug(loggerPrefix + "Update Trl : " + messageTrl);
 
             messageTrlRepository.save(messageTrl);
           }

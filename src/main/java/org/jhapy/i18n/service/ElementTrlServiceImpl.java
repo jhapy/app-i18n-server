@@ -268,7 +268,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
           element.setCategory(category);
           element.setIsTranslated(true);
 
-          logger().debug(loggerPrefix+"Create : " + element );
+          logger().debug(loggerPrefix + "Create : " + element);
 
           element = elementRepository.save(element);
         } else {
@@ -276,7 +276,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
           element.setCategory(category);
           element.setIsTranslated(true);
 
-          logger().debug(loggerPrefix+"Update : " + element );
+          logger().debug(loggerPrefix + "Update : " + element);
 
           element = elementRepository.save(element);
         }
@@ -292,7 +292,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
           elementTrl.setElement(element);
           elementTrl.setIsTranslated(true);
 
-          logger().debug(loggerPrefix+"Create Trl : " + elementTrl );
+          logger().debug(loggerPrefix + "Create Trl : " + elementTrl);
 
           elementTrlRepository.save(elementTrl);
         } else {
@@ -304,7 +304,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
             elementTrl.setElement(element);
             elementTrl.setIsTranslated(true);
 
-            logger().debug(loggerPrefix+"Update Trl : " + elementTrl );
+            logger().debug(loggerPrefix + "Update Trl : " + elementTrl);
 
             elementTrlRepository.save(elementTrl);
           }

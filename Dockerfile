@@ -1,9 +1,10 @@
-FROM openjdk:14-jdk-oracle
+FROM openjdk:14-jdk-slim-buster
 
 MAINTAINER jHapy Lead Dev <jhapy@jhapy.org>
 
-RUN yum update -y && \
-    yum clean all
+RUN apt-get update -y && \
+    apt-get install -y wget curl &&
+    apt-get autoclean
 
 ENV JAVA_OPTS=""
 ENV APP_OPTS=""

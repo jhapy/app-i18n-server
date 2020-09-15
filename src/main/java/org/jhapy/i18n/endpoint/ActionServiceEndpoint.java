@@ -62,7 +62,7 @@ public class ActionServiceEndpoint extends BaseEndpoint {
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
           "ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findAnyMatching")
   public ResponseEntity<ServiceResult> findAnyMatching(
       @Parameter(name = "Query parameter", required = true) @RequestBody FindAnyMatchingQuery query) {
@@ -82,7 +82,7 @@ public class ActionServiceEndpoint extends BaseEndpoint {
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
           "ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/countAnyMatching")
   public ResponseEntity<ServiceResult> countAnyMatching(@RequestBody CountAnyMatchingQuery query) {
     String loggerPrefix = getLoggerPrefix("countAnyMatching");
@@ -98,7 +98,7 @@ public class ActionServiceEndpoint extends BaseEndpoint {
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
           "ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
     String loggerPrefix = getLoggerPrefix("getById");
@@ -113,7 +113,7 @@ public class ActionServiceEndpoint extends BaseEndpoint {
   @Operation(
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAuthority('ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
       @RequestBody SaveQuery<Action> query) {
@@ -129,7 +129,7 @@ public class ActionServiceEndpoint extends BaseEndpoint {
     }
   }
 
-  @PreAuthorize("hasAuthority('ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/delete")
   public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByIdQuery query) {
     String loggerPrefix = getLoggerPrefix("delete");

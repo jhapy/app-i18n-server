@@ -62,7 +62,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
           "ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findByAction")
   public ResponseEntity<ServiceResult> findByAction(@RequestBody FindByActionQuery query) {
     String loggerPrefix = getLoggerPrefix("findByAction");
@@ -81,7 +81,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
           "ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/countByAction")
   public ResponseEntity<ServiceResult> countByAction(@RequestBody CountByActionQuery query) {
     String loggerPrefix = getLoggerPrefix("countByAction");
@@ -97,7 +97,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
           "ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findByIso3")
   public ResponseEntity<ServiceResult> findByIso3(@RequestBody FindByIso3Query query) {
     String loggerPrefix = getLoggerPrefix("findByIso3");
@@ -116,7 +116,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
           "ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getByNameAndIso3")
   public ResponseEntity<ServiceResult> getByNameAndIso3(@RequestBody GetByNameAndIso3Query query) {
     String loggerPrefix = getLoggerPrefix("getByNameAndIso3");
@@ -135,7 +135,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
           "ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
     String loggerPrefix = getLoggerPrefix("getById");
@@ -151,7 +151,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
   @Operation(
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAuthority('ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
       @RequestBody SaveQuery<org.jhapy.dto.domain.i18n.ActionTrl> query) {
@@ -169,7 +169,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
   @Operation(
       security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
   )
-  @PreAuthorize("hasAuthority('ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/delete")
   public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByIdQuery query) {
     String loggerPrefix = getLoggerPrefix("delete");

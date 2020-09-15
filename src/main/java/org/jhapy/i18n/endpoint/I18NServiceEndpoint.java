@@ -60,7 +60,7 @@ public class I18NServiceEndpoint extends BaseEndpoint {
     }
   }
 
-  @PreAuthorize("hasAuthority('ROLE_I18N_WRITE')")
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/importI18NFile")
   public ResponseEntity<ServiceResult> importI18NFile(@RequestBody ImportI18NFileQuery query) {
     String loggerPrefix = getLoggerPrefix("importI18NFile");

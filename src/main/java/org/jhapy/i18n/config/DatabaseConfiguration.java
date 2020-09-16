@@ -18,7 +18,6 @@
 
 package org.jhapy.i18n.config;
 
-import com.codahale.metrics.MetricRegistry;
 import com.zaxxer.hikari.HikariDataSource;
 import io.micrometer.core.instrument.MeterRegistry;
 import javax.annotation.PostConstruct;
@@ -36,6 +35,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EntityScan("org.jhapy.i18n.domain")
 @EnableTransactionManagement
 public class DatabaseConfiguration {
+
   @Autowired
   private DataSource dataSource;
 
@@ -44,7 +44,7 @@ public class DatabaseConfiguration {
 
   @PostConstruct
   public void setUpHikariWithMetrics() {
-    if(dataSource instanceof HikariDataSource) {
+    if (dataSource instanceof HikariDataSource) {
       ((HikariDataSource) dataSource).setMetricRegistry(meterRegistry);
     }
   }

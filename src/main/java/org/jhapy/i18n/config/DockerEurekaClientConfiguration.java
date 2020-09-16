@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.net.util.SubnetUtils;
 import org.jhapy.commons.utils.HasLogger;
-import org.jhapy.commons.utils.SpringProfileConstants;
 import org.springframework.cloud.commons.util.IdUtils;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.cloud.netflix.eureka.EurekaClientConfigBean;
@@ -39,7 +38,6 @@ import org.springframework.cloud.netflix.eureka.metadata.ManagementMetadataProvi
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.StringUtils;
 
@@ -78,10 +76,14 @@ public class DockerEurekaClientConfiguration implements
     boolean isSecurePortEnabled = Boolean
         .parseBoolean(env.getProperty("eureka.instance.secure-port-enabled"));
     String serverContextPath = this.env.getProperty("server.servlet.context-path", "/");
-    int serverPort = Integer.parseInt(this.env.getProperty("server.port", this.env.getProperty("port", "8080")));
-    Integer managementPort = this.env.getProperty("management.server.port", Integer.class, serverPort);
-    Boolean isManagementSecuredPortEnabled = this.env.getProperty("management.server.ssl.enabled", Boolean.class, false );
-    String managementContextPath = this.env.getProperty("management.servlet.context-path", this.env.getProperty("management.endpoints.web.base-path", "/management"));
+    int serverPort = Integer
+        .parseInt(this.env.getProperty("server.port", this.env.getProperty("port", "8080")));
+    Integer managementPort = this.env
+        .getProperty("management.server.port", Integer.class, serverPort);
+    Boolean isManagementSecuredPortEnabled = this.env
+        .getProperty("management.server.ssl.enabled", Boolean.class, false);
+    String managementContextPath = this.env.getProperty("management.servlet.context-path",
+        this.env.getProperty("management.endpoints.web.base-path", "/management"));
     Integer jmxPort = this.env.getProperty("com.sun.management.jmxremote.port", Integer.class);
     EurekaInstanceConfigBean instance = new EurekaInstanceConfigBean(inetUtils);
     instance.setNonSecurePort(serverPort);
@@ -165,7 +167,8 @@ public class DockerEurekaClientConfiguration implements
                       interfaceAddress.getAddress().getHostName(),
                       interfaceAddress.getAddress().getHostAddress()
                   );
-                  result = createEurekaInstanceConfigBean(inetUtils, instance,isManagementSecuredPortEnabled, managementContextPath, interfaceAddress);
+                  result = createEurekaInstanceConfigBean(inetUtils, instance,
+                      isManagementSecuredPortEnabled, managementContextPath, interfaceAddress);
                   break external_loop;
                 }
               }
@@ -198,7 +201,8 @@ public class DockerEurekaClientConfiguration implements
   }
 
   private EurekaInstanceConfigBean createEurekaInstanceConfigBean(InetUtils inetUtils,
-      EurekaInstanceConfigBean defaultResult, Boolean isManagementSecuredPortEnabled, String managementContextPath, InterfaceAddress interfaceAddress) {
+      EurekaInstanceConfigBean defaultResult, Boolean isManagementSecuredPortEnabled,
+      String managementContextPath, InterfaceAddress interfaceAddress) {
     EurekaInstanceConfigBean result;
     result = new EurekaInstanceConfigBean(inetUtils);
     result.setPreferIpAddress(defaultResult.isPreferIpAddress());
@@ -210,19 +214,21 @@ public class DockerEurekaClientConfiguration implements
     result.setNonSecurePort(defaultResult.getNonSecurePort());
 
     String managementUrl;
-    if ( isManagementSecuredPortEnabled )
-        managementUrl ="https://";
-    else
-      managementUrl ="http://";
-    if ( defaultResult.isPreferIpAddress())
+    if (isManagementSecuredPortEnabled) {
+      managementUrl = "https://";
+    } else {
+      managementUrl = "http://";
+    }
+    if (defaultResult.isPreferIpAddress()) {
       managementUrl += result.getIpAddress();
-    else
+    } else {
       managementUrl += result.getHostname();
+    }
 
-      managementUrl+= ":" + defaultResult.getMetadataMap().get("management.port");
+    managementUrl += ":" + defaultResult.getMetadataMap().get("management.port");
 
     managementUrl += managementContextPath;
-    defaultResult.getMetadataMap().put("management.url", managementUrl );
+    defaultResult.getMetadataMap().put("management.url", managementUrl);
     result.setMetadataMap(defaultResult.getMetadataMap());
     result.setInstanceId(result.getInstanceId());
     result.setHealthCheckUrlPath(defaultResult.getHealthCheckUrlPath());

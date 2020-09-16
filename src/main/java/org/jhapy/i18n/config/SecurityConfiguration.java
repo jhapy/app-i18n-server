@@ -18,7 +18,6 @@
 
 package org.jhapy.i18n.config;
 
-import java.util.Arrays;
 import org.jhapy.commons.config.AppProperties;
 import org.jhapy.commons.security.oauth2.AudienceValidator;
 import org.jhapy.commons.security.oauth2.JwtGrantedAuthorityConverter;
@@ -77,7 +76,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
         .and()
         .headers()
         .contentSecurityPolicy(
-            "default-src 'self' "+appProperties.getKeycloakAdmin().getServerUrl()+"; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:")
+            "default-src 'self' " + appProperties.getKeycloakAdmin().getServerUrl()
+                + "; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:")
         .and()
         .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
         .and()

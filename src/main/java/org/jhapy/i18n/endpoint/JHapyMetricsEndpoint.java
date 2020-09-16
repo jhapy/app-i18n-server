@@ -18,7 +18,6 @@
 
 package org.jhapy.i18n.endpoint;
 
-import com.zaxxer.hikari.metrics.micrometer.MicrometerMetricsTracker;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.core.instrument.Gauge;

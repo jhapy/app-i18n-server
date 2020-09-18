@@ -33,6 +33,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jhapy.commons.utils.HasLogger;
+import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.repository.ElementRepository;
@@ -69,6 +70,14 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
       ElementTrlRepository elementTrlRepository) {
     this.elementRepository = elementRepository;
     this.elementTrlRepository = elementTrlRepository;
+  }
+
+  @Transactional
+  @Override
+  public void reset() {
+    List<ElementTrl> allElements = elementTrlRepository.findAll();
+    allElements.forEach(actionTrl -> actionTrl.setIsTranslated(false));
+    elementTrlRepository.saveAll(allElements);
   }
 
   @Transactional

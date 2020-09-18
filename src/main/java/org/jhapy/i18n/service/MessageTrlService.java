@@ -43,4 +43,6 @@ public interface MessageTrlService extends CrudService<MessageTrl> {
   void postUpdate(MessageTrl messageTrl);
 
   String importExcelFile(byte[] content);
+
+  void reset();
 }

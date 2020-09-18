@@ -33,6 +33,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jhapy.commons.utils.HasLogger;
+import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
 import org.jhapy.i18n.repository.MessageRepository;
@@ -69,6 +70,14 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
       MessageTrlRepository messageTrlRepository) {
     this.messageRepository = messageRepository;
     this.messageTrlRepository = messageTrlRepository;
+  }
+
+  @Transactional
+  @Override
+  public void reset() {
+    List<MessageTrl> allMessages = messageTrlRepository.findAll();
+    allMessages.forEach(actionTrl -> actionTrl.setIsTranslated(false));
+    messageTrlRepository.saveAll(allMessages);
   }
 
   @Transactional

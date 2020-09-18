@@ -100,6 +100,9 @@ public class I18nServiceImpl implements I18nService {
     this.actionTrlRepository = actionTrlRepository;
   }
 
+public List<String> getExistingLanguages() {
+  return elementTrlRepository.getIso3Languages();
+}
 
   private static Map<String, CellStyle> createStyles(Workbook wb) {
     Map<String, CellStyle> styles = new HashMap<>();
@@ -401,18 +404,22 @@ public class I18nServiceImpl implements I18nService {
     return ArrayUtils.toObject(outputStream.toByteArray());
   }
 
+  @Transactional
   public String importI18NFile(Byte[] fileToImport) {
     byte[] fileContent = ArrayUtils.toPrimitive(fileToImport);
+    actionTrlService.reset();
     String fileImportResult = actionTrlService.importExcelFile(fileContent);
     if (fileImportResult != null) {
       return fileImportResult;
     }
 
+    elementTrlService.reset();
     fileImportResult = elementTrlService.importExcelFile(fileContent);
     if (fileImportResult != null) {
       return fileImportResult;
     }
 
+    messageTrlService.reset();
     fileImportResult = messageTrlService.importExcelFile(fileContent);
     return fileImportResult;
   }

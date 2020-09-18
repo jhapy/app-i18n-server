@@ -18,6 +18,8 @@
 
 package org.jhapy.i18n.service;
 
+import java.util.List;
+
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
@@ -28,4 +30,6 @@ public interface I18nService {
   Byte[] getI18NFile();
 
   String importI18NFile(Byte[] fileToImport);
+
+  List<String> getExistingLanguages();
 }

@@ -166,6 +166,14 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
 
   @Transactional
   @Override
+  public void reset() {
+    List<ActionTrl> allActions = actionTrlRepository.findAll();
+    allActions.forEach(actionTrl -> actionTrl.setIsTranslated(false));
+    actionTrlRepository.saveAll(allActions);
+  }
+
+  @Transactional
+  @Override
   public void postUpdate(ActionTrl actionTrl) {
     boolean isAllTranslated = true;
     Action action = actionTrl.getAction();

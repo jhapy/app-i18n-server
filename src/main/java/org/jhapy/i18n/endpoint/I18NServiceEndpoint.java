@@ -50,6 +50,17 @@ public class I18NServiceEndpoint extends BaseEndpoint {
   }
 
   @PreAuthorize("hasAuthority('ROLE_I18N_READ')")
+  @PostMapping(value = "/getExistingLanguages")
+  public ResponseEntity<ServiceResult> getExistingLanguages(@RequestBody BaseRemoteQuery query) {
+    String loggerPrefix = getLoggerPrefix("getExistingLanguages");
+    try {
+      return handleResult(loggerPrefix, i18nService.getExistingLanguages());
+    } catch (Throwable t) {
+      return handleResult(loggerPrefix, t);
+    }
+  }
+
+  @PreAuthorize("hasAuthority('ROLE_I18N_READ')")
   @PostMapping(value = "/getI18NFile")
   public ResponseEntity<ServiceResult> getI18NFile(@RequestBody BaseRemoteQuery query) {
     String loggerPrefix = getLoggerPrefix("getI18NFile");

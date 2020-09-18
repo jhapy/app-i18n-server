@@ -15,7 +15,7 @@ pipeline {
                 }
             }
             steps {
-                sh 'mvn -U -Dmaven.test.skip -Dmaven.javadoc.skip install'
+                sh 'mvn -Dmaven.test.skip -Dmaven.javadoc.skip install'
                 stash includes: '**/target/*.jar', name: 'app'
             }
         }

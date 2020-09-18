@@ -43,4 +43,6 @@ public interface ElementTrlService extends CrudService<ElementTrl> {
   void postUpdate(ElementTrl elementTrl);
 
   String importExcelFile(byte[] content);
+
+  void reset();
 }

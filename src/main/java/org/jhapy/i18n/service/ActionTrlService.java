@@ -43,4 +43,6 @@ public interface ActionTrlService extends CrudService<ActionTrl> {
   void postUpdate(ActionTrl actionTrl);
 
   String importExcelFile(byte[] content);
+
+  void reset();
 }

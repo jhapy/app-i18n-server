@@ -122,7 +122,10 @@
       <artifactId>problem-spring-web</artifactId>
       <version>${problem-spring-web.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
     <!-- Hazelcast dependencies -->
     <dependency>
       <artifactId>hazelcast</artifactId>

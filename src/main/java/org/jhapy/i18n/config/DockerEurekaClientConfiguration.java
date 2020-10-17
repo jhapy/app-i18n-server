@@ -18,6 +18,10 @@
 
 package org.jhapy.i18n.config;
 
+import org.jhapy.commons.utils.HasLogger;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Configuration;
+
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -28,7 +32,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.net.util.SubnetUtils;
-import org.jhapy.commons.utils.HasLogger;
 import org.springframework.cloud.commons.util.IdUtils;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.cloud.netflix.eureka.EurekaClientConfigBean;
@@ -43,6 +46,7 @@ import org.springframework.util.StringUtils;
 
 
 @Configuration
+@ConditionalOnProperty(value = "spring.cloud.kubernetes.enabled",matchIfMissing = false)
 public class DockerEurekaClientConfiguration implements
     HasLogger {
 

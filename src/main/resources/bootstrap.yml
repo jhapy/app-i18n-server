@@ -8,5 +8,6 @@ spring:
       password: ${jhapy.registry.password}
     refresh:
       enabled: false
+
   main:
     allow-bean-definition-overriding: true

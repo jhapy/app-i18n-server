@@ -61,6 +61,8 @@ public class CacheConfiguration implements DisposableBean, HasLogger {
   public CacheConfiguration(Environment env, ServerProperties serverProperties,
       DiscoveryClient discoveryClient,
       AppProperties appProperties) {
+    String loggerPrefix = getLoggerPrefix("CacheConfiguration");
+    logger().info(loggerPrefix + "Startup");
     this.env = env;
     this.serverProperties = serverProperties;
     this.discoveryClient = discoveryClient;
@@ -99,6 +101,8 @@ public class CacheConfiguration implements DisposableBean, HasLogger {
     }
     Config config = new Config();
     config.setInstanceName(env.getProperty("spring.application.name"));
+    config.getNetworkConfig().setPort(5701);
+    config.getNetworkConfig().setPortAutoIncrement(true);
 
     GroupConfig groupConfig = new GroupConfig();
     groupConfig.setName(env.getProperty("spring.application.name"));
@@ -116,6 +120,22 @@ public class CacheConfiguration implements DisposableBean, HasLogger {
           .debug(loggerPrefix + "Configuring Hazelcast clustering for instanceId: {}", serviceId);
       // In development, everything goes through 127.0.0.1, with a different port
       if (env
+          .acceptsProfiles(Profiles.of(SpringProfileConstants.SPRING_PROFILE_K8S))) {
+        logger().debug(
+            "Application is running with the \"k8s\" profile, Hazelcast cluster will use Kubernetes Client");
+
+        config.setProperty("hazelcast.discovery.enabled", "true");
+        config.setProperty("hazelcast.shutdownhook.enabled", "true");
+        config.setProperty("hazelcast.socket.bind.any", "false");
+
+        config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
+        config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
+        config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+        config.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true);
+        config.getNetworkConfig().getJoin().getKubernetesConfig().setProperty("namespace", "thothee-test")
+            .setProperty("service-name", "app-i18n-server");
+
+      } else if (env
           .acceptsProfiles(Profiles.of(SpringProfileConstants.SPRING_PROFILE_TEST,
               SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT,
               SpringProfileConstants.SPRING_PROFILE_STAGING,

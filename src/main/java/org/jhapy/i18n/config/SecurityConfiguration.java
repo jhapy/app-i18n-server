@@ -94,6 +94,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
         .antMatchers("/api/auth-info").permitAll()
         .antMatchers("/api/**").authenticated()
         .antMatchers("/management/health").permitAll()
+        .antMatchers("/management/health/**").permitAll()
         .antMatchers("/management/info").permitAll()
         .antMatchers("/management/prometheus").permitAll()
         .antMatchers("/management/**").hasAuthority("ROLE_ADMIN")

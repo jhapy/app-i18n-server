@@ -1,10 +1,4 @@
-FROM openjdk:15-jdk-slim-buster
-
-MAINTAINER jHapy Lead Dev <jhapy@jhapy.org>
-
-RUN apt-get update -y && \
-    apt-get install -y wget curl && \
-    apt-get autoclean
+FROM jhapy/base-image-slim
 
 ENV JAVA_OPTS=""
 ENV APP_OPTS=""

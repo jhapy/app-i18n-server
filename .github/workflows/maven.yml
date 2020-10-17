@@ -1,9 +1,8 @@
-name: Java CI
+name: JHapy App I18N Server CI
 
 on:
   push:
-  repository_dispatch:
-    types: [shared-commons-build]
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: app-i18n-server

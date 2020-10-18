@@ -29,7 +29,7 @@
     <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
 
     <docker-base-image-name>jhapy/base-image-slim:1.0</docker-base-image-name>
-    <docker-target-image-name>jhapy/app-i18n-server:latest</docker-target-image-name>
+    <docker-target-image-name>jhapy/app-i18n-server:v2</docker-target-image-name>
 
     <!-- These remain empty unless the corresponding profile is active -->
     <profile.swagger/>
@@ -517,7 +517,7 @@
     <profile>
       <id>k8s</id>
       <properties>
-        <docker-target-image-name>jhapy/app-i18n-server-k8s:latest</docker-target-image-name>
+        <docker-target-image-name>jhapy/app-i18n-server-k8s:v2</docker-target-image-name>
       </properties>
       <dependencies>
         <dependency>

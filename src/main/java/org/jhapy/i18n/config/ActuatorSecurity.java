@@ -88,7 +88,7 @@ public class ActuatorSecurity {
               authorize
                   .requestMatchers(EndpointRequest.to(HealthEndpoint.class), EndpointRequest.to(
                       HystrixStreamEndpoint.class)).permitAll()
-                  .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("MONITORING")
+                  .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ROLE_MONITORING")
                   .anyRequest().permitAll()
           ).httpBasic(Customizer.withDefaults());
     }

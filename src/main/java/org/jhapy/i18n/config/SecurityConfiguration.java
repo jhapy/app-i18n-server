@@ -65,7 +65,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
   @Override
   public void configure(HttpSecurity http) throws Exception {
     // @formatter:off
-    http
+    http.cors()
+        .and()
         .csrf()
         .disable()
         .cors().configurationSource(corsConfigurationSource())

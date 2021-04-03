@@ -19,6 +19,7 @@
 package org.jhapy.i18n.service;
 
 import java.util.List;
+import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ElementTrl;
 
 /**
@@ -40,9 +41,15 @@ public interface ElementTrlService extends CrudService<ElementTrl> {
 
   void deleteAll(List<ElementTrl> elementTrls);
 
-  void postUpdate(ElementTrl elementTrl);
-
   String importExcelFile(byte[] content);
 
   void reset();
+
+  void postUpdate(ElementTrl elementTrl);
+
+  void postPersist(ElementTrl elementTrl);
+
+  void postRemove(ElementTrl elementTrl);
+
+  boolean hasBootstrapped();
 }

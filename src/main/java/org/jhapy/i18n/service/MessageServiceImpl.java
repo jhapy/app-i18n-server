@@ -20,9 +20,16 @@ package org.jhapy.i18n.service;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.jhapy.commons.utils.OrikaBeanMapper;
+import org.jhapy.dto.messageQueue.I18NElementUpdate;
+import org.jhapy.dto.messageQueue.I18NMessageUpdate;
+import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
+import org.jhapy.i18n.client.I18NQueue;
+import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
 import org.jhapy.i18n.repository.MessageRepository;
+import org.jhapy.i18n.repository.VersionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,11 +47,19 @@ public class MessageServiceImpl implements MessageService {
 
   private final MessageRepository messageRepository;
   private final MessageTrlService messageTrlService;
+  private final VersionRepository versionRepository;
+  private final OrikaBeanMapper mapperFacade;
+  private final I18NQueue i18NQueue;
 
   public MessageServiceImpl(MessageRepository messageRepository,
-      MessageTrlService messageTrlService) {
+      MessageTrlService messageTrlService,
+      VersionRepository versionRepository, OrikaBeanMapper mapperFacade,
+      I18NQueue i18NQueue) {
     this.messageRepository = messageRepository;
     this.messageTrlService = messageTrlService;
+    this.versionRepository = versionRepository;
+    this.mapperFacade = mapperFacade;
+    this.i18NQueue = i18NQueue;
   }
 
   @Override
@@ -77,6 +92,32 @@ public class MessageServiceImpl implements MessageService {
 
   @Override
   @Transactional
+  public void postUpdate(Message message) {
+    I18NMessageUpdate messageUpdate = new I18NMessageUpdate();
+    messageUpdate.setMessage(mapperFacade.map( message, org.jhapy.dto.domain.i18n.Message.class));
+    messageUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
+    i18NQueue.sendMessageUpdate(messageUpdate);
+  }
+
+  @Override
+  @Transactional
+  public void postPersist(Message message) {
+    I18NMessageUpdate messageUpdate = new I18NMessageUpdate();
+    messageUpdate.setMessage(mapperFacade.map( message, org.jhapy.dto.domain.i18n.Message.class));
+    messageUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
+    i18NQueue.sendMessageUpdate(messageUpdate);
+  }
+
+  @Override
+  @Transactional
+  public void postRemove(Message message) {
+    I18NMessageUpdate messageUpdate = new I18NMessageUpdate();
+    messageUpdate.setMessage(mapperFacade.map( message, org.jhapy.dto.domain.i18n.Message.class));
+    messageUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
+    i18NQueue.sendMessageUpdate(messageUpdate);
+  }
+  @Override
+  @Transactional
   public Message save(Message entity) {
     List<MessageTrl> translations = entity.getTranslations();
     entity = messageRepository.save(entity);
@@ -86,7 +127,7 @@ public class MessageServiceImpl implements MessageService {
     if (translations.size() > 0) {
       entity.setTranslations(messageTrlService.saveAll(translations));
     }
-
+    versionRepository.incMessageRecords();
     return entity;
   }
 
@@ -99,6 +140,8 @@ public class MessageServiceImpl implements MessageService {
     }
 
     messageRepository.delete(entity);
+
+    versionRepository.incMessageRecords();
   }
 
   @Override

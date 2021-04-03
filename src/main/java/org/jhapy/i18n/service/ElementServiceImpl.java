@@ -20,9 +20,16 @@ package org.jhapy.i18n.service;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.jhapy.commons.utils.OrikaBeanMapper;
+import org.jhapy.dto.messageQueue.I18NActionUpdate;
+import org.jhapy.dto.messageQueue.I18NElementUpdate;
+import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
+import org.jhapy.i18n.client.I18NQueue;
+import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.repository.ElementRepository;
+import org.jhapy.i18n.repository.VersionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,11 +47,19 @@ public class ElementServiceImpl implements ElementService {
 
   private final ElementRepository elementRepository;
   private final ElementTrlService elementTrlService;
+  private final VersionRepository versionRepository;
+  private final OrikaBeanMapper mapperFacade;
+  private final I18NQueue i18NQueue;
 
   public ElementServiceImpl(ElementRepository elementRepository,
-      ElementTrlService elementTrlService) {
+      ElementTrlService elementTrlService,
+      VersionRepository versionRepository, OrikaBeanMapper mapperFacade,
+      I18NQueue i18NQueue) {
     this.elementRepository = elementRepository;
     this.elementTrlService = elementTrlService;
+    this.versionRepository = versionRepository;
+    this.mapperFacade = mapperFacade;
+    this.i18NQueue = i18NQueue;
   }
 
   @Override
@@ -77,6 +92,38 @@ public class ElementServiceImpl implements ElementService {
 
   @Override
   @Transactional
+  public void postUpdate(Element element) {
+    if ( elementTrlService.hasBootstrapped() ) {
+      I18NElementUpdate elementUpdate = new I18NElementUpdate();
+      elementUpdate.setElement(mapperFacade.map(element, org.jhapy.dto.domain.i18n.Element.class));
+      elementUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
+      i18NQueue.sendElementUpdate(elementUpdate);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void postPersist(Element element) {
+    if ( elementTrlService.hasBootstrapped() ) {
+      I18NElementUpdate elementUpdate = new I18NElementUpdate();
+      elementUpdate.setElement(mapperFacade.map(element, org.jhapy.dto.domain.i18n.Element.class));
+      elementUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
+      i18NQueue.sendElementUpdate(elementUpdate);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void postRemove(Element element) {
+    if ( elementTrlService.hasBootstrapped() ) {
+      I18NElementUpdate elementUpdate = new I18NElementUpdate();
+      elementUpdate.setElement(mapperFacade.map(element, org.jhapy.dto.domain.i18n.Element.class));
+      elementUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
+      i18NQueue.sendElementUpdate(elementUpdate);
+    }
+  }
+  @Override
+  @Transactional
   public Element save(Element entity) {
     List<ElementTrl> translations = entity.getTranslations();
     entity = elementRepository.save(entity);
@@ -86,6 +133,8 @@ public class ElementServiceImpl implements ElementService {
     if (translations.size() > 0) {
       entity.setTranslations(elementTrlService.saveAll(translations));
     }
+
+    versionRepository.incElementRecords();
 
     return entity;
   }
@@ -99,6 +148,8 @@ public class ElementServiceImpl implements ElementService {
     }
 
     elementRepository.delete(entity);
+
+    versionRepository.incElementRecords();
   }
 
   @Override

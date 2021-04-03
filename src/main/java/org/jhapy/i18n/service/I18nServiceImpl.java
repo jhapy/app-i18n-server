@@ -20,6 +20,8 @@ package org.jhapy.i18n.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,20 +38,24 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jhapy.i18n.client.I18NQueue;
 import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
+import org.jhapy.i18n.domain.I18NVersion;
 import org.jhapy.i18n.repository.ActionRepository;
 import org.jhapy.i18n.repository.ActionTrlRepository;
 import org.jhapy.i18n.repository.ElementRepository;
 import org.jhapy.i18n.repository.ElementTrlRepository;
 import org.jhapy.i18n.repository.MessageRepository;
 import org.jhapy.i18n.repository.MessageTrlRepository;
+import org.jhapy.i18n.repository.VersionRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,6 +81,10 @@ public class I18nServiceImpl implements I18nService {
   private final ActionRepository actionRepository;
   private final ActionTrlRepository actionTrlRepository;
 
+  private final VersionRepository versionRepository;
+private final I18NQueue i18NQueue;
+private final static Integer fiveMinutesInSeconds = 5 *  60;
+
   private final static String[] i18nExportHeaders = new String[]{"Cat", "Name0", "Name1", "Name2",
       "Name3", "Language", "Value", "Tooltip", "Key"};
   private final static String[] i18nExportMessageHeaders = new String[]{"Cat", "Name0", "Name1",
@@ -88,7 +98,8 @@ public class I18nServiceImpl implements I18nService {
       MessageTrlRepository messageTrlRepository,
       ActionTrlService actionTrlService,
       ActionRepository actionRepository,
-      ActionTrlRepository actionTrlRepository) {
+      ActionTrlRepository actionTrlRepository,
+      VersionRepository versionRepository, I18NQueue i18NQueue) {
     this.elementTrlService = elementTrlService;
     this.elementRepository = elementRepository;
     this.elementTrlRepository = elementTrlRepository;
@@ -98,9 +109,26 @@ public class I18nServiceImpl implements I18nService {
     this.actionTrlService = actionTrlService;
     this.actionRepository = actionRepository;
     this.actionTrlRepository = actionTrlRepository;
+    this.versionRepository = versionRepository;
+    this.i18NQueue = i18NQueue;
   }
 
-public List<String> getExistingLanguages() {
+  @Override
+  public Integer getElementCurrentVersion(String isoLang) {
+    return versionRepository.getElementCurrentVersion(isoLang);
+  }
+
+  @Override
+  public Integer getMessageCurrentVersion(String isoLang) {
+    return versionRepository.getMessageCurrentVersion(isoLang);
+  }
+
+  @Override
+  public Integer getActionCurrentVersion(String isoLang) {
+    return versionRepository.getActionCurrentVersion(isoLang);
+  }
+
+  public List<String> getExistingLanguages() {
   return elementTrlRepository.getIso3Languages();
 }
 

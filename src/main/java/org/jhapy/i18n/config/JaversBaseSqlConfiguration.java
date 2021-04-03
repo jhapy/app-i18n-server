@@ -19,8 +19,10 @@
 package org.jhapy.i18n.config;
 
 import org.javers.spring.auditable.AuthorProvider;
+import org.javers.spring.boot.mongo.JaversMongoAutoConfiguration;
 import org.jhapy.commons.config.Constants;
 import org.jhapy.commons.security.SecurityUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,8 +31,9 @@ import org.springframework.context.annotation.Configuration;
  * @version 1.0
  * @since 20/04/2020
  */
+@ConditionalOnProperty(name = "javers.enable", havingValue = "true")
 @Configuration
-public class JaversBaseSqlConfiguration {
+public class JaversBaseSqlConfiguration extends JaversMongoAutoConfiguration {
 
   @Bean
   public AuthorProvider authorProvider() {

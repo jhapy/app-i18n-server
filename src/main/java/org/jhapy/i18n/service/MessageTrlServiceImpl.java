@@ -33,11 +33,18 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jhapy.commons.utils.HasLogger;
-import org.jhapy.i18n.domain.ElementTrl;
+import org.jhapy.commons.utils.OrikaBeanMapper;
+import org.jhapy.dto.messageQueue.I18NActionTrlUpdate;
+import org.jhapy.dto.messageQueue.I18NMessageTrlUpdate;
+import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
+import org.jhapy.i18n.client.I18NQueue;
+import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
+import org.jhapy.i18n.domain.I18NVersion;
 import org.jhapy.i18n.repository.MessageRepository;
 import org.jhapy.i18n.repository.MessageTrlRepository;
+import org.jhapy.i18n.repository.VersionRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -57,6 +64,8 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
   private final MessageRepository messageRepository;
   private final MessageTrlRepository messageTrlRepository;
+  private final OrikaBeanMapper mapperFacade;
+  private final I18NQueue i18NQueue;
 
   private boolean hasBootstrapped = false;
 
@@ -67,9 +76,13 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
   private Boolean isBootstrapEnabled;
 
   public MessageTrlServiceImpl(MessageRepository messageRepository,
-      MessageTrlRepository messageTrlRepository) {
+      MessageTrlRepository messageTrlRepository,
+      VersionRepository versionRepository, OrikaBeanMapper mapperFacade,
+      I18NQueue i18NQueue) {
     this.messageRepository = messageRepository;
     this.messageTrlRepository = messageTrlRepository;
+    this.mapperFacade = mapperFacade;
+    this.i18NQueue = i18NQueue;
   }
 
   @Transactional
@@ -78,6 +91,11 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
     List<MessageTrl> allMessages = messageTrlRepository.findAll();
     allMessages.forEach(actionTrl -> actionTrl.setIsTranslated(false));
     messageTrlRepository.saveAll(allMessages);
+  }
+
+  @Override
+  public boolean hasBootstrapped() {
+    return hasBootstrapped;
   }
 
   @Transactional
@@ -159,7 +177,8 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
   @Override
   public List<MessageTrl> saveAll(List<MessageTrl> translations) {
-    return messageTrlRepository.saveAll(translations);
+    List<MessageTrl> result = messageTrlRepository.saveAll(translations);
+    return result;
   }
 
   @Override
@@ -187,6 +206,28 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
       message.setIsTranslated(false);
       messageRepository.save(message);
     }
+    I18NMessageTrlUpdate messageTrlUpdate = new I18NMessageTrlUpdate();
+    messageTrlUpdate.setMessageTrl(mapperFacade.map( messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
+    messageTrlUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
+    i18NQueue.sendMessageTrlUpdate(messageTrlUpdate);
+  }
+
+  @Override
+  @Transactional
+  public void postPersist(MessageTrl messageTrl) {
+    I18NMessageTrlUpdate messageTrlUpdate = new I18NMessageTrlUpdate();
+    messageTrlUpdate.setMessageTrl(mapperFacade.map( messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
+    messageTrlUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
+    i18NQueue.sendMessageTrlUpdate(messageTrlUpdate);
+  }
+
+  @Override
+  @Transactional
+  public void postRemove(MessageTrl messageTrl) {
+    I18NMessageTrlUpdate messageTrlUpdate = new I18NMessageTrlUpdate();
+    messageTrlUpdate.setMessageTrl(mapperFacade.map( messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
+    messageTrlUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
+    i18NQueue.sendMessageTrlUpdate(messageTrlUpdate);
   }
 
   @Override
@@ -196,9 +237,13 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
   @Transactional
   public synchronized void bootstrapMessages() {
-    if (hasBootstrapped || !isBootstrapEnabled) {
+    if ( hasBootstrapped )
+      return;
+
+    if (!isBootstrapEnabled) {
       return;
     }
+
     String loggerPrefix = getLoggerPrefix("bootstrapMessages");
     try {
       importExcelFile(Files.readAllBytes(Path.of(bootstrapFile)));

@@ -32,4 +32,10 @@ public interface I18nService {
   String importI18NFile(Byte[] fileToImport);
 
   List<String> getExistingLanguages();
+
+  Integer getElementCurrentVersion(String isoLang);
+
+  Integer getActionCurrentVersion(String isoLang);
+
+  Integer getMessageCurrentVersion(String isoLang);
 }

@@ -18,6 +18,7 @@
 
 package org.jhapy.i18n.service;
 
+import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,4 +38,10 @@ public interface MessageService extends CrudService<Message> {
   long countAnyMatching(String filter);
 
   long countByNameLike(String name);
+
+  void postUpdate(Message message);
+
+  void postPersist(Message message);
+
+  void postRemove(Message message);
 }

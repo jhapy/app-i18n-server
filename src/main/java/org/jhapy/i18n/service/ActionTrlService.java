@@ -19,6 +19,7 @@
 package org.jhapy.i18n.service;
 
 import java.util.List;
+import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ActionTrl;
 
 /**
@@ -40,9 +41,15 @@ public interface ActionTrlService extends CrudService<ActionTrl> {
 
   void deleteAll(List<ActionTrl> actionTrls);
 
-  void postUpdate(ActionTrl actionTrl);
-
   String importExcelFile(byte[] content);
 
   void reset();
+
+  void postUpdate(ActionTrl actionTrl);
+
+  void postPersist(ActionTrl actionTrl);
+
+  void postRemove(ActionTrl actionTrl);
+
+  boolean hasBootstrapped();
 }

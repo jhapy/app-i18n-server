@@ -22,9 +22,10 @@ import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
-import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.service.MessageTrlService;
+import org.jhapy.i18n.domain.Action;
+import org.jhapy.i18n.domain.ActionTrl;
+import org.jhapy.i18n.service.ActionService;
+import org.jhapy.i18n.service.ActionTrlService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,36 +34,35 @@ import org.springframework.stereotype.Component;
  * @since 2/10/20
  */
 @Component
-public class MessageTrlListener {
+public class ActionListener {
 
-  private MessageTrlService messageTrlService;
+  private ActionService actionService;
 
   @PostPersist
-  public void postPersist(MessageTrl messageTrl) {
-    if (getMessageTrlService() != null) {
-      getMessageTrlService().postPersist(messageTrl);
+  public void postPersist(Action action) {
+    if (getActionService() != null) {
+      getActionService().postPersist(action);
     }
   }
 
   @PostUpdate
-  public void postUpdate(MessageTrl messageTrl) {
-    if (getMessageTrlService() != null) {
-      getMessageTrlService().postUpdate(messageTrl);
+  public void postUpdate(Action action) {
+    if (getActionService() != null) {
+      getActionService().postUpdate(action);
     }
   }
   @PostRemove
-  public void postRemove(MessageTrl messageTrl) {
-    if (getMessageTrlService() != null) {
-      getMessageTrlService().postRemove(messageTrl);
+  public void postRemove(Action action) {
+    if (getActionService() != null) {
+      getActionService().postRemove(action);
     }
   }
 
-
-  protected MessageTrlService getMessageTrlService() {
-    if (messageTrlService == null) {
-      messageTrlService = SpringApplicationContext.getBean(MessageTrlService.class);
+  protected ActionService getActionService() {
+    if (actionService == null) {
+      actionService = SpringApplicationContext.getBean(ActionService.class);
     }
-    return messageTrlService;
+    return actionService;
   }
 
 }

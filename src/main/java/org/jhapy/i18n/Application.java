@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
+import org.javers.spring.boot.mongo.JaversMongoAutoConfiguration;
 import org.jhapy.commons.config.AppProperties;
 import org.jhapy.commons.utils.DefaultProfileUtil;
 import org.jhapy.commons.utils.SpringProfileConstants;
@@ -45,7 +46,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
  * @version 1.0
  * @since 2019-07-02
  */
-@SpringBootApplication
+@SpringBootApplication(exclude= JaversMongoAutoConfiguration.class)
 @EnableDiscoveryClient
 @EnableConfigurationProperties(AppProperties.class)
 @EnableCircuitBreaker

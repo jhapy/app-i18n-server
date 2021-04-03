@@ -19,8 +19,10 @@
 package org.jhapy.i18n.listeners;
 
 import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
+import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.service.ElementTrlService;
 import org.springframework.stereotype.Component;
@@ -35,11 +37,23 @@ public class ElementTrlListener {
 
   private ElementTrlService elementTrlService;
 
-  @PostUpdate
   @PostPersist
+  public void postPersist(ElementTrl elementTrl) {
+    if (getElementTrlService() != null) {
+      getElementTrlService().postPersist(elementTrl);
+    }
+  }
+
+  @PostUpdate
   public void postUpdate(ElementTrl elementTrl) {
     if (getElementTrlService() != null) {
       getElementTrlService().postUpdate(elementTrl);
+    }
+  }
+  @PostRemove
+  public void postRemove(ElementTrl elementTrl) {
+    if (getElementTrlService() != null) {
+      getElementTrlService().postRemove(elementTrl);
     }
   }
 

@@ -19,8 +19,12 @@
 package org.jhapy.i18n.listeners;
 
 import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
+import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.service.ActionTrlService;
 import org.springframework.stereotype.Component;
@@ -35,11 +39,24 @@ public class ActionTrlListener {
 
   private ActionTrlService actionTrlService;
 
-  @PostUpdate
+
   @PostPersist
+  public void postPersist(ActionTrl actionTrl) {
+    if (getActionTrlService() != null) {
+      getActionTrlService().postPersist(actionTrl);
+    }
+  }
+
+  @PostUpdate
   public void postUpdate(ActionTrl actionTrl) {
     if (getActionTrlService() != null) {
       getActionTrlService().postUpdate(actionTrl);
+    }
+  }
+  @PostRemove
+  public void postRemove(ActionTrl actionTrl) {
+    if (getActionTrlService() != null) {
+      getActionTrlService().postRemove(actionTrl);
     }
   }
 

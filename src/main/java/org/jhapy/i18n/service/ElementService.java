@@ -18,6 +18,7 @@
 
 package org.jhapy.i18n.service;
 
+import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.Element;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,4 +38,10 @@ public interface ElementService extends CrudService<Element> {
   long countAnyMatching(String filter);
 
   long countByNameLike(String name);
+
+  void postUpdate(Element element);
+
+  void postPersist(Element element);
+
+  void postRemove(Element element);
 }

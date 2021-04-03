@@ -37,4 +37,10 @@ public interface ActionService extends CrudService<Action> {
   long countAnyMatching(String filter);
 
   long countByNameLike(String name);
+
+  void postUpdate(Action action);
+
+  void postPersist(Action action);
+
+  void postRemove(Action action);
 }

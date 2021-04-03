@@ -22,9 +22,8 @@ import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
-import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.service.MessageTrlService;
+import org.jhapy.i18n.domain.Message;
+import org.jhapy.i18n.service.MessageService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,36 +32,35 @@ import org.springframework.stereotype.Component;
  * @since 2/10/20
  */
 @Component
-public class MessageTrlListener {
+public class MessageListener {
 
-  private MessageTrlService messageTrlService;
+  private MessageService messageService;
 
   @PostPersist
-  public void postPersist(MessageTrl messageTrl) {
-    if (getMessageTrlService() != null) {
-      getMessageTrlService().postPersist(messageTrl);
+  public void postPersist(Message message) {
+    if (getMessageService() != null) {
+      getMessageService().postPersist(message);
     }
   }
 
   @PostUpdate
-  public void postUpdate(MessageTrl messageTrl) {
-    if (getMessageTrlService() != null) {
-      getMessageTrlService().postUpdate(messageTrl);
+  public void postUpdate(Message message) {
+    if (getMessageService() != null) {
+      getMessageService().postUpdate(message);
     }
   }
   @PostRemove
-  public void postRemove(MessageTrl messageTrl) {
-    if (getMessageTrlService() != null) {
-      getMessageTrlService().postRemove(messageTrl);
+  public void postRemove(Message message) {
+    if (getMessageService() != null) {
+      getMessageService().postRemove(message);
     }
   }
 
-
-  protected MessageTrlService getMessageTrlService() {
-    if (messageTrlService == null) {
-      messageTrlService = SpringApplicationContext.getBean(MessageTrlService.class);
+  protected MessageService getMessageService() {
+    if (messageService == null) {
+      messageService = SpringApplicationContext.getBean(MessageService.class);
     }
-    return messageTrlService;
+    return messageService;
   }
 
 }

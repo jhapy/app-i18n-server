@@ -33,10 +33,17 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jhapy.commons.utils.HasLogger;
+import org.jhapy.commons.utils.OrikaBeanMapper;
+import org.jhapy.dto.messageQueue.I18NActionTrlUpdate;
+import org.jhapy.dto.messageQueue.I18NActionUpdate;
+import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
+import org.jhapy.i18n.client.I18NQueue;
 import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ActionTrl;
+import org.jhapy.i18n.domain.I18NVersion;
 import org.jhapy.i18n.repository.ActionRepository;
 import org.jhapy.i18n.repository.ActionTrlRepository;
+import org.jhapy.i18n.repository.VersionRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -56,6 +63,9 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
 
   private final ActionRepository actionRepository;
   private final ActionTrlRepository actionTrlRepository;
+  private final VersionRepository versionRepository;
+  private final OrikaBeanMapper mapperFacade;
+  private final I18NQueue i18NQueue;
 
   private boolean hasBootstrapped = false;
 
@@ -66,9 +76,19 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
   private Boolean isBootstrapEnabled;
 
   public ActionTrlServiceImpl(ActionRepository actionRepository,
-      ActionTrlRepository actionTrlRepository) {
+      ActionTrlRepository actionTrlRepository,
+      VersionRepository versionRepository, VersionService versionService,
+      OrikaBeanMapper mapperFacade, I18NQueue i18NQueue) {
     this.actionRepository = actionRepository;
     this.actionTrlRepository = actionTrlRepository;
+    this.versionRepository = versionRepository;
+    this.mapperFacade = mapperFacade;
+    this.i18NQueue = i18NQueue;
+  }
+
+  @Override
+  public boolean hasBootstrapped() {
+    return hasBootstrapped;
   }
 
   @Transactional
@@ -150,13 +170,16 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
 
   @Override
   public List<ActionTrl> saveAll(List<ActionTrl> translations) {
-    return actionTrlRepository.saveAll(translations);
+    List<ActionTrl> result = actionTrlRepository.saveAll(translations);
+    versionRepository.incActionRecords();
+    return result;
   }
 
   @Override
   @Transactional
   public void deleteAll(List<ActionTrl> actionTrls) {
     actionTrlRepository.deleteAll(actionTrls);
+    versionRepository.incActionRecords();
   }
 
   @Override
@@ -170,6 +193,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
     List<ActionTrl> allActions = actionTrlRepository.findAll();
     allActions.forEach(actionTrl -> actionTrl.setIsTranslated(false));
     actionTrlRepository.saveAll(allActions);
+    versionRepository.incActionRecords();
   }
 
   @Transactional
@@ -191,11 +215,48 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
       action.setIsTranslated(false);
       actionRepository.save(action);
     }
+
+    if ( hasBootstrapped ) {
+      I18NActionTrlUpdate actionTrlUpdate = new I18NActionTrlUpdate();
+      actionTrlUpdate
+          .setActionTrl(mapperFacade.map(actionTrl, org.jhapy.dto.domain.i18n.ActionTrl.class));
+      actionTrlUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
+      i18NQueue.sendActionTrlUpdate(actionTrlUpdate);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void postPersist(ActionTrl actionTrl) {
+    if ( hasBootstrapped ) {
+      I18NActionTrlUpdate actionTrlUpdate = new I18NActionTrlUpdate();
+      actionTrlUpdate
+          .setActionTrl(mapperFacade.map(actionTrl, org.jhapy.dto.domain.i18n.ActionTrl.class));
+      actionTrlUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
+      i18NQueue.sendActionTrlUpdate(actionTrlUpdate);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void postRemove(ActionTrl actionTrl) {
+    if ( hasBootstrapped ) {
+      I18NActionTrlUpdate actionTrlUpdate = new I18NActionTrlUpdate();
+      actionTrlUpdate
+          .setActionTrl(mapperFacade.map(actionTrl, org.jhapy.dto.domain.i18n.ActionTrl.class));
+      actionTrlUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
+      i18NQueue.sendActionTrlUpdate(actionTrlUpdate);
+    }
   }
 
   @Transactional
   public synchronized void bootstrapActions() {
-    if (hasBootstrapped || !isBootstrapEnabled) {
+    if (hasBootstrapped) {
+      return;
+    }
+
+    if (!isBootstrapEnabled) {
+      hasBootstrapped = true;
       return;
     }
 

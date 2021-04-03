@@ -16,40 +16,40 @@
  * limitations under the License.
  */
 
-package org.jhapy.i18n.service;
+package org.jhapy.i18n.domain;
 
+import java.util.ArrayList;
 import java.util.List;
-import org.jhapy.i18n.domain.Action;
-import org.jhapy.i18n.domain.MessageTrl;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.TableGenerator;
+import javax.persistence.Transient;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.javers.core.metamodel.annotation.TypeName;
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
- * @since 2019-07-16
+ * @since 2019-04-18
  */
-public interface MessageTrlService extends CrudService<MessageTrl> {
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Entity
+@Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
+public class I18NVersion extends BaseEntity {
 
-  List<MessageTrl> findByMessage(Long messageId);
+  @Column(nullable = false)
+  private String tableName;
 
-  long countByMessage(Long messageId);
+  @Column(nullable = false)
+  private String isoLang;
 
-  MessageTrl getByNameAndIso3Language(String name, String iso3Language);
+  private Integer recordVersion;
 
-  List<MessageTrl> getByIso3Language(String iso3Language);
+  private Integer previousRecordVersion;
 
-  List<MessageTrl> saveAll(List<MessageTrl> translations);
-
-  void deleteAll(List<MessageTrl> messageTrls);
-
-  String importExcelFile(byte[] content);
-
-  void reset();
-
-  void postUpdate(MessageTrl messageTrl);
-
-  void postPersist(MessageTrl messageTrl);
-
-  void postRemove(MessageTrl messageTrl);
-
-  boolean hasBootstrapped();
+  private Boolean notificationSent = Boolean.FALSE;
 }

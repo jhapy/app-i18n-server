@@ -22,9 +22,8 @@ import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
-import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.service.MessageTrlService;
+import org.jhapy.i18n.domain.Element;
+import org.jhapy.i18n.service.ElementService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,36 +32,35 @@ import org.springframework.stereotype.Component;
  * @since 2/10/20
  */
 @Component
-public class MessageTrlListener {
+public class ElementListener {
 
-  private MessageTrlService messageTrlService;
+  private ElementService elementService;
 
   @PostPersist
-  public void postPersist(MessageTrl messageTrl) {
-    if (getMessageTrlService() != null) {
-      getMessageTrlService().postPersist(messageTrl);
+  public void postPersist(Element element) {
+    if (getElementService() != null) {
+      getElementService().postPersist(element);
     }
   }
 
   @PostUpdate
-  public void postUpdate(MessageTrl messageTrl) {
-    if (getMessageTrlService() != null) {
-      getMessageTrlService().postUpdate(messageTrl);
+  public void postUpdate(Element element) {
+    if (getElementService() != null) {
+      getElementService().postUpdate(element);
     }
   }
   @PostRemove
-  public void postRemove(MessageTrl messageTrl) {
-    if (getMessageTrlService() != null) {
-      getMessageTrlService().postRemove(messageTrl);
+  public void postRemove(Element element) {
+    if (getElementService() != null) {
+      getElementService().postRemove(element);
     }
   }
 
-
-  protected MessageTrlService getMessageTrlService() {
-    if (messageTrlService == null) {
-      messageTrlService = SpringApplicationContext.getBean(MessageTrlService.class);
+  protected ElementService getElementService() {
+    if (elementService == null) {
+      elementService = SpringApplicationContext.getBean(ElementService.class);
     }
-    return messageTrlService;
+    return elementService;
   }
 
 }

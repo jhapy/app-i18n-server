@@ -49,7 +49,8 @@ public class I18NConverter implements HasLogger {
 
   @Bean
   public void i18NConverters() {
-    orikaBeanMapper.addMapper(Action.class, org.jhapy.dto.domain.i18n.Action.class);
+
+    orikaBeanMapper.getClassMapBuilder(Action.class, org.jhapy.dto.domain.i18n.Action.class).exclude("translations").byDefault().register();
     orikaBeanMapper
         .getClassMapBuilder(ActionTrl.class, org.jhapy.dto.domain.i18n.ActionTrl.class)
         .byDefault().customize(
@@ -61,7 +62,7 @@ public class I18NConverter implements HasLogger {
           }
         }).register();
 
-    orikaBeanMapper.addMapper(Element.class, org.jhapy.dto.domain.i18n.Element.class);
+    orikaBeanMapper.getClassMapBuilder(Element.class, org.jhapy.dto.domain.i18n.Element.class).exclude("translations").byDefault().register();
     orikaBeanMapper
         .getClassMapBuilder(ElementTrl.class, org.jhapy.dto.domain.i18n.ElementTrl.class)
         .byDefault().customize(
@@ -73,7 +74,7 @@ public class I18NConverter implements HasLogger {
           }
         }).register();
 
-    orikaBeanMapper.addMapper(Message.class, org.jhapy.dto.domain.i18n.Message.class);
+    orikaBeanMapper.getClassMapBuilder(Message.class, org.jhapy.dto.domain.i18n.Message.class).exclude("translations").byDefault().register();
     orikaBeanMapper
         .getClassMapBuilder(MessageTrl.class, org.jhapy.dto.domain.i18n.MessageTrl.class)
         .byDefault().customize(

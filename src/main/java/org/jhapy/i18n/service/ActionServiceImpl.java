@@ -18,8 +18,18 @@
 
 package org.jhapy.i18n.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Criteria;
 import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NActionUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
@@ -28,8 +38,6 @@ import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.repository.ActionRepository;
 import org.jhapy.i18n.repository.VersionRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,44 +56,18 @@ public class ActionServiceImpl implements ActionService {
   private final VersionRepository versionRepository;
   private final OrikaBeanMapper mapperFacade;
   private final I18NQueue i18NQueue;
+private final EntityManager entityManager;
 
   public ActionServiceImpl(ActionRepository actionRepository,
       ActionTrlService actionTrlService,
       VersionRepository versionRepository, OrikaBeanMapper mapperFacade,
-      I18NQueue i18NQueue) {
+      I18NQueue i18NQueue, EntityManager entityManager) {
     this.actionRepository = actionRepository;
     this.actionTrlService = actionTrlService;
     this.versionRepository = versionRepository;
     this.mapperFacade = mapperFacade;
     this.i18NQueue = i18NQueue;
-  }
-
-  @Override
-  public Page<Action> findByNameLike(String name, Pageable pageable) {
-    return actionRepository.findByNameLike(name, pageable);
-  }
-
-  @Override
-  public long countByNameLike(String name) {
-    return actionRepository.countByNameLike(name);
-  }
-
-  @Override
-  public Page<Action> findAnyMatching(String filter, Pageable pageable) {
-    if (StringUtils.isBlank(filter)) {
-      return actionRepository.findAll(pageable);
-    } else {
-      return actionRepository.findAnyMatching(filter, pageable);
-    }
-  }
-
-  @Override
-  public long countAnyMatching(String filter) {
-    if (StringUtils.isBlank(filter)) {
-      return actionRepository.count();
-    } else {
-      return actionRepository.countAnyMatching(filter);
-    }
+    this.entityManager = entityManager;
   }
 
   @Override
@@ -150,7 +132,46 @@ public class ActionServiceImpl implements ActionService {
   }
 
   @Override
+  public CriteriaQuery buildSearchQuery(CriteriaQuery query, Root<Action> entity,
+      CriteriaBuilder cb, String currentUserId, String filter, Boolean showInactive,
+      Object... otherCriteria) {
+    List<Predicate> orPredicates = new ArrayList<>();
+    List<Predicate> andPredicated = new ArrayList<>();
+
+    if (StringUtils.isNotBlank(filter)) {
+      Join<Action, ActionTrl> join = entity.join("translations", JoinType.LEFT);
+      String pattern = "%"+filter.toLowerCase()+"%";
+      orPredicates.add(cb.like(cb.lower(entity.get("name")), pattern));
+      orPredicates.add(cb.like(cb.lower(entity.get("category")), pattern));
+      orPredicates.add(cb.like(cb.lower(join.get("value")), pattern));
+    }
+
+    if (showInactive == null || !showInactive) {
+      andPredicated.add(cb.equal(entity.get("isActive"), Boolean.TRUE));
+    }
+
+    if (!orPredicates.isEmpty()) {
+      andPredicated.add(cb.or(orPredicates.toArray(new Predicate[0])));
+    }
+
+    if (!andPredicated.isEmpty()) {
+      query.where( cb.and(andPredicated.toArray(new Predicate[0])));
+    }
+    return query;
+  }
+
+  @Override
   public JpaRepository<Action, Long> getRepository() {
     return actionRepository;
+  }
+
+  @Override
+  public EntityManager getEntityManager() {
+    return entityManager;
+  }
+
+  @Override
+  public Class<Action> getEntityClass() {
+    return Action.class;
   }
 }

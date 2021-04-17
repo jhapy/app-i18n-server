@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -48,6 +49,6 @@ public class Element extends BaseEntity {
 
   private Boolean isTranslated = Boolean.FALSE;
 
-  @Transient
+  @OneToMany(mappedBy = "element")
   private List<ElementTrl> translations = new ArrayList<>();
 }

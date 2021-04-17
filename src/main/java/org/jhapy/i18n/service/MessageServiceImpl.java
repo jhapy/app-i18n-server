@@ -18,14 +18,21 @@
 
 package org.jhapy.i18n.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.jhapy.commons.utils.OrikaBeanMapper;
-import org.jhapy.dto.messageQueue.I18NElementUpdate;
 import org.jhapy.dto.messageQueue.I18NMessageUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
 import org.jhapy.i18n.domain.Element;
+import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
 import org.jhapy.i18n.repository.MessageRepository;
@@ -50,44 +57,18 @@ public class MessageServiceImpl implements MessageService {
   private final VersionRepository versionRepository;
   private final OrikaBeanMapper mapperFacade;
   private final I18NQueue i18NQueue;
+private final EntityManager entityManager;
 
   public MessageServiceImpl(MessageRepository messageRepository,
       MessageTrlService messageTrlService,
       VersionRepository versionRepository, OrikaBeanMapper mapperFacade,
-      I18NQueue i18NQueue) {
+      I18NQueue i18NQueue, EntityManager entityManager) {
     this.messageRepository = messageRepository;
     this.messageTrlService = messageTrlService;
     this.versionRepository = versionRepository;
     this.mapperFacade = mapperFacade;
     this.i18NQueue = i18NQueue;
-  }
-
-  @Override
-  public Page<Message> findByNameLike(String name, Pageable pageable) {
-    return messageRepository.findByNameLike(name, pageable);
-  }
-
-  @Override
-  public long countByNameLike(String name) {
-    return messageRepository.countByNameLike(name);
-  }
-
-  @Override
-  public Page<Message> findAnyMatching(String filter, Pageable pageable) {
-    if (StringUtils.isBlank(filter)) {
-      return messageRepository.findAll(pageable);
-    } else {
-      return messageRepository.findAnyMatching(filter, pageable);
-    }
-  }
-
-  @Override
-  public long countAnyMatching(String filter) {
-    if (StringUtils.isBlank(filter)) {
-      return messageRepository.count();
-    } else {
-      return messageRepository.countAnyMatching(filter);
-    }
+    this.entityManager = entityManager;
   }
 
   @Override
@@ -147,5 +128,44 @@ public class MessageServiceImpl implements MessageService {
   @Override
   public JpaRepository<Message, Long> getRepository() {
     return messageRepository;
+  }
+
+  @Override
+  public EntityManager getEntityManager() {
+    return entityManager;
+  }
+
+  @Override
+  public Class<Message> getEntityClass() {
+    return Message.class;
+  }
+
+  @Override
+  public CriteriaQuery buildSearchQuery(CriteriaQuery query, Root<Message> entity,
+      CriteriaBuilder cb, String currentUserId, String filter, Boolean showInactive,
+      Object... otherCriteria) {
+    List<Predicate> orPredicates = new ArrayList<>();
+    List<Predicate> andPredicated = new ArrayList<>();
+
+    if (StringUtils.isNotBlank(filter)) {
+      Join<Message, MessageTrl> join = entity.join("translations");
+      String pattern = "%"+filter.toLowerCase()+"%";
+      orPredicates.add(cb.like(cb.lower(entity.get("name")), pattern));
+      orPredicates.add(cb.like(cb.lower(entity.get("category")), pattern));
+      orPredicates.add(cb.like(cb.lower(join.get("value")), pattern));
+    }
+
+    if (showInactive == null || !showInactive) {
+      andPredicated.add(cb.equal(entity.get("isActive"), Boolean.TRUE));
+    }
+
+    if (!orPredicates.isEmpty()) {
+      andPredicated.add(cb.or(orPredicates.toArray(new Predicate[0])));
+    }
+
+    if (!andPredicated.isEmpty()) {
+      query.where( cb.and(andPredicated.toArray(new Predicate[0])));
+    }
+    return query;
   }
 }

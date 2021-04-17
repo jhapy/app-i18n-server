@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 import lombok.Data;
@@ -50,6 +51,6 @@ public class Action extends BaseEntity {
 
   private Boolean isTranslated = Boolean.FALSE;
 
-  @Transient
+  @OneToMany(mappedBy = "action")
   private List<ActionTrl> translations = new ArrayList<>();
 }

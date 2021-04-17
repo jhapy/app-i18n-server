@@ -28,6 +28,7 @@ import org.jhapy.dto.serviceQuery.generic.DeleteByIdQuery;
 import org.jhapy.dto.serviceQuery.generic.FindAnyMatchingQuery;
 import org.jhapy.dto.serviceQuery.generic.GetByIdQuery;
 import org.jhapy.dto.serviceQuery.generic.SaveQuery;
+import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.service.MessageService;
 import org.springframework.data.domain.Page;
@@ -68,7 +69,7 @@ public class MessageServiceEndpoint extends BaseEndpoint {
     logger().debug(loggerPrefix + "Query = " + query);
     try {
       Page<Message> result = messageService
-          .findAnyMatching(query.getFilter(), mapperFacade.map(query.getPageable(),
+          .findAnyMatching(query.getQueryUsername(), query.getFilter(),query.getShowInactive(), mapperFacade.map(query.getPageable(),
               Pageable.class, getOrikaContext(query)));
 
       logger().debug(loggerPrefix + "Result size = " + result.getContent().size());
@@ -89,7 +90,7 @@ public class MessageServiceEndpoint extends BaseEndpoint {
     String loggerPrefix = getLoggerPrefix("countAnyMatching");
     try {
       return handleResult(loggerPrefix, messageService
-          .countAnyMatching(query.getFilter()));
+          .countAnyMatching(query.getQueryUsername(), query.getFilter(), query.getShowInactive()));
     } catch (Throwable t) {
       return handleResult(loggerPrefix, t);
     }
@@ -120,10 +121,10 @@ public class MessageServiceEndpoint extends BaseEndpoint {
       @RequestBody SaveQuery<org.jhapy.dto.domain.i18n.Message> query) {
     String loggerPrefix = getLoggerPrefix("save");
     try {
-      return handleResult(loggerPrefix, mapperFacade.map(messageService
-              .save(mapperFacade
-                  .map(query.getEntity(), Message.class, getOrikaContext(query))),
-          org.jhapy.dto.domain.i18n.Message.class, getOrikaContext(query)));
+      org.jhapy.i18n.domain.Message converted = mapperFacade.map(query.getEntity(), org.jhapy.i18n.domain.Message.class, getOrikaContext(query));
+      if ( query.getEntity().getTranslations() != null )
+        converted.setTranslations(mapperFacade.mapAsList( query.getEntity().getTranslations(),org.jhapy.i18n.domain.MessageTrl.class, getOrikaContext(query)));
+      return handleResult(loggerPrefix, mapperFacade.map(messageService.save(converted), org.jhapy.dto.domain.i18n.Message.class, getOrikaContext(query)));
     } catch (Throwable t) {
       return handleResult(loggerPrefix, t);
     }

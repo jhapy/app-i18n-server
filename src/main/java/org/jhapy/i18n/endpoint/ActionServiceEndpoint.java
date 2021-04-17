@@ -69,7 +69,7 @@ public class ActionServiceEndpoint extends BaseEndpoint {
     String loggerPrefix = getLoggerPrefix("findAnyMatching");
     try {
       Page<org.jhapy.i18n.domain.Action> result = actionService
-          .findAnyMatching(query.getFilter(), mapperFacade.map(query.getPageable(),
+          .findAnyMatching(query.getQueryUsername(), query.getFilter(), query.getShowInactive(), mapperFacade.map(query.getPageable(),
               Pageable.class, getOrikaContext(query)));
       return handleResult(loggerPrefix,
           mapperFacade.map(result, org.jhapy.dto.utils.Page.class, getOrikaContext(query)));
@@ -88,7 +88,7 @@ public class ActionServiceEndpoint extends BaseEndpoint {
     String loggerPrefix = getLoggerPrefix("countAnyMatching");
     try {
       return handleResult(loggerPrefix, actionService
-          .countAnyMatching(query.getFilter()));
+          .countAnyMatching(query.getQueryUsername(), query.getFilter(), query.getShowInactive()));
     } catch (Throwable t) {
       return handleResult(loggerPrefix, t);
     }
@@ -119,11 +119,10 @@ public class ActionServiceEndpoint extends BaseEndpoint {
       @RequestBody SaveQuery<Action> query) {
     String loggerPrefix = getLoggerPrefix("save");
     try {
-      return handleResult(loggerPrefix, mapperFacade.map(actionService
-              .save(mapperFacade
-                  .map(query.getEntity(), org.jhapy.i18n.domain.Action.class,
-                      getOrikaContext(query))),
-          Action.class, getOrikaContext(query)));
+      org.jhapy.i18n.domain.Action converted = mapperFacade.map(query.getEntity(), org.jhapy.i18n.domain.Action.class, getOrikaContext(query));
+      if ( query.getEntity().getTranslations() != null )
+        converted.setTranslations(mapperFacade.mapAsList( query.getEntity().getTranslations(),org.jhapy.i18n.domain.ActionTrl.class, getOrikaContext(query)));
+      return handleResult(loggerPrefix, mapperFacade.map(actionService.save(converted), Action.class, getOrikaContext(query)));
     } catch (Throwable t) {
       return handleResult(loggerPrefix, t);
     }

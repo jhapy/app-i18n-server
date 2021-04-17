@@ -28,15 +28,7 @@ import org.springframework.data.domain.Pageable;
  * @since 2019-07-16
  */
 
-public interface ActionService extends CrudService<Action> {
-
-  Page<Action> findAnyMatching(String filter, Pageable pageable);
-
-  Page<Action> findByNameLike(String name, Pageable pageable);
-
-  long countAnyMatching(String filter);
-
-  long countByNameLike(String name);
+public interface ActionService extends CrudRelationalService<Action> {
 
   void postUpdate(Action action);
 

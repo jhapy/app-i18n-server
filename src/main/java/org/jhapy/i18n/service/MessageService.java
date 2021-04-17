@@ -29,15 +29,7 @@ import org.springframework.data.domain.Pageable;
  * @since 2019-07-16
  */
 
-public interface MessageService extends CrudService<Message> {
-
-  Page<Message> findAnyMatching(String filter, Pageable pageable);
-
-  Page<Message> findByNameLike(String name, Pageable pageable);
-
-  long countAnyMatching(String filter);
-
-  long countByNameLike(String name);
+public interface MessageService extends CrudRelationalService<Message> {
 
   void postUpdate(Message message);
 

@@ -16,24 +16,32 @@
  * limitations under the License.
  */
 
-package org.jhapy.i18n.service;
-
-import org.jhapy.i18n.domain.Action;
-import org.jhapy.i18n.domain.Element;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+package org.jhapy.i18n.exception;
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
- * @since 2019-07-16
+ * @since 2019-06-04
  */
+public class ServiceException extends Exception {
 
-public interface ElementService extends CrudRelationalService<Element> {
+  public ServiceException() {
+  }
 
-  void postUpdate(Element element);
+  public ServiceException(String message) {
+    super(message);
+  }
 
-  void postPersist(Element element);
+  public ServiceException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-  void postRemove(Element element);
+  public ServiceException(Throwable cause) {
+    super(cause);
+  }
+
+  public ServiceException(String message, Throwable cause, boolean enableSuppression,
+      boolean writableStackTrace) {
+    super(message, cause, enableSuppression, writableStackTrace);
+  }
 }

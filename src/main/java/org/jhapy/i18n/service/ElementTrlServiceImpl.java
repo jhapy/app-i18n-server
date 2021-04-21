@@ -35,13 +35,10 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jhapy.commons.utils.HasLogger;
 import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NElementTrlUpdate;
-import org.jhapy.dto.messageQueue.I18NMessageTrlUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
 import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
-import org.jhapy.i18n.domain.I18NVersion;
-import org.jhapy.i18n.domain.MessageTrl;
 import org.jhapy.i18n.repository.ElementRepository;
 import org.jhapy.i18n.repository.ElementTrlRepository;
 import org.jhapy.i18n.repository.VersionRepository;
@@ -206,7 +203,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
       element.setIsTranslated(false);
       elementRepository.save(element);
     }
-    if ( hasBootstrapped ) {
+    if (hasBootstrapped) {
       I18NElementTrlUpdate elementTrlUpdate = new I18NElementTrlUpdate();
       elementTrlUpdate
           .setElementTrl(mapperFacade.map(elementTrl, org.jhapy.dto.domain.i18n.ElementTrl.class));
@@ -218,7 +215,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
   @Override
   @Transactional
   public void postPersist(ElementTrl elementTrl) {
-    if ( hasBootstrapped ) {
+    if (hasBootstrapped) {
       I18NElementTrlUpdate elementTrlUpdate = new I18NElementTrlUpdate();
       elementTrlUpdate
           .setElementTrl(mapperFacade.map(elementTrl, org.jhapy.dto.domain.i18n.ElementTrl.class));
@@ -230,7 +227,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
   @Override
   @Transactional
   public void postRemove(ElementTrl elementTrl) {
-    if ( hasBootstrapped ) {
+    if (hasBootstrapped) {
       I18NElementTrlUpdate elementTrlUpdate = new I18NElementTrlUpdate();
       elementTrlUpdate
           .setElementTrl(mapperFacade.map(elementTrl, org.jhapy.dto.domain.i18n.ElementTrl.class));
@@ -246,8 +243,9 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
 
   @Transactional
   public synchronized void bootstrapElements() {
-    if ( hasBootstrapped )
+    if (hasBootstrapped) {
       return;
+    }
 
     if (!isBootstrapEnabled) {
       hasBootstrapped = true;

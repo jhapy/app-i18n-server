@@ -23,7 +23,6 @@ import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
 import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.domain.MessageTrl;
 import org.jhapy.i18n.service.MessageTrlService;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +49,7 @@ public class MessageTrlListener {
       getMessageTrlService().postUpdate(messageTrl);
     }
   }
+
   @PostRemove
   public void postRemove(MessageTrl messageTrl) {
     if (getMessageTrlService() != null) {

@@ -28,6 +28,7 @@
 
   <springProfile name="dev,test,staging,k8s-test">
     <logger level="DEBUG" name="org.jhapy"/>
+    <logger level="DEBUG" name="org.hibernate.SQL"/>
     <logger level="INFO" name="org.springframework"/>
     <logger level="WARN" name="org.hibernate.engine.internal"/>
 
@@ -50,6 +51,7 @@
 
   <springProfile name="local,k8s-local">
     <logger level="DEBUG" name="org.jhapy"/>
+    <logger level="DEBUG" name="org.hibernate.SQL"/>
     <logger level="WARN" name="org.hibernate.engine.internal"/>
 
     <root level="INFO">

@@ -35,12 +35,10 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jhapy.commons.utils.HasLogger;
 import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NActionTrlUpdate;
-import org.jhapy.dto.messageQueue.I18NActionUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
 import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ActionTrl;
-import org.jhapy.i18n.domain.I18NVersion;
 import org.jhapy.i18n.repository.ActionRepository;
 import org.jhapy.i18n.repository.ActionTrlRepository;
 import org.jhapy.i18n.repository.VersionRepository;
@@ -216,7 +214,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
       actionRepository.save(action);
     }
 
-    if ( hasBootstrapped ) {
+    if (hasBootstrapped) {
       I18NActionTrlUpdate actionTrlUpdate = new I18NActionTrlUpdate();
       actionTrlUpdate
           .setActionTrl(mapperFacade.map(actionTrl, org.jhapy.dto.domain.i18n.ActionTrl.class));
@@ -228,7 +226,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
   @Override
   @Transactional
   public void postPersist(ActionTrl actionTrl) {
-    if ( hasBootstrapped ) {
+    if (hasBootstrapped) {
       I18NActionTrlUpdate actionTrlUpdate = new I18NActionTrlUpdate();
       actionTrlUpdate
           .setActionTrl(mapperFacade.map(actionTrl, org.jhapy.dto.domain.i18n.ActionTrl.class));
@@ -240,7 +238,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
   @Override
   @Transactional
   public void postRemove(ActionTrl actionTrl) {
-    if ( hasBootstrapped ) {
+    if (hasBootstrapped) {
       I18NActionTrlUpdate actionTrlUpdate = new I18NActionTrlUpdate();
       actionTrlUpdate
           .setActionTrl(mapperFacade.map(actionTrl, org.jhapy.dto.domain.i18n.ActionTrl.class));

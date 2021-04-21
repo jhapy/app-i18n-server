@@ -32,14 +32,10 @@ import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NElementUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
-import org.jhapy.i18n.domain.Action;
-import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.repository.ElementRepository;
 import org.jhapy.i18n.repository.VersionRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +54,7 @@ public class ElementServiceImpl implements ElementService {
   private final VersionRepository versionRepository;
   private final OrikaBeanMapper mapperFacade;
   private final I18NQueue i18NQueue;
-private final EntityManager entityManager;
+  private final EntityManager entityManager;
 
   public ElementServiceImpl(ElementRepository elementRepository,
       ElementTrlService elementTrlService,
@@ -75,7 +71,7 @@ private final EntityManager entityManager;
   @Override
   @Transactional
   public void postUpdate(Element element) {
-    if ( elementTrlService.hasBootstrapped() ) {
+    if (elementTrlService.hasBootstrapped()) {
       I18NElementUpdate elementUpdate = new I18NElementUpdate();
       elementUpdate.setElement(mapperFacade.map(element, org.jhapy.dto.domain.i18n.Element.class));
       elementUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
@@ -86,7 +82,7 @@ private final EntityManager entityManager;
   @Override
   @Transactional
   public void postPersist(Element element) {
-    if ( elementTrlService.hasBootstrapped() ) {
+    if (elementTrlService.hasBootstrapped()) {
       I18NElementUpdate elementUpdate = new I18NElementUpdate();
       elementUpdate.setElement(mapperFacade.map(element, org.jhapy.dto.domain.i18n.Element.class));
       elementUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
@@ -97,13 +93,14 @@ private final EntityManager entityManager;
   @Override
   @Transactional
   public void postRemove(Element element) {
-    if ( elementTrlService.hasBootstrapped() ) {
+    if (elementTrlService.hasBootstrapped()) {
       I18NElementUpdate elementUpdate = new I18NElementUpdate();
       elementUpdate.setElement(mapperFacade.map(element, org.jhapy.dto.domain.i18n.Element.class));
       elementUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
       i18NQueue.sendElementUpdate(elementUpdate);
     }
   }
+
   @Override
   @Transactional
   public Element save(Element entity) {
@@ -158,7 +155,7 @@ private final EntityManager entityManager;
 
     if (StringUtils.isNotBlank(filter)) {
       Join<Element, ElementTrl> join = entity.join("translations", JoinType.LEFT);
-      String pattern = "%"+filter.toLowerCase()+"%";
+      String pattern = "%" + filter.toLowerCase() + "%";
       orPredicates.add(cb.like(cb.lower(entity.get("name")), pattern));
       orPredicates.add(cb.like(cb.lower(entity.get("category")), pattern));
       orPredicates.add(cb.like(cb.lower(join.get("value")), pattern));
@@ -173,7 +170,7 @@ private final EntityManager entityManager;
     }
 
     if (!andPredicated.isEmpty()) {
-      query.where( cb.and(andPredicated.toArray(new Predicate[0])));
+      query.where(cb.and(andPredicated.toArray(new Predicate[0])));
     }
     return query;
   }

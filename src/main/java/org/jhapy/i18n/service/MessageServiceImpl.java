@@ -31,14 +31,10 @@ import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NMessageUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
-import org.jhapy.i18n.domain.Element;
-import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
 import org.jhapy.i18n.repository.MessageRepository;
 import org.jhapy.i18n.repository.VersionRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +53,7 @@ public class MessageServiceImpl implements MessageService {
   private final VersionRepository versionRepository;
   private final OrikaBeanMapper mapperFacade;
   private final I18NQueue i18NQueue;
-private final EntityManager entityManager;
+  private final EntityManager entityManager;
 
   public MessageServiceImpl(MessageRepository messageRepository,
       MessageTrlService messageTrlService,
@@ -75,7 +71,7 @@ private final EntityManager entityManager;
   @Transactional
   public void postUpdate(Message message) {
     I18NMessageUpdate messageUpdate = new I18NMessageUpdate();
-    messageUpdate.setMessage(mapperFacade.map( message, org.jhapy.dto.domain.i18n.Message.class));
+    messageUpdate.setMessage(mapperFacade.map(message, org.jhapy.dto.domain.i18n.Message.class));
     messageUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
     i18NQueue.sendMessageUpdate(messageUpdate);
   }
@@ -84,7 +80,7 @@ private final EntityManager entityManager;
   @Transactional
   public void postPersist(Message message) {
     I18NMessageUpdate messageUpdate = new I18NMessageUpdate();
-    messageUpdate.setMessage(mapperFacade.map( message, org.jhapy.dto.domain.i18n.Message.class));
+    messageUpdate.setMessage(mapperFacade.map(message, org.jhapy.dto.domain.i18n.Message.class));
     messageUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
     i18NQueue.sendMessageUpdate(messageUpdate);
   }
@@ -93,10 +89,11 @@ private final EntityManager entityManager;
   @Transactional
   public void postRemove(Message message) {
     I18NMessageUpdate messageUpdate = new I18NMessageUpdate();
-    messageUpdate.setMessage(mapperFacade.map( message, org.jhapy.dto.domain.i18n.Message.class));
+    messageUpdate.setMessage(mapperFacade.map(message, org.jhapy.dto.domain.i18n.Message.class));
     messageUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
     i18NQueue.sendMessageUpdate(messageUpdate);
   }
+
   @Override
   @Transactional
   public Message save(Message entity) {
@@ -149,7 +146,7 @@ private final EntityManager entityManager;
 
     if (StringUtils.isNotBlank(filter)) {
       Join<Message, MessageTrl> join = entity.join("translations");
-      String pattern = "%"+filter.toLowerCase()+"%";
+      String pattern = "%" + filter.toLowerCase() + "%";
       orPredicates.add(cb.like(cb.lower(entity.get("name")), pattern));
       orPredicates.add(cb.like(cb.lower(entity.get("category")), pattern));
       orPredicates.add(cb.like(cb.lower(join.get("value")), pattern));
@@ -164,7 +161,7 @@ private final EntityManager entityManager;
     }
 
     if (!andPredicated.isEmpty()) {
-      query.where( cb.and(andPredicated.toArray(new Predicate[0])));
+      query.where(cb.and(andPredicated.toArray(new Predicate[0])));
     }
     return query;
   }

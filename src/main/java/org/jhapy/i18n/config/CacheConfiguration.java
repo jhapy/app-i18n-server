@@ -132,7 +132,8 @@ public class CacheConfiguration implements DisposableBean, HasLogger {
         config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true);
-        config.getNetworkConfig().getJoin().getKubernetesConfig().setProperty("namespace", "thothee-test")
+        config.getNetworkConfig().getJoin().getKubernetesConfig()
+            .setProperty("namespace", "thothee-test")
             .setProperty("service-name", "app-i18n-server");
 
       } else if (env

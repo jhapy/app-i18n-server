@@ -20,8 +20,6 @@ package org.jhapy.i18n.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +43,6 @@ import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.domain.I18NVersion;
 import org.jhapy.i18n.repository.ActionRepository;
 import org.jhapy.i18n.repository.ActionTrlRepository;
 import org.jhapy.i18n.repository.ElementRepository;
@@ -55,7 +52,6 @@ import org.jhapy.i18n.repository.MessageTrlRepository;
 import org.jhapy.i18n.repository.VersionRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,8 +78,8 @@ public class I18nServiceImpl implements I18nService {
   private final ActionTrlRepository actionTrlRepository;
 
   private final VersionRepository versionRepository;
-private final I18NQueue i18NQueue;
-private final static Integer fiveMinutesInSeconds = 5 *  60;
+  private final I18NQueue i18NQueue;
+  private final static Integer fiveMinutesInSeconds = 5 * 60;
 
   private final static String[] i18nExportHeaders = new String[]{"Cat", "Name0", "Name1", "Name2",
       "Name3", "Language", "Value", "Tooltip", "Key"};
@@ -129,8 +125,8 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
   }
 
   public List<String> getExistingLanguages() {
-  return elementTrlRepository.getIso3Languages();
-}
+    return elementTrlRepository.getIso3Languages();
+  }
 
   private static Map<String, CellStyle> createStyles(Workbook wb) {
     Map<String, CellStyle> styles = new HashMap<>();

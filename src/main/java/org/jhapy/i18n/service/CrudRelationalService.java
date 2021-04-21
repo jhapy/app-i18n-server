@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2019-03-26
  */
 public interface CrudRelationalService<T extends BaseEntity> extends HasLogger {
+
   JpaRepository<T, Long> getRepository();
 
   EntityManager getEntityManager();

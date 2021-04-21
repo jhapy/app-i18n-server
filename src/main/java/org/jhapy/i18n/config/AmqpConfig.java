@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class AmqpConfig {
+
   @Bean
   public FanoutExchange elementUpdate() {
     return new FanoutExchange("i18n.elementUpdate");
@@ -20,18 +21,22 @@ public class AmqpConfig {
   public FanoutExchange elementTrlUpdate() {
     return new FanoutExchange("i18n.elementTrlUpdate");
   }
+
   @Bean
   public FanoutExchange actionUpdate() {
     return new FanoutExchange("i18n.actionUpdate");
   }
+
   @Bean
   public FanoutExchange actionTrlUpdate() {
     return new FanoutExchange("i18n.actionTrlUpdate");
   }
 
-  @Bean public FanoutExchange messageUpdate() {
+  @Bean
+  public FanoutExchange messageUpdate() {
     return new FanoutExchange("i18n.messageUpdate");
   }
+
   @Bean
   public FanoutExchange messageTrlUpdate() {
     return new FanoutExchange("i18n.messageTrlUpdate");

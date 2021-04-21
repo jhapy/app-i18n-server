@@ -22,7 +22,6 @@ import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
-import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.service.ElementTrlService;
 import org.springframework.stereotype.Component;
@@ -50,6 +49,7 @@ public class ElementTrlListener {
       getElementTrlService().postUpdate(elementTrl);
     }
   }
+
   @PostRemove
   public void postRemove(ElementTrl elementTrl) {
     if (getElementTrlService() != null) {

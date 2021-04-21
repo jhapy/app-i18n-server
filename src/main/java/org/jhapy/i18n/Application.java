@@ -46,7 +46,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
  * @version 1.0
  * @since 2019-07-02
  */
-@SpringBootApplication(exclude= JaversMongoAutoConfiguration.class)
+@SpringBootApplication(exclude = JaversMongoAutoConfiguration.class)
 @EnableDiscoveryClient
 @EnableConfigurationProperties(AppProperties.class)
 @EnableCircuitBreaker

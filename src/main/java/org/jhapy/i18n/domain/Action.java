@@ -27,6 +27,7 @@ import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.javers.core.metamodel.annotation.TypeName;
@@ -38,6 +39,7 @@ import org.javers.core.metamodel.annotation.TypeName;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(exclude = "translations")
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 @TableGenerator(name = "ActionKeyGen", table = "Sequence", pkColumnName = "COLUMN_NAME", pkColumnValue = "ACTION_ID", valueColumnName = "SEQ_VAL", initialValue = 0, allocationSize = 1)

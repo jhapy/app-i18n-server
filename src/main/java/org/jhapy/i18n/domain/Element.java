@@ -25,6 +25,7 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.javers.core.metamodel.annotation.TypeName;
@@ -36,6 +37,7 @@ import org.javers.core.metamodel.annotation.TypeName;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(exclude = "translations")
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 @TypeName("Element")

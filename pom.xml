@@ -68,7 +68,7 @@
         <mariadb-java-client.version>2.7.2</mariadb-java-client.version>
         <postgresql-java-client.version>42.2.19</postgresql-java-client.version>
 
-        <poi.version>5.0.0</poi.version>
+        <poi.version>4.1.2</poi.version>
 
         <javers-spring-boot-starter-mongo.version>6.0.1</javers-spring-boot-starter-mongo.version>
     </properties>

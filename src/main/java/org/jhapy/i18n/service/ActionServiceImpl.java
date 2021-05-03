@@ -20,7 +20,6 @@ package org.jhapy.i18n.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -29,7 +28,6 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
 import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NActionUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
@@ -56,7 +54,7 @@ public class ActionServiceImpl implements ActionService {
   private final VersionRepository versionRepository;
   private final OrikaBeanMapper mapperFacade;
   private final I18NQueue i18NQueue;
-private final EntityManager entityManager;
+  private final EntityManager entityManager;
 
   public ActionServiceImpl(ActionRepository actionRepository,
       ActionTrlService actionTrlService,
@@ -88,7 +86,7 @@ private final EntityManager entityManager;
   @Override
   @Transactional
   public void postUpdate(Action action) {
-    if ( actionTrlService.hasBootstrapped() ) {
+    if (actionTrlService.hasBootstrapped()) {
       I18NActionUpdate actionUpdate = new I18NActionUpdate();
       actionUpdate.setAction(mapperFacade.map(action, org.jhapy.dto.domain.i18n.Action.class));
       actionUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
@@ -99,7 +97,7 @@ private final EntityManager entityManager;
   @Override
   @Transactional
   public void postPersist(Action action) {
-    if ( actionTrlService.hasBootstrapped() ) {
+    if (actionTrlService.hasBootstrapped()) {
       I18NActionUpdate actionUpdate = new I18NActionUpdate();
       actionUpdate.setAction(mapperFacade.map(action, org.jhapy.dto.domain.i18n.Action.class));
       actionUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
@@ -110,7 +108,7 @@ private final EntityManager entityManager;
   @Override
   @Transactional
   public void postRemove(Action action) {
-    if ( actionTrlService.hasBootstrapped() ) {
+    if (actionTrlService.hasBootstrapped()) {
       I18NActionUpdate actionUpdate = new I18NActionUpdate();
       actionUpdate.setAction(mapperFacade.map(action, org.jhapy.dto.domain.i18n.Action.class));
       actionUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
@@ -140,7 +138,7 @@ private final EntityManager entityManager;
 
     if (StringUtils.isNotBlank(filter)) {
       Join<Action, ActionTrl> join = entity.join("translations", JoinType.LEFT);
-      String pattern = "%"+filter.toLowerCase()+"%";
+      String pattern = "%" + filter.toLowerCase() + "%";
       orPredicates.add(cb.like(cb.lower(entity.get("name")), pattern));
       orPredicates.add(cb.like(cb.lower(entity.get("category")), pattern));
       orPredicates.add(cb.like(cb.lower(join.get("value")), pattern));
@@ -155,7 +153,7 @@ private final EntityManager entityManager;
     }
 
     if (!andPredicated.isEmpty()) {
-      query.where( cb.and(andPredicated.toArray(new Predicate[0])));
+      query.where(cb.and(andPredicated.toArray(new Predicate[0])));
     }
     return query;
   }

@@ -120,7 +120,7 @@ public class MessageTrlServiceEndpoint extends BaseEndpoint {
   public ResponseEntity<ServiceResult> getByNameAndIso3(@RequestBody GetByNameAndIso3Query query) {
     String loggerPrefix = getLoggerPrefix("getByNameAndIso3");
     try {
-      MessageTrl result = messageTrlService
+      var result = messageTrlService
           .getByNameAndIso3Language(query.getName(), query.getIso3Language());
 
       return handleResult(loggerPrefix, mapperFacade

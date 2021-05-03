@@ -19,7 +19,6 @@
 package org.jhapy.i18n.repository;
 
 import java.util.List;
-import javax.transaction.Transactional;
 import org.jhapy.i18n.domain.I18NVersion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -34,57 +33,57 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VersionRepository extends JpaRepository<I18NVersion, Long> {
 
-  @Query( "SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Element' and v.isoLang = :isoLang")
+  @Query("SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Element' and v.isoLang = :isoLang")
   Integer getElementCurrentVersion(String isoLang);
 
-  @Query( "SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Element'")
+  @Query("SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Element'")
   List<Integer> getElementCurrentVersion();
 
-  @Query( "SELECT v FROM I18NVersion v WHERE v.tableName = 'Element'")
+  @Query("SELECT v FROM I18NVersion v WHERE v.tableName = 'Element'")
   List<I18NVersion> getElementVersions();
 
-  @Query( "SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Action' and v.isoLang = :isoLang")
+  @Query("SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Action' and v.isoLang = :isoLang")
   Integer getActionCurrentVersion(String isoLang);
 
-  @Query( "SELECT v FROM I18NVersion v WHERE v.tableName = 'Action' and v.isoLang = :isoLang")
+  @Query("SELECT v FROM I18NVersion v WHERE v.tableName = 'Action' and v.isoLang = :isoLang")
   I18NVersion getActionByIsoLang(String isoLang);
 
-  @Query( "SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Action'")
+  @Query("SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Action'")
   List<Integer> getActionCurrentVersions();
 
-  @Query( "SELECT v FROM I18NVersion v WHERE v.tableName = 'Action'")
+  @Query("SELECT v FROM I18NVersion v WHERE v.tableName = 'Action'")
   List<I18NVersion> getActionVersions();
 
-  @Query( "SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Message' and v.isoLang = :isoLang")
+  @Query("SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Message' and v.isoLang = :isoLang")
   Integer getMessageCurrentVersion(String isoLang);
 
-  @Query( "SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Message'")
+  @Query("SELECT v.recordVersion FROM I18NVersion v WHERE v.tableName = 'Message'")
   List<Integer> getMessageCurrentVersions();
 
-  @Query( "SELECT v FROM I18NVersion v WHERE v.tableName = 'Message'")
+  @Query("SELECT v FROM I18NVersion v WHERE v.tableName = 'Message'")
   List<I18NVersion> getMessageVersions();
 
   @Modifying
-  @Query( "UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Action' and isoLang = :isoLang")
+  @Query("UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Action' and isoLang = :isoLang")
   void incActionRecords(String isoLang);
 
   @Modifying
-  @Query( "UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Action'")
+  @Query("UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Action'")
   void incActionRecords();
 
   @Modifying
-  @Query( "UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Element' and isoLang = :isoLang")
+  @Query("UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Element' and isoLang = :isoLang")
   void incElementRecords(String isoLang);
 
   @Modifying
-  @Query( "UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Element'")
+  @Query("UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Element'")
   void incElementRecords();
 
   @Modifying
-  @Query( "UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Message' and isoLang = :isoLang")
+  @Query("UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Message' and isoLang = :isoLang")
   void incMessageRecords(String isoLang);
 
   @Modifying
-  @Query( "UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Message'")
+  @Query("UPDATE I18NVersion SET previousRecordVersion = recordVersion, recordVersion = previousRecordVersion + 1, notificationSent = false WHERE tableName = 'Message'")
   void incMessageRecords();
 }

@@ -49,6 +49,7 @@ public class ElementListener {
       getElementService().postUpdate(element);
     }
   }
+
   @PostRemove
   public void postRemove(Element element) {
     if (getElementService() != null) {

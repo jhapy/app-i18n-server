@@ -6,5 +6,6 @@ package org.jhapy.i18n.service;
  * @since 28/03/2021
  */
 public interface VersionService {
-void incVersionForAction(String iso3Lang);
+
+  void incVersionForAction(String iso3Lang);
 }

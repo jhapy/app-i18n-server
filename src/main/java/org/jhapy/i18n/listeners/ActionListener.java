@@ -23,9 +23,7 @@ import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
 import org.jhapy.i18n.domain.Action;
-import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.service.ActionService;
-import org.jhapy.i18n.service.ActionTrlService;
 import org.springframework.stereotype.Component;
 
 /**
@@ -51,6 +49,7 @@ public class ActionListener {
       getActionService().postUpdate(action);
     }
   }
+
   @PostRemove
   public void postRemove(Action action) {
     if (getActionService() != null) {

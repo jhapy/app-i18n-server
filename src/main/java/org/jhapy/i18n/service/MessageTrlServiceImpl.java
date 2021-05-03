@@ -27,24 +27,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jhapy.commons.utils.HasLogger;
 import org.jhapy.commons.utils.OrikaBeanMapper;
-import org.jhapy.dto.messageQueue.I18NActionTrlUpdate;
 import org.jhapy.dto.messageQueue.I18NMessageTrlUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
-import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.domain.I18NVersion;
 import org.jhapy.i18n.repository.MessageRepository;
 import org.jhapy.i18n.repository.MessageTrlRepository;
-import org.jhapy.i18n.repository.VersionRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -73,11 +66,11 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
   private String bootstrapFile;
 
   @Value("${jhapy.bootstrap.i18n.enabled}")
-  private Boolean isBootstrapEnabled;
+  private boolean isBootstrapEnabled;
 
   public MessageTrlServiceImpl(MessageRepository messageRepository,
       MessageTrlRepository messageTrlRepository,
-      VersionRepository versionRepository, OrikaBeanMapper mapperFacade,
+      OrikaBeanMapper mapperFacade,
       I18NQueue i18NQueue) {
     this.messageRepository = messageRepository;
     this.messageTrlRepository = messageTrlRepository;
@@ -100,15 +93,15 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
   @Transactional
   @EventListener(ApplicationReadyEvent.class)
-  protected void postLoad() {
+  public void postLoad() {
     bootstrapMessages();
   }
 
   @Override
   public List<MessageTrl> findByMessage(Long messageId) {
-    Optional<Message> _message = messageRepository.findById(messageId);
-    if (_message.isPresent()) {
-      return messageTrlRepository.findByMessage(_message.get());
+    Optional<Message> message = messageRepository.findById(messageId);
+    if (message.isPresent()) {
+      return messageTrlRepository.findByMessage(message.get());
     } else {
       return Collections.emptyList();
     }
@@ -116,12 +109,8 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
   @Override
   public long countByMessage(Long messageId) {
-    Optional<Message> _message = messageRepository.findById(messageId);
-    if (_message.isPresent()) {
-      return messageTrlRepository.countByMessage(_message.get());
-    } else {
-      return 0;
-    }
+    return messageRepository.findById(messageId).map(messageTrlRepository::countByMessage)
+        .orElse(0L);
   }
 
   @Transactional
@@ -132,32 +121,32 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
     Assert.notNull(name, "Name mandatory");
     Assert.notNull(iso3Language, "ISO3 language is mandatory");
 
-    Optional<Message> _message = messageRepository.getByName(name);
+    Optional<Message> optMessage = messageRepository.getByName(name);
     Message message;
-    if (!_message.isPresent()) {
-      logger().warn(loggerPrefix + "Message '" + name + "' not found, create a new one");
+    if (optMessage.isEmpty()) {
+      warn(loggerPrefix, "Message '{0}' not found, create a new one", name);
       message = new Message();
       message.setName(name);
       message.setIsTranslated(false);
       message = messageRepository.save(message);
     } else {
-      message = _message.get();
+      message = optMessage.get();
     }
-    Optional<MessageTrl> _messageTrl = messageTrlRepository
+    Optional<MessageTrl> optMessageTrl = messageTrlRepository
         .getByMessageAndIso3Language(message, iso3Language);
-    if (_messageTrl.isPresent()) {
-      return _messageTrl.get();
+    if (optMessageTrl.isPresent()) {
+      return optMessageTrl.get();
     } else {
-      logger().warn(loggerPrefix + "Message '" + name + "', '" + iso3Language
-          + "' language translation not found, create a new one");
-      MessageTrl messageTrl = new MessageTrl();
+      warn(loggerPrefix, "Message ''{0}', '{1}' language translation not found, create a new one",
+          name, iso3Language);
+      var messageTrl = new MessageTrl();
       messageTrl.setIso3Language(iso3Language);
       messageTrl.setMessage(message);
 
-      Optional<MessageTrl> _defaultMessageTrl = messageTrlRepository
+      Optional<MessageTrl> optDefaultMessageTrl = messageTrlRepository
           .getByMessageAndIsDefault(message, true);
-      if (_defaultMessageTrl.isPresent()) {
-        messageTrl.setValue(_defaultMessageTrl.get().getValue());
+      if (optDefaultMessageTrl.isPresent()) {
+        messageTrl.setValue(optDefaultMessageTrl.get().getValue());
       } else {
         messageTrl.setValue(name);
       }
@@ -177,8 +166,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
   @Override
   public List<MessageTrl> saveAll(List<MessageTrl> translations) {
-    List<MessageTrl> result = messageTrlRepository.saveAll(translations);
-    return result;
+    return messageTrlRepository.saveAll(translations);
   }
 
   @Override
@@ -190,8 +178,8 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
   @Transactional
   @Override
   public void postUpdate(MessageTrl messageTrl) {
-    boolean isAllTranslated = true;
-    Message message = messageTrl.getMessage();
+    var isAllTranslated = true;
+    var message = messageTrl.getMessage();
     List<MessageTrl> trls = messageTrl.getMessage().getTranslations();
     for (MessageTrl trl : trls) {
       if (!trl.getIsTranslated()) {
@@ -206,8 +194,9 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
       message.setIsTranslated(false);
       messageRepository.save(message);
     }
-    I18NMessageTrlUpdate messageTrlUpdate = new I18NMessageTrlUpdate();
-    messageTrlUpdate.setMessageTrl(mapperFacade.map( messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
+    var messageTrlUpdate = new I18NMessageTrlUpdate();
+    messageTrlUpdate
+        .setMessageTrl(mapperFacade.map(messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
     messageTrlUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
     i18NQueue.sendMessageTrlUpdate(messageTrlUpdate);
   }
@@ -215,8 +204,9 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
   @Override
   @Transactional
   public void postPersist(MessageTrl messageTrl) {
-    I18NMessageTrlUpdate messageTrlUpdate = new I18NMessageTrlUpdate();
-    messageTrlUpdate.setMessageTrl(mapperFacade.map( messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
+    var messageTrlUpdate = new I18NMessageTrlUpdate();
+    messageTrlUpdate
+        .setMessageTrl(mapperFacade.map(messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
     messageTrlUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
     i18NQueue.sendMessageTrlUpdate(messageTrlUpdate);
   }
@@ -224,8 +214,9 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
   @Override
   @Transactional
   public void postRemove(MessageTrl messageTrl) {
-    I18NMessageTrlUpdate messageTrlUpdate = new I18NMessageTrlUpdate();
-    messageTrlUpdate.setMessageTrl(mapperFacade.map( messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
+    var messageTrlUpdate = new I18NMessageTrlUpdate();
+    messageTrlUpdate
+        .setMessageTrl(mapperFacade.map(messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
     messageTrlUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
     i18NQueue.sendMessageTrlUpdate(messageTrlUpdate);
   }
@@ -237,8 +228,9 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
   @Transactional
   public synchronized void bootstrapMessages() {
-    if ( hasBootstrapped )
+    if (hasBootstrapped) {
       return;
+    }
 
     if (!isBootstrapEnabled) {
       return;
@@ -248,57 +240,57 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
     try {
       importExcelFile(Files.readAllBytes(Path.of(bootstrapFile)));
     } catch (IOException e) {
-      logger().error(loggerPrefix + "Something wrong happen : " + e.getMessage(), e);
+      error(loggerPrefix, e, "Something wrong happen : {0}", e.getMessage());
     }
   }
 
   @Transactional
   public String importExcelFile(byte[] content) {
     String loggerPrefix = getLoggerPrefix("importExcelFile");
-    try (Workbook workbook = WorkbookFactory.create(new ByteArrayInputStream(content))) {
-      Sheet sheet = workbook.getSheet("Messages");
+    try (var workbook = WorkbookFactory.create(new ByteArrayInputStream(content))) {
+      var sheet = workbook.getSheet("Messages");
       if (sheet == null) {
         sheet = workbook.getSheet("messages");
       }
 
-      logger().info(loggerPrefix + sheet.getPhysicalNumberOfRows() + " rows");
+      info(loggerPrefix, "{0} rows", sheet.getPhysicalNumberOfRows());
 
       Iterator<Row> rowIterator = sheet.rowIterator();
-      int rowIndex = 0;
+      var rowIndex = 0;
 
       while (rowIterator.hasNext()) {
-        Row row = rowIterator.next();
+        var row = rowIterator.next();
         rowIndex++;
         if (rowIndex == 1) {
           continue;
         }
 
         if (rowIndex % 10 == 0) {
-          logger().info(loggerPrefix + "Handle row " + rowIndex);
+          info(loggerPrefix, "Handle row {0}", rowIndex);
         }
 
-        int colIdx = 0;
-        Cell categoryCell = row.getCell(colIdx++);
-        Cell name0Cell = row.getCell(colIdx++);
-        Cell name1Cell = row.getCell(colIdx++);
-        Cell name2Cell = row.getCell(colIdx++);
-        Cell name3Cell = row.getCell(colIdx++);
-        Cell langCell = row.getCell(colIdx++);
-        Cell valueCell = row.getCell(colIdx);
+        var colIdx = 0;
+        var categoryCell = row.getCell(colIdx++);
+        var name0Cell = row.getCell(colIdx++);
+        var name1Cell = row.getCell(colIdx++);
+        var name2Cell = row.getCell(colIdx++);
+        var name3Cell = row.getCell(colIdx++);
+        var langCell = row.getCell(colIdx++);
+        var valueCell = row.getCell(colIdx);
 
         if (langCell == null) {
-          logger().error(loggerPrefix + "Empty value for language, skip");
+          error(loggerPrefix, "Empty value for language, skip");
           continue;
         }
 
         if (name0Cell == null) {
-          logger().error(loggerPrefix + "Empty value for name, skip");
+          error(loggerPrefix, "Empty value for name, skip");
           continue;
         }
 
         String category = categoryCell == null ? null : categoryCell.getStringCellValue();
 
-        String name = name0Cell.getStringCellValue();
+        var name = name0Cell.getStringCellValue();
         if (name1Cell != null && StringUtils.isNotBlank(name1Cell.getStringCellValue())) {
           name += "." + name1Cell.getStringCellValue();
         }
@@ -309,62 +301,62 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
           name += "." + name3Cell.getStringCellValue();
         }
 
-        String language = langCell.getStringCellValue();
+        var language = langCell.getStringCellValue();
 
-        Optional<Message> _message = messageRepository.getByName(name);
+        Optional<Message> optMessage = messageRepository.getByName(name);
         Message message;
-        if (!_message.isPresent()) {
+        if (optMessage.isEmpty()) {
           message = new Message();
           message.setName(name);
           message.setCategory(category);
           message.setIsTranslated(true);
 
-          logger().debug(loggerPrefix + "Create : " + message);
+          debug(loggerPrefix, "Create : {0}", message);
 
           message = messageRepository.save(message);
         } else {
-          message = _message.get();
+          message = optMessage.get();
           message.setCategory(category);
           message.setIsTranslated(true);
 
-          logger().debug(loggerPrefix + "Update : " + message);
+          debug(loggerPrefix, "Update : {0}", message);
 
           message = messageRepository.save(message);
         }
 
-        Optional<MessageTrl> _messageTrl = messageTrlRepository
+        Optional<MessageTrl> optMessageTrl = messageTrlRepository
             .getByMessageAndIso3Language(message, language);
         MessageTrl messageTrl;
-        if (!_messageTrl.isPresent()) {
+        if (optMessageTrl.isEmpty()) {
           messageTrl = new MessageTrl();
           messageTrl.setValue(valueCell == null ? "" : valueCell.getStringCellValue());
           messageTrl.setIso3Language(language);
           messageTrl.setMessage(message);
           messageTrl.setIsTranslated(true);
 
-          logger().debug(loggerPrefix + "Create Trl : " + messageTrl);
+          debug(loggerPrefix, "Create Trl : {0}", messageTrl);
 
           messageTrlRepository.save(messageTrl);
         } else {
-          messageTrl = _messageTrl.get();
+          messageTrl = optMessageTrl.get();
           if (!messageTrl.getIsTranslated()) {
             messageTrl.setValue(valueCell == null ? "" : valueCell.getStringCellValue());
             messageTrl.setIso3Language(language);
             messageTrl.setMessage(message);
             messageTrl.setIsTranslated(true);
 
-            logger().debug(loggerPrefix + "Update Trl : " + messageTrl);
+            debug(loggerPrefix, "Update Trl : {0}", messageTrl);
 
             messageTrlRepository.save(messageTrl);
           }
         }
       }
     } catch (IOException e) {
-      logger().error(loggerPrefix + "Something wrong happen : " + e.getMessage(), e);
+      error(loggerPrefix, e, "Something wrong happen : {0}", e.getMessage());
       return e.getMessage();
     }
 
-    logger().info(loggerPrefix + "Done");
+    info(loggerPrefix, "Done");
 
     hasBootstrapped = true;
 

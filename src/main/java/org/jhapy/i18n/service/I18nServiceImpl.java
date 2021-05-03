@@ -20,8 +20,6 @@ package org.jhapy.i18n.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +43,6 @@ import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.domain.I18NVersion;
 import org.jhapy.i18n.repository.ActionRepository;
 import org.jhapy.i18n.repository.ActionTrlRepository;
 import org.jhapy.i18n.repository.ElementRepository;
@@ -55,7 +52,6 @@ import org.jhapy.i18n.repository.MessageTrlRepository;
 import org.jhapy.i18n.repository.VersionRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,8 +78,6 @@ public class I18nServiceImpl implements I18nService {
   private final ActionTrlRepository actionTrlRepository;
 
   private final VersionRepository versionRepository;
-private final I18NQueue i18NQueue;
-private final static Integer fiveMinutesInSeconds = 5 *  60;
 
   private final static String[] i18nExportHeaders = new String[]{"Cat", "Name0", "Name1", "Name2",
       "Name3", "Language", "Value", "Tooltip", "Key"};
@@ -99,7 +93,7 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
       ActionTrlService actionTrlService,
       ActionRepository actionRepository,
       ActionTrlRepository actionTrlRepository,
-      VersionRepository versionRepository, I18NQueue i18NQueue) {
+      VersionRepository versionRepository) {
     this.elementTrlService = elementTrlService;
     this.elementRepository = elementRepository;
     this.elementTrlRepository = elementTrlRepository;
@@ -110,7 +104,6 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
     this.actionRepository = actionRepository;
     this.actionTrlRepository = actionTrlRepository;
     this.versionRepository = versionRepository;
-    this.i18NQueue = i18NQueue;
   }
 
   @Override
@@ -129,15 +122,14 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
   }
 
   public List<String> getExistingLanguages() {
-  return elementTrlRepository.getIso3Languages();
-}
+    return elementTrlRepository.getIso3Languages();
+  }
 
   private static Map<String, CellStyle> createStyles(Workbook wb) {
     Map<String, CellStyle> styles = new HashMap<>();
-    DataFormat df = wb.createDataFormat();
 
     CellStyle style;
-    Font headerFont = wb.createFont();
+    var headerFont = wb.createFont();
     headerFont.setFontName("Calibri");
     headerFont.setFontHeightInPoints((short) 12);
     headerFont.setBold(true);
@@ -148,7 +140,7 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
     style.setFont(headerFont);
     styles.put("header", style);
 
-    Font defaultFont = wb.createFont();
+    var defaultFont = wb.createFont();
     defaultFont.setFontName("Calibri");
     defaultFont.setFontHeightInPoints((short) 12);
     style = wb.createCellStyle();
@@ -165,12 +157,12 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
 
     Map<String, CellStyle> styles = createStyles(wb);
     {
-      Sheet sheet = wb.createSheet("Elements");
+      var sheet = wb.createSheet("Elements");
 
-      Row headerRow = sheet.createRow(0);
+      var headerRow = sheet.createRow(0);
       headerRow.setHeightInPoints(12.75f);
-      for (int i = 0; i < i18nExportHeaders.length; i++) {
-        Cell cell = headerRow.createCell(i);
+      for (var i = 0; i < i18nExportHeaders.length; i++) {
+        var cell = headerRow.createCell(i);
         cell.setCellValue(i18nExportHeaders[i]);
         cell.setCellStyle(styles.get("header"));
       }
@@ -179,7 +171,7 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
 
       Row row;
       Cell cell;
-      int rownum = 1;
+      var rownum = 1;
       List<Element> elementList = elementRepository
           .findAll(Sort.by(Order.asc("category"), Order.asc("name")));
       List<String> iso3Languages = elementTrlRepository.getIso3Languages();
@@ -188,7 +180,7 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
         for (String iso3Language : iso3Languages) {
           row = sheet.createRow(rownum);
 
-          int j = 0;
+          var j = 0;
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
           cell.setCellValue(element.getCategory());
@@ -222,16 +214,16 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          Optional<ElementTrl> _elementTrl = elementTrlRepository
+          Optional<ElementTrl> optElementTrl = elementTrlRepository
               .getByElementAndIso3Language(element, iso3Language);
-          if (_elementTrl.isPresent() && !_elementTrl.get().getValue().equals(element.getName())) {
-            cell.setCellValue(_elementTrl.get().getValue());
+          if (optElementTrl.isPresent() && !optElementTrl.get().getValue().equals(element.getName())) {
+            cell.setCellValue(optElementTrl.get().getValue());
           }
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          if (_elementTrl.isPresent() && !_elementTrl.get().getValue().equals(element.getName())) {
-            cell.setCellValue(_elementTrl.get().getTooltip());
+          if (optElementTrl.isPresent() && !optElementTrl.get().getValue().equals(element.getName())) {
+            cell.setCellValue(optElementTrl.get().getTooltip());
           }
 
           rownum++;
@@ -254,12 +246,12 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
       sheet.setColumnWidth(8, 256 * 45);
     }
     {
-      Sheet sheet = wb.createSheet("Actions");
+      var sheet = wb.createSheet("Actions");
 
-      Row headerRow = sheet.createRow(0);
+      var headerRow = sheet.createRow(0);
       headerRow.setHeightInPoints(12.75f);
-      for (int i = 0; i < i18nExportHeaders.length; i++) {
-        Cell cell = headerRow.createCell(i);
+      for (var i = 0; i < i18nExportHeaders.length; i++) {
+        var cell = headerRow.createCell(i);
         cell.setCellValue(i18nExportHeaders[i]);
         cell.setCellStyle(styles.get("header"));
       }
@@ -268,7 +260,7 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
 
       Row row;
       Cell cell;
-      int rownum = 1;
+      var rownum = 1;
       List<Action> actionList = actionRepository
           .findAll(Sort.by(Order.asc("category"), Order.asc("name")));
       List<String> iso3Languages = actionTrlRepository.getIso3Languages();
@@ -277,7 +269,7 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
         for (String iso3Language : iso3Languages) {
           row = sheet.createRow(rownum);
 
-          int j = 0;
+          var j = 0;
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
           cell.setCellValue(action.getCategory());
@@ -311,16 +303,16 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          Optional<ActionTrl> _actionTrl = actionTrlRepository
+          Optional<ActionTrl> optActionTrl = actionTrlRepository
               .getByActionAndIso3Language(action, iso3Language);
-          if (_actionTrl.isPresent() && !_actionTrl.get().getValue().equals(action.getName())) {
-            cell.setCellValue(_actionTrl.get().getValue());
+          if (optActionTrl.isPresent() && !optActionTrl.get().getValue().equals(action.getName())) {
+            cell.setCellValue(optActionTrl.get().getValue());
           }
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          if (_actionTrl.isPresent() && !_actionTrl.get().getValue().equals(action.getName())) {
-            cell.setCellValue(_actionTrl.get().getTooltip());
+          if (optActionTrl.isPresent() && !optActionTrl.get().getValue().equals(action.getName())) {
+            cell.setCellValue(optActionTrl.get().getTooltip());
           }
 
           rownum++;
@@ -343,12 +335,12 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
       sheet.setColumnWidth(8, 256 * 45);
     }
     {
-      Sheet sheet = wb.createSheet("Messages");
+      var sheet = wb.createSheet("Messages");
 
-      Row headerRow = sheet.createRow(0);
+      var headerRow = sheet.createRow(0);
       headerRow.setHeightInPoints(12.75f);
-      for (int i = 0; i < i18nExportMessageHeaders.length; i++) {
-        Cell cell = headerRow.createCell(i);
+      for (var i = 0; i < i18nExportMessageHeaders.length; i++) {
+        var cell = headerRow.createCell(i);
         cell.setCellValue(i18nExportMessageHeaders[i]);
         cell.setCellStyle(styles.get("header"));
       }
@@ -357,7 +349,7 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
 
       Row row;
       Cell cell;
-      int rownum = 1;
+      var rownum = 1;
       List<Message> messageList = messageRepository
           .findAll(Sort.by(Order.asc("category"), Order.asc("name")));
       List<String> iso3Languages = messageTrlRepository.getIso3Languages();
@@ -366,7 +358,7 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
         for (String iso3Language : iso3Languages) {
           row = sheet.createRow(rownum);
 
-          int j = 0;
+          var j = 0;
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
           cell.setCellValue(message.getCategory());
@@ -400,10 +392,10 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          Optional<MessageTrl> _messageTrl = messageTrlRepository
+          Optional<MessageTrl> optMessageTrl = messageTrlRepository
               .getByMessageAndIso3Language(message, iso3Language);
-          if (_messageTrl.isPresent() && !_messageTrl.get().getValue().equals(message.getName())) {
-            cell.setCellValue(_messageTrl.get().getValue());
+          if (optMessageTrl.isPresent() && !optMessageTrl.get().getValue().equals(message.getName())) {
+            cell.setCellValue(optMessageTrl.get().getValue());
           }
           rownum++;
           cell = row.createCell(j++);
@@ -423,7 +415,7 @@ private final static Integer fiveMinutesInSeconds = 5 *  60;
       sheet.setColumnWidth(6, 256 * 65);
       sheet.setColumnWidth(7, 256 * 45);
     }
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    var outputStream = new ByteArrayOutputStream();
     try {
       wb.write(outputStream);
     } catch (IOException e) {

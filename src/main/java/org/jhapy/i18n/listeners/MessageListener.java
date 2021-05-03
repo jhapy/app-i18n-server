@@ -49,6 +49,7 @@ public class MessageListener {
       getMessageService().postUpdate(message);
     }
   }
+
   @PostRemove
   public void postRemove(Message message) {
     if (getMessageService() != null) {

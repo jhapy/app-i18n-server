@@ -35,7 +35,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
@@ -46,7 +45,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
  * @version 1.0
  * @since 2019-07-02
  */
-@SpringBootApplication(exclude= JaversMongoAutoConfiguration.class)
+@SpringBootApplication(exclude = JaversMongoAutoConfiguration.class)
 @EnableDiscoveryClient
 @EnableConfigurationProperties(AppProperties.class)
 @EnableGlobalMethodSecurity(prePostEnabled = true)

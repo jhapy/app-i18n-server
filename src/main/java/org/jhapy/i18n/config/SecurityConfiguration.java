@@ -110,7 +110,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
   }
 
   Converter<Jwt, AbstractAuthenticationToken> authenticationConverter() {
-    JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+    var jwtAuthenticationConverter = new JwtAuthenticationConverter();
     jwtAuthenticationConverter
         .setJwtGrantedAuthoritiesConverter(new JwtGrantedAuthorityConverter());
     return jwtAuthenticationConverter;
@@ -134,7 +134,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     String loggerPrefix = getLoggerPrefix("corsConfigurationSource");
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    var source = new UrlBasedCorsConfigurationSource();
     CorsConfiguration config = appProperties.getCors();
     config.applyPermitDefaultValues();
 

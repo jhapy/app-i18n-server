@@ -14,7 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class VersionServiceImpl implements VersionService {
-private  final VersionRepository versionRepository;
+
+  private final VersionRepository versionRepository;
 
   public VersionServiceImpl(VersionRepository versionRepository) {
     this.versionRepository = versionRepository;
@@ -23,7 +24,7 @@ private  final VersionRepository versionRepository;
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   @Override
   public void incVersionForAction(String iso3Lang) {
-    I18NVersion i18NVersion  = versionRepository.getActionByIsoLang(iso3Lang);
+    var i18NVersion = versionRepository.getActionByIsoLang(iso3Lang);
     i18NVersion.setPreviousRecordVersion(i18NVersion.getRecordVersion());
     i18NVersion.setRecordVersion(i18NVersion.getRecordVersion() + 1);
     i18NVersion.setNotificationSent(false);

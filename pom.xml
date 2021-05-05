@@ -9,10 +9,8 @@
     <groupId>org.jhapy</groupId>
     <artifactId>jhapy-bom</artifactId>
     <version>3.0.0-SNAPSHOT</version>
-    <relativePath/>
   </parent>
 
-  <groupId>org.jhapy</groupId>
   <artifactId>app-i18n-server</artifactId>
   <version>3.0.0-SNAPSHOT</version>
 

@@ -63,37 +63,37 @@ public class I18NQueue implements HasLogger {
   }
 
   public void sendElementUpdate(final I18NElementUpdate elementUpdate) {
-    String loggerPrefix = getLoggerPrefix("sendElementUpdate", elementUpdate);
+    var loggerPrefix = getLoggerPrefix("sendElementUpdate", elementUpdate);
     logger().debug(loggerPrefix + "Send Update");
     amqpTemplate.convertAndSend(elementUpdateFanout.getName(), "", elementUpdate);
   }
 
   public void sendElementTrlUpdate(final I18NElementTrlUpdate elementTrlUpdate) {
-    String loggerPrefix = getLoggerPrefix("sendElementTrlUpdate", elementTrlUpdate);
+    var loggerPrefix = getLoggerPrefix("sendElementTrlUpdate", elementTrlUpdate);
     logger().debug(loggerPrefix + "Send Update");
     amqpTemplate.convertAndSend(elementTrlUpdateFanout.getName(), "", elementTrlUpdate);
   }
 
   public void sendActionUpdate(final I18NActionUpdate actionUpdate) {
-    String loggerPrefix = getLoggerPrefix("sendActionUpdate", actionUpdate);
+    var loggerPrefix = getLoggerPrefix("sendActionUpdate", actionUpdate);
     logger().debug(loggerPrefix + "Send Update");
     amqpTemplate.convertAndSend(actionUpdateFanout.getName(), "", actionUpdate);
   }
 
   public void sendActionTrlUpdate(final I18NActionTrlUpdate actionTrlUpdate) {
-    String loggerPrefix = getLoggerPrefix("sendActionTrlUpdate", actionTrlUpdate);
+    var loggerPrefix = getLoggerPrefix("sendActionTrlUpdate", actionTrlUpdate);
     logger().debug(loggerPrefix + "Send Update");
     amqpTemplate.convertAndSend(actionTrlUpdateFanout.getName(), "", actionTrlUpdate);
   }
 
   public void sendMessageUpdate(final I18NMessageUpdate messageUpdate) {
-    String loggerPrefix = getLoggerPrefix("sendMessageUpdate", messageUpdate);
+    var loggerPrefix = getLoggerPrefix("sendMessageUpdate", messageUpdate);
     logger().debug(loggerPrefix + "Send Update");
     amqpTemplate.convertAndSend(messageUpdateFanout.getName(), "", messageUpdate);
   }
 
   public void sendMessageTrlUpdate(final I18NMessageTrlUpdate messageTrlUpdate) {
-    String loggerPrefix = getLoggerPrefix("sendMessageTrlUpdate", messageTrlUpdate);
+    var loggerPrefix = getLoggerPrefix("sendMessageTrlUpdate", messageTrlUpdate);
     logger().debug(loggerPrefix + "Send Update");
     amqpTemplate.convertAndSend(messageTrlUpdateFanout.getName(), "", messageTrlUpdate);
   }

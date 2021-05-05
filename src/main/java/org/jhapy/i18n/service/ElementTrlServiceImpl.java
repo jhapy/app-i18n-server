@@ -41,7 +41,6 @@ import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.repository.ElementRepository;
 import org.jhapy.i18n.repository.ElementTrlRepository;
-import org.jhapy.i18n.repository.VersionRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -114,24 +113,20 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
   @Override
   public long countByElement(Long elementId) {
     Optional<Element> _element = elementRepository.findById(elementId);
-    if (_element.isPresent()) {
-      return elementTrlRepository.countByElement(_element.get());
-    } else {
-      return 0;
-    }
+    return _element.map(elementTrlRepository::countByElement).orElse(0L);
   }
 
   @Transactional
   @Override
   public ElementTrl getByNameAndIso3Language(String name, String iso3Language) {
-    String loggerPrefix = getLoggerPrefix("getByNameAndIso3Language", name, iso3Language);
+    var loggerPrefix = getLoggerPrefix("getByNameAndIso3Language", name, iso3Language);
 
     Assert.notNull(name, "Name mandatory");
     Assert.notNull(iso3Language, "ISO3 language is mandatory");
 
     Optional<Element> _element = elementRepository.getByName(name);
     Element element;
-    if (!_element.isPresent()) {
+    if (_element.isEmpty()) {
       logger().warn(loggerPrefix + "Element '" + name + "' not found, create a new one");
       element = new Element();
       element.setName(name);
@@ -174,8 +169,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
 
   @Override
   public List<ElementTrl> saveAll(List<ElementTrl> translations) {
-    List<ElementTrl> result = elementTrlRepository.saveAll(translations);
-    return result;
+    return elementTrlRepository.saveAll(translations);
   }
 
   @Override
@@ -252,7 +246,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
       return;
     }
 
-    String loggerPrefix = getLoggerPrefix("bootstrapElements");
+    var loggerPrefix = getLoggerPrefix("bootstrapElements");
     try {
       importExcelFile(Files.readAllBytes(Path.of(bootstrapFile)));
     } catch (IOException e) {
@@ -262,7 +256,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
 
   @Transactional
   public String importExcelFile(byte[] content) {
-    String loggerPrefix = getLoggerPrefix("importExcelFile");
+    var loggerPrefix = getLoggerPrefix("importExcelFile");
     try (Workbook workbook = WorkbookFactory.create(new ByteArrayInputStream(content))) {
       Sheet sheet = workbook.getSheet("Elements");
       if (sheet == null) {
@@ -324,7 +318,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
 
         Optional<Element> _element = elementRepository.getByName(name);
         Element element;
-        if (!_element.isPresent()) {
+        if (_element.isEmpty()) {
           element = new Element();
           element.setName(name);
           element.setCategory(category);
@@ -332,7 +326,6 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
 
           logger().debug(loggerPrefix + "Create : " + element);
 
-          element = elementRepository.save(element);
         } else {
           element = _element.get();
           element.setCategory(category);
@@ -340,13 +333,13 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
 
           logger().debug(loggerPrefix + "Update : " + element);
 
-          element = elementRepository.save(element);
         }
+        element = elementRepository.save(element);
 
         Optional<ElementTrl> _elementTrl = elementTrlRepository
             .getByElementAndIso3Language(element, language);
         ElementTrl elementTrl;
-        if (!_elementTrl.isPresent()) {
+        if (_elementTrl.isEmpty()) {
           elementTrl = new ElementTrl();
           elementTrl.setValue(valueCell == null ? "" : valueCell.getStringCellValue());
           elementTrl.setTooltip(tooltipCell == null ? null : tooltipCell.getStringCellValue());

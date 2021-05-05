@@ -133,7 +133,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
 
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
-    String loggerPrefix = getLoggerPrefix("corsConfigurationSource");
+    var loggerPrefix = getLoggerPrefix("corsConfigurationSource");
     var source = new UrlBasedCorsConfigurationSource();
     CorsConfiguration config = appProperties.getCors();
     config.applyPermitDefaultValues();

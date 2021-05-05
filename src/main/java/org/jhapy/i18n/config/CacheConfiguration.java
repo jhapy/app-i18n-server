@@ -61,7 +61,7 @@ public class CacheConfiguration implements HasLogger {
 
   public CacheConfiguration(Environment env, ServerProperties serverProperties,
       DiscoveryClient discoveryClient) {
-    String loggerPrefix = getLoggerPrefix("CacheConfiguration");
+    var loggerPrefix = getLoggerPrefix("CacheConfiguration");
     logger().info(loggerPrefix + "Startup");
     this.env = env;
     this.serverProperties = serverProperties;
@@ -74,22 +74,22 @@ public class CacheConfiguration implements HasLogger {
   }
 
   @PreDestroy
-  public void destroy() throws Exception {
-    String loggerPrefix = getLoggerPrefix("destroy");
+  public void destroy() {
+    var loggerPrefix = getLoggerPrefix("destroy");
     logger().info(loggerPrefix + "Closing Cache Manager");
     Hazelcast.shutdownAll();
   }
 
   @Bean
   public CacheManager cacheManager(HazelcastInstance hazelcastInstance) {
-    String loggerPrefix = getLoggerPrefix("cacheManager");
+    var loggerPrefix = getLoggerPrefix("cacheManager");
     logger().info(loggerPrefix + "Starting HazelcastCacheManager");
     return new com.hazelcast.spring.cache.HazelcastCacheManager(hazelcastInstance);
   }
 
   @Bean
   public HazelcastInstance hazelcastInstance(AppProperties appProperties) {
-    String loggerPrefix = getLoggerPrefix("hazelcastInstance");
+    var loggerPrefix = getLoggerPrefix("hazelcastInstance");
 
     logger().info(loggerPrefix + "Configuring Hazelcast");
     HazelcastInstance hazelCastInstance = Hazelcast

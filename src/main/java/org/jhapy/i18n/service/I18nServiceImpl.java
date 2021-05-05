@@ -27,16 +27,12 @@ import java.util.Optional;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jhapy.i18n.client.I18NQueue;
 import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.domain.Element;
@@ -216,13 +212,15 @@ public class I18nServiceImpl implements I18nService {
           cell.setCellStyle(styles.get("cell_normal"));
           Optional<ElementTrl> optElementTrl = elementTrlRepository
               .getByElementAndIso3Language(element, iso3Language);
-          if (optElementTrl.isPresent() && !optElementTrl.get().getValue().equals(element.getName())) {
+          if (optElementTrl.isPresent() && !optElementTrl.get().getValue()
+              .equals(element.getName())) {
             cell.setCellValue(optElementTrl.get().getValue());
           }
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          if (optElementTrl.isPresent() && !optElementTrl.get().getValue().equals(element.getName())) {
+          if (optElementTrl.isPresent() && !optElementTrl.get().getValue()
+              .equals(element.getName())) {
             cell.setCellValue(optElementTrl.get().getTooltip());
           }
 
@@ -394,7 +392,8 @@ public class I18nServiceImpl implements I18nService {
           cell.setCellStyle(styles.get("cell_normal"));
           Optional<MessageTrl> optMessageTrl = messageTrlRepository
               .getByMessageAndIso3Language(message, iso3Language);
-          if (optMessageTrl.isPresent() && !optMessageTrl.get().getValue().equals(message.getName())) {
+          if (optMessageTrl.isPresent() && !optMessageTrl.get().getValue()
+              .equals(message.getName())) {
             cell.setCellValue(optMessageTrl.get().getValue());
           }
           rownum++;

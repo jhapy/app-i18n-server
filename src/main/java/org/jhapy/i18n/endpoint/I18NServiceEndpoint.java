@@ -52,7 +52,7 @@ public class I18NServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAuthority('ROLE_I18N_READ')")
   @PostMapping(value = "/getExistingLanguages")
   public ResponseEntity<ServiceResult> getExistingLanguages(@RequestBody BaseRemoteQuery query) {
-    String loggerPrefix = getLoggerPrefix("getExistingLanguages");
+    var loggerPrefix = getLoggerPrefix("getExistingLanguages");
     try {
       return handleResult(loggerPrefix, i18nService.getExistingLanguages());
     } catch (Throwable t) {
@@ -63,7 +63,7 @@ public class I18NServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAuthority('ROLE_I18N_READ')")
   @PostMapping(value = "/getI18NFile")
   public ResponseEntity<ServiceResult> getI18NFile(@RequestBody BaseRemoteQuery query) {
-    String loggerPrefix = getLoggerPrefix("getI18NFile");
+    var loggerPrefix = getLoggerPrefix("getI18NFile");
     try {
       return handleResult(loggerPrefix, i18nService.getI18NFile());
     } catch (Throwable t) {
@@ -74,7 +74,7 @@ public class I18NServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/importI18NFile")
   public ResponseEntity<ServiceResult> importI18NFile(@RequestBody ImportI18NFileQuery query) {
-    String loggerPrefix = getLoggerPrefix("importI18NFile");
+    var loggerPrefix = getLoggerPrefix("importI18NFile");
     try {
       String result = i18nService.importI18NFile(query.getFileContent());
       if (result == null) {

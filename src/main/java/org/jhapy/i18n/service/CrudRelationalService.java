@@ -113,12 +113,12 @@ public interface CrudRelationalService<T extends BaseEntity> extends HasLogger {
 
   default Page<T> findAnyMatching(String currentUserId, String filter, Boolean showInactive,
       Pageable pageable, Object... otherCriteria) {
-    String loggerString = getLoggerPrefix("findAnyMatching");
+    var loggerString = getLoggerPrefix("findAnyMatching");
 
     logger().debug(
         loggerString + "----------------------------------");
 
-    String currentUser = SecurityUtils.getCurrentUserLogin().get();
+    String currentUser = SecurityUtils.getCurrentUserLogin().orElse(null);
 
     logger().debug(
         loggerString + "In, Filter = " + filter + ", Show Inactive = "
@@ -157,12 +157,12 @@ public interface CrudRelationalService<T extends BaseEntity> extends HasLogger {
 
   default List<T> findAnyMatchingNoPaging(String currentUserId, String filter, Boolean showInactive,
       Object... otherCriteria) {
-    String loggerString = getLoggerPrefix("findAnyMatchingNoPaging");
+    var loggerString = getLoggerPrefix("findAnyMatchingNoPaging");
 
     logger().debug(
         loggerString + "----------------------------------");
 
-    String currentUser = SecurityUtils.getCurrentUserLogin().get();
+    String currentUser = SecurityUtils.getCurrentUserLogin().orElse(null);
 
     logger().debug(
         loggerString + "In, Filter = " + filter + ", Show Inactive = "
@@ -188,12 +188,12 @@ public interface CrudRelationalService<T extends BaseEntity> extends HasLogger {
 
   default long countAnyMatching(String currentUserId, String filter, Boolean showInactive,
       Object... otherCriteria) {
-    String loggerString = getLoggerPrefix("countAnyMatching");
+    var loggerString = getLoggerPrefix("countAnyMatching");
 
     logger().debug(
         loggerString + "----------------------------------");
 
-    String currentUser = SecurityUtils.getCurrentUserLogin().get();
+    String currentUser = SecurityUtils.getCurrentUserLogin().orElse(null);
 
     logger().debug(
         loggerString + "In, Filter = " + filter + ", Show Inactive = "
@@ -231,7 +231,8 @@ public interface CrudRelationalService<T extends BaseEntity> extends HasLogger {
     } catch (NumberFormatException nfe) {
       throw new ServiceException("ID attribute value is invalid");
     }
-    T existingRecord = getRepository().findById(id).get();
+    var existingRecord = getRepository().findById(id)
+        .orElseThrow(() -> new ServiceException("Record not found"));
     convert(entity, existingRecord);
 
     return save(existingRecord);

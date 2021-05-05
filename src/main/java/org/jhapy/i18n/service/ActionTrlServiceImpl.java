@@ -91,7 +91,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
 
   @Transactional
   @EventListener(ApplicationReadyEvent.class)
-  protected void postLoad() {
+  public void postLoad() {
     bootstrapActions();
   }
 
@@ -108,24 +108,20 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
   @Override
   public long countByAction(Long actionId) {
     Optional<Action> _action = actionRepository.findById(actionId);
-    if (_action.isPresent()) {
-      return actionTrlRepository.countByAction(_action.get());
-    } else {
-      return 0;
-    }
+    return _action.map(actionTrlRepository::countByAction).orElse(0L);
   }
 
   @Transactional
   @Override
   public ActionTrl getByNameAndIso3Language(String name, String iso3Language) {
-    String loggerPrefix = getLoggerPrefix("getByNameAndIso3Language");
+    var loggerPrefix = getLoggerPrefix("getByNameAndIso3Language");
 
     Assert.notNull(name, "Name mandatory");
     Assert.notNull(iso3Language, "ISO3 language is mandatory");
 
     Optional<Action> _action = actionRepository.getByName(name);
     Action action;
-    if (!_action.isPresent()) {
+    if (_action.isEmpty()) {
       logger().warn(loggerPrefix + "Action '" + name + "' not found, create a new one");
       action = new Action();
       action.setName(name);
@@ -258,7 +254,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
       return;
     }
 
-    String loggerPrefix = getLoggerPrefix("bootstrapActions");
+    var loggerPrefix = getLoggerPrefix("bootstrapActions");
 
     try {
       importExcelFile(Files.readAllBytes(Path.of(bootstrapFile)));
@@ -269,7 +265,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
 
   @Transactional
   public String importExcelFile(byte[] content) {
-    String loggerPrefix = getLoggerPrefix("importExcelFile");
+    var loggerPrefix = getLoggerPrefix("importExcelFile");
     try (Workbook workbook = WorkbookFactory.create(new ByteArrayInputStream(content))) {
 
       Sheet sheet = workbook.getSheet("Actions");
@@ -333,7 +329,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
 
         Optional<Action> _action = actionRepository.getByName(name);
         Action action;
-        if (!_action.isPresent()) {
+        if (_action.isEmpty()) {
           action = new Action();
           action.setName(name);
           action.setCategory(category);
@@ -341,7 +337,6 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
 
           logger().debug(loggerPrefix + "Create : " + action);
 
-          action = actionRepository.save(action);
         } else {
           action = _action.get();
           action.setCategory(category);
@@ -349,13 +344,13 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
 
           logger().debug(loggerPrefix + "Update : " + action);
 
-          action = actionRepository.save(action);
         }
+        action = actionRepository.save(action);
 
         Optional<ActionTrl> _actionTrl = actionTrlRepository
             .getByActionAndIso3Language(action, language);
         ActionTrl actionTrl;
-        if (!_actionTrl.isPresent()) {
+        if (_actionTrl.isEmpty()) {
           actionTrl = new ActionTrl();
           actionTrl.setValue(valueCell == null ? "" : valueCell.getStringCellValue());
           actionTrl.setTooltip(tooltipCell == null ? null : tooltipCell.getStringCellValue());

@@ -65,7 +65,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findByAction")
   public ResponseEntity<ServiceResult> findByAction(@RequestBody FindByActionQuery query) {
-    String loggerPrefix = getLoggerPrefix("findByAction");
+    var loggerPrefix = getLoggerPrefix("findByAction");
     try {
       List<ActionTrl> result = actionTrlService
           .findByAction(query.getActionId());
@@ -84,7 +84,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/countByAction")
   public ResponseEntity<ServiceResult> countByAction(@RequestBody CountByActionQuery query) {
-    String loggerPrefix = getLoggerPrefix("countByAction");
+    var loggerPrefix = getLoggerPrefix("countByAction");
     try {
       return handleResult(loggerPrefix, actionTrlService
           .countByAction(query.getActionId()));
@@ -100,7 +100,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findByIso3")
   public ResponseEntity<ServiceResult> findByIso3(@RequestBody FindByIso3Query query) {
-    String loggerPrefix = getLoggerPrefix("findByIso3");
+    var loggerPrefix = getLoggerPrefix("findByIso3");
     try {
       List<ActionTrl> result = actionTrlService
           .getByIso3Language(query.getIso3Language());
@@ -119,7 +119,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getByNameAndIso3")
   public ResponseEntity<ServiceResult> getByNameAndIso3(@RequestBody GetByNameAndIso3Query query) {
-    String loggerPrefix = getLoggerPrefix("getByNameAndIso3");
+    var loggerPrefix = getLoggerPrefix("getByNameAndIso3");
     try {
       ActionTrl result = actionTrlService
           .getByNameAndIso3Language(query.getName(), query.getIso3Language());
@@ -138,7 +138,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
-    String loggerPrefix = getLoggerPrefix("getById");
+    var loggerPrefix = getLoggerPrefix("getById");
     try {
       return handleResult(loggerPrefix, mapperFacade.map(actionTrlService
               .load(query.getId()), org.jhapy.dto.domain.i18n.ActionTrl.class,
@@ -155,7 +155,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
       @RequestBody SaveQuery<org.jhapy.dto.domain.i18n.ActionTrl> query) {
-    String loggerPrefix = getLoggerPrefix("save");
+    var loggerPrefix = getLoggerPrefix("save");
     try {
       return handleResult(loggerPrefix, mapperFacade.map(actionTrlService
               .save(mapperFacade
@@ -172,7 +172,7 @@ public class ActionTrlServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/delete")
   public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByIdQuery query) {
-    String loggerPrefix = getLoggerPrefix("delete");
+    var loggerPrefix = getLoggerPrefix("delete");
     try {
       actionTrlService
           .delete(query.getId());

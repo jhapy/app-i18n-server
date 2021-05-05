@@ -22,7 +22,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.micrometer.core.instrument.MeterRegistry;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -36,11 +35,15 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DatabaseConfiguration {
 
-  @Autowired
-  private DataSource dataSource;
+  private final DataSource dataSource;
 
-  @Autowired
-  private MeterRegistry meterRegistry;
+  private final MeterRegistry meterRegistry;
+
+  public DatabaseConfiguration(DataSource dataSource,
+      MeterRegistry meterRegistry) {
+    this.dataSource = dataSource;
+    this.meterRegistry = meterRegistry;
+  }
 
   @PostConstruct
   public void setUpHikariWithMetrics() {

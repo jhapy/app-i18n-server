@@ -102,7 +102,7 @@ public class MessageServiceImpl implements MessageService {
     for (MessageTrl messageTrl : translations) {
       messageTrl.setMessage(entity);
     }
-    if (!translations.isEmpty() ) {
+    if (!translations.isEmpty()) {
       entity.setTranslations(messageTrlService.saveAll(translations));
     }
     versionRepository.incMessageRecords();
@@ -113,7 +113,7 @@ public class MessageServiceImpl implements MessageService {
   @Transactional
   public void delete(Message entity) {
     List<MessageTrl> messageTrls = messageTrlService.findByMessage(entity.getId());
-    if ( ! messageTrls.isEmpty()) {
+    if (!messageTrls.isEmpty()) {
       messageTrlService.deleteAll(messageTrls);
     }
 

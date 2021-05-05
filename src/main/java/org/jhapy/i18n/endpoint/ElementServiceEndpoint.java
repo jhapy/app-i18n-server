@@ -64,7 +64,7 @@ public class ElementServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findAnyMatching")
   public ResponseEntity<ServiceResult> findAnyMatching(@RequestBody FindAnyMatchingQuery query) {
-    String loggerPrefix = getLoggerPrefix("findAnyMatching");
+    var loggerPrefix = getLoggerPrefix("findAnyMatching");
     try {
       Page<Element> result = elementService
           .findAnyMatching(query.getQueryUsername(), query.getFilter(), query.getShowInactive(),
@@ -84,7 +84,7 @@ public class ElementServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/countAnyMatching")
   public ResponseEntity<ServiceResult> countAnyMatching(@RequestBody CountAnyMatchingQuery query) {
-    String loggerPrefix = getLoggerPrefix("countAnyMatching");
+    var loggerPrefix = getLoggerPrefix("countAnyMatching");
     try {
       return handleResult(loggerPrefix, elementService
           .countAnyMatching(query.getQueryUsername(), query.getFilter(), query.getShowInactive()));
@@ -100,7 +100,7 @@ public class ElementServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
-    String loggerPrefix = getLoggerPrefix("getById");
+    var loggerPrefix = getLoggerPrefix("getById");
     try {
       return handleResult(loggerPrefix, mapperFacade.map(elementService
           .load(query.getId()), Element.class, getOrikaContext(query)));
@@ -116,7 +116,7 @@ public class ElementServiceEndpoint extends BaseEndpoint {
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
       @RequestBody SaveQuery<org.jhapy.dto.domain.i18n.Element> query) {
-    String loggerPrefix = getLoggerPrefix("save");
+    var loggerPrefix = getLoggerPrefix("save");
     try {
       org.jhapy.i18n.domain.Element converted = mapperFacade
           .map(query.getEntity(), org.jhapy.i18n.domain.Element.class, getOrikaContext(query));
@@ -139,7 +139,7 @@ public class ElementServiceEndpoint extends BaseEndpoint {
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/delete")
   public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByIdQuery query) {
-    String loggerPrefix = getLoggerPrefix("delete");
+    var loggerPrefix = getLoggerPrefix("delete");
     try {
       elementService
           .delete(query.getId());

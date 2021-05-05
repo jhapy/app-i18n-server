@@ -147,7 +147,7 @@ public class ElementServiceImpl implements ElementService {
   }
 
   @Override
-  public CriteriaQuery buildSearchQuery(CriteriaQuery query, Root<Element> entity,
+  public CriteriaQuery buildSearchQuery(CriteriaQuery query, Root entity,
       CriteriaBuilder cb, String currentUserId, String filter, Boolean showInactive,
       Object... otherCriteria) {
     List<Predicate> orPredicates = new ArrayList<>();

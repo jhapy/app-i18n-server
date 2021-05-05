@@ -85,11 +85,14 @@ public class Application implements InitializingBean {
     } catch (UnknownHostException e) {
       logger.warn("The host name could not be determined, using `localhost` as fallback");
     }
-    logger.info("\n----------------------------------------------------------\n\t" +
-            "Application '{}' is running! Access URLs:\n\t" +
-            "Local: \t\t{}://localhost:{}{}\n\t" +
-            "External: \t{}://{}:{}{}\n\t" +
-            "Profile(s): \t{}\n----------------------------------------------------------",
+    logger.info("""
+
+            ----------------------------------------------------------
+            \tApplication '{}' is running! Access URLs:
+            \tLocal: \t\t{}://localhost:{}{}
+            \tExternal: \t{}://{}:{}{}
+            \tProfile(s): \t{}
+            ----------------------------------------------------------""",
         env.getProperty("spring.application.name"),
         protocol,
         serverPort,
@@ -104,13 +107,16 @@ public class Application implements InitializingBean {
     if (configServerStatus == null) {
       configServerStatus = "Not found or not setup for this application";
     }
-    logger.info("\n----------------------------------------------------------\n\t" +
-            "Config Server: \t{}\n----------------------------------------------------------",
+    logger.info("""
+
+            ----------------------------------------------------------
+            \tConfig Server: \t{}
+            ----------------------------------------------------------""",
         configServerStatus);
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     Collection<String> activeProfiles = Arrays.asList(env.getActiveProfiles());
     if (activeProfiles.contains(SpringProfileConstants.SPRING_PROFILE_DEVELOPMENT) && activeProfiles
         .contains(SpringProfileConstants.SPRING_PROFILE_PRODUCTION)) {

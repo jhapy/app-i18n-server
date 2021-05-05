@@ -1,6 +1,5 @@
 package org.jhapy.i18n.service;
 
-import org.jhapy.i18n.domain.I18NVersion;
 import org.jhapy.i18n.repository.VersionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;

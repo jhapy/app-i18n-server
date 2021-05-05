@@ -116,7 +116,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
   @Transactional
   @Override
   public MessageTrl getByNameAndIso3Language(String name, String iso3Language) {
-    String loggerPrefix = getLoggerPrefix("getByNameAndIso3Language");
+    var loggerPrefix = getLoggerPrefix("getByNameAndIso3Language");
 
     Assert.notNull(name, "Name mandatory");
     Assert.notNull(iso3Language, "ISO3 language is mandatory");
@@ -236,7 +236,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
       return;
     }
 
-    String loggerPrefix = getLoggerPrefix("bootstrapMessages");
+    var loggerPrefix = getLoggerPrefix("bootstrapMessages");
     try {
       importExcelFile(Files.readAllBytes(Path.of(bootstrapFile)));
     } catch (IOException e) {
@@ -246,7 +246,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
   @Transactional
   public String importExcelFile(byte[] content) {
-    String loggerPrefix = getLoggerPrefix("importExcelFile");
+    var loggerPrefix = getLoggerPrefix("importExcelFile");
     try (var workbook = WorkbookFactory.create(new ByteArrayInputStream(content))) {
       var sheet = workbook.getSheet("Messages");
       if (sheet == null) {
@@ -313,7 +313,6 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
           debug(loggerPrefix, "Create : {0}", message);
 
-          message = messageRepository.save(message);
         } else {
           message = optMessage.get();
           message.setCategory(category);
@@ -321,8 +320,8 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
           debug(loggerPrefix, "Update : {0}", message);
 
-          message = messageRepository.save(message);
         }
+        message = messageRepository.save(message);
 
         Optional<MessageTrl> optMessageTrl = messageTrlRepository
             .getByMessageAndIso3Language(message, language);

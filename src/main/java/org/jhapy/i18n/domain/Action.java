@@ -41,7 +41,7 @@ import org.javers.core.metamodel.annotation.TypeName;
 @ToString(exclude = "translations")
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-@TableGenerator(name = "ActionKeyGen", table = "Sequence", pkColumnName = "COLUMN_NAME", pkColumnValue = "ACTION_ID", valueColumnName = "SEQ_VAL", initialValue = 0, allocationSize = 1)
+@TableGenerator(name = "ActionKeyGen", table = "Sequence", pkColumnName = "COLUMN_NAME", pkColumnValue = "ACTION_ID", valueColumnName = "SEQ_VAL", allocationSize = 1)
 @TypeName("Action")
 public class Action extends BaseEntity {
 

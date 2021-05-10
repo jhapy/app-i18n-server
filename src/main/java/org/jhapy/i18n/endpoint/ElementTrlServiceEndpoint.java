@@ -92,11 +92,6 @@ public class ElementTrlServiceEndpoint extends BaseEndpoint {
     }
   }
 
-  @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
-          "ROLE_I18N_WRITE"})
-  )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findByIso3")
   public ResponseEntity<ServiceResult> findByIso3(@RequestBody FindByIso3Query query) {
     var loggerPrefix = getLoggerPrefix("findByIso3");

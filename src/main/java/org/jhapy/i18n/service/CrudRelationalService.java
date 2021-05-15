@@ -222,7 +222,8 @@ public interface CrudRelationalService<T extends BaseEntity> extends HasLogger {
       throws ServiceException {
     // Not working yet
     if (!entity.containsKey("id") || entity.get("id") == null) {
-      throw new ServiceException("At least an ID attribute is required with a value", "CrudRelationalService");
+      throw new ServiceException("At least an ID attribute is required with a value",
+          "CrudRelationalService");
     }
 
     long id;

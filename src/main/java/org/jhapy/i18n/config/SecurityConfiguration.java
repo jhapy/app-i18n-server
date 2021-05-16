@@ -93,6 +93,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
         .and()
         .authorizeRequests()
         .antMatchers("/api/auth-info").permitAll()
+        .antMatchers("/api/i18NService/getExistingLanguages").permitAll()
         .antMatchers("/api/elementTrlService/**").permitAll()
         .antMatchers("/api/actionTrlService/**").permitAll()
         .antMatchers("/api/messageTrlService/**").permitAll()

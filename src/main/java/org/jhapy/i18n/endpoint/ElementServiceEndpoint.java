@@ -57,11 +57,6 @@ public class ElementServiceEndpoint extends BaseEndpoint {
     this.elementService = elementService;
   }
 
-  @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
-          "ROLE_I18N_WRITE"})
-  )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findAnyMatching")
   public ResponseEntity<ServiceResult> findAnyMatching(@RequestBody FindAnyMatchingQuery query) {
     var loggerPrefix = getLoggerPrefix("findAnyMatching");
@@ -77,11 +72,6 @@ public class ElementServiceEndpoint extends BaseEndpoint {
     }
   }
 
-  @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
-          "ROLE_I18N_WRITE"})
-  )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/countAnyMatching")
   public ResponseEntity<ServiceResult> countAnyMatching(@RequestBody CountAnyMatchingQuery query) {
     var loggerPrefix = getLoggerPrefix("countAnyMatching");
@@ -93,11 +83,6 @@ public class ElementServiceEndpoint extends BaseEndpoint {
     }
   }
 
-  @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
-          "ROLE_I18N_WRITE"})
-  )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
     var loggerPrefix = getLoggerPrefix("getById");
@@ -110,7 +95,7 @@ public class ElementServiceEndpoint extends BaseEndpoint {
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
   )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/save")
@@ -134,7 +119,7 @@ public class ElementServiceEndpoint extends BaseEndpoint {
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
   )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/delete")

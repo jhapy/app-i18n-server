@@ -18,6 +18,8 @@
 
 package org.jhapy.i18n.endpoint;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.jhapy.commons.endpoint.BaseEndpoint;
 import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.serviceQuery.BaseRemoteQuery;
@@ -49,7 +51,6 @@ public class I18NServiceEndpoint extends BaseEndpoint {
     this.i18nService = i18nService;
   }
 
-  @PreAuthorize("hasAuthority('ROLE_I18N_READ')")
   @PostMapping(value = "/getExistingLanguages")
   public ResponseEntity<ServiceResult> getExistingLanguages(@RequestBody BaseRemoteQuery query) {
     var loggerPrefix = getLoggerPrefix("getExistingLanguages");
@@ -60,7 +61,10 @@ public class I18NServiceEndpoint extends BaseEndpoint {
     }
   }
 
-  @PreAuthorize("hasAuthority('ROLE_I18N_READ')")
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
+  )
+  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getI18NFile")
   public ResponseEntity<ServiceResult> getI18NFile(@RequestBody BaseRemoteQuery query) {
     var loggerPrefix = getLoggerPrefix("getI18NFile");
@@ -71,6 +75,9 @@ public class I18NServiceEndpoint extends BaseEndpoint {
     }
   }
 
+  @Operation(
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
+  )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/importI18NFile")
   public ResponseEntity<ServiceResult> importI18NFile(@RequestBody ImportI18NFileQuery query) {

@@ -57,11 +57,6 @@ public class MessageTrlServiceEndpoint extends BaseEndpoint {
     this.messageTrlService = messageTrlService;
   }
 
-  @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
-          "ROLE_I18N_WRITE"})
-  )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/findByMessage")
   public ResponseEntity<ServiceResult> findByMessage(@RequestBody FindByMessageQuery query) {
     var loggerPrefix = getLoggerPrefix("findByMessage");
@@ -75,11 +70,6 @@ public class MessageTrlServiceEndpoint extends BaseEndpoint {
     }
   }
 
-  @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
-          "ROLE_I18N_WRITE"})
-  )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/countByMessage")
   public ResponseEntity<ServiceResult> countByMessage(@RequestBody CountByMessageQuery query) {
     var loggerPrefix = getLoggerPrefix("countByMessage");
@@ -105,12 +95,6 @@ public class MessageTrlServiceEndpoint extends BaseEndpoint {
     }
   }
 
-  @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
-          "ROLE_I18N_WRITE"})
-  )
-
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getByNameAndIso3")
   public ResponseEntity<ServiceResult> getByNameAndIso3(@RequestBody GetByNameAndIso3Query query) {
     var loggerPrefix = getLoggerPrefix("getByNameAndIso3");
@@ -125,11 +109,6 @@ public class MessageTrlServiceEndpoint extends BaseEndpoint {
     }
   }
 
-  @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_READ",
-          "ROLE_I18N_WRITE"})
-  )
-  @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_READ', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
     var loggerPrefix = getLoggerPrefix("getById");
@@ -143,7 +122,7 @@ public class MessageTrlServiceEndpoint extends BaseEndpoint {
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
   )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/save")
@@ -161,7 +140,7 @@ public class MessageTrlServiceEndpoint extends BaseEndpoint {
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE"})
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
   )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/delete")

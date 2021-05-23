@@ -257,6 +257,9 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
   @Transactional
   public String importExcelFile(byte[] content) {
     var loggerPrefix = getLoggerPrefix("importExcelFile");
+    logger().info(loggerPrefix + "Clean data");
+    elementTrlRepository.deleteAll();
+    elementRepository.deleteAll();
     try (Workbook workbook = WorkbookFactory.create(new ByteArrayInputStream(content))) {
       Sheet sheet = workbook.getSheet("Elements");
       if (sheet == null) {
@@ -287,6 +290,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
         Cell name1Cell = row.getCell(colIdx++);
         Cell name2Cell = row.getCell(colIdx++);
         Cell name3Cell = row.getCell(colIdx++);
+        Cell name4Cell = row.getCell(colIdx++);
         Cell langCell = row.getCell(colIdx++);
         Cell valueCell = row.getCell(colIdx++);
         Cell tooltipCell = row.getCell(colIdx);
@@ -312,6 +316,9 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
         }
         if (name3Cell != null && StringUtils.isNotBlank(name3Cell.getStringCellValue())) {
           name += "." + name3Cell.getStringCellValue();
+        }
+        if (name4Cell != null && StringUtils.isNotBlank(name4Cell.getStringCellValue())) {
+          name += "." + name4Cell.getStringCellValue();
         }
 
         String language = langCell.getStringCellValue();

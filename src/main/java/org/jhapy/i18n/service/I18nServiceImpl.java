@@ -76,7 +76,7 @@ public class I18nServiceImpl implements I18nService {
   private final VersionRepository versionRepository;
 
   private final static String[] i18nExportHeaders = new String[]{"Cat", "Name0", "Name1", "Name2",
-      "Name3", "Language", "Value", "Tooltip", "Key"};
+      "Name3","Name4", "Language", "Value", "Tooltip", "Key"};
   private final static String[] i18nExportMessageHeaders = new String[]{"Cat", "Name0", "Name1",
       "Name2", "Name3", "Language", "Value", "Key"};
 
@@ -206,6 +206,12 @@ public class I18nServiceImpl implements I18nService {
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 4) {
+            cell.setCellValue(nameSplited[4]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
           cell.setCellValue(iso3Language);
 
           cell = row.createCell(j++);
@@ -293,6 +299,12 @@ public class I18nServiceImpl implements I18nService {
           cell.setCellStyle(styles.get("cell_normal"));
           if (nameSplited.length > 3) {
             cell.setCellValue(nameSplited[3]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 4) {
+            cell.setCellValue(nameSplited[4]);
           }
 
           cell = row.createCell(j++);

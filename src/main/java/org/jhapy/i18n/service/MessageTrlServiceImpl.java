@@ -247,6 +247,9 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
   @Transactional
   public String importExcelFile(byte[] content) {
     var loggerPrefix = getLoggerPrefix("importExcelFile");
+    logger().info(loggerPrefix + "Clean data");
+    messageTrlRepository.deleteAll();
+    messageRepository.deleteAll();
     try (var workbook = WorkbookFactory.create(new ByteArrayInputStream(content))) {
       var sheet = workbook.getSheet("Messages");
       if (sheet == null) {

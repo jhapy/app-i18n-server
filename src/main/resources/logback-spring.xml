@@ -51,7 +51,7 @@
   <springProfile name="local,k8s-local">
     <logger level="DEBUG" name="org.jhapy"/>
     <logger level="WARN" name="org.hibernate.engine.internal"/>
-
+    <logger level="WARN" name="com.hazelcast.internal.diagnostics"/>
     <root level="INFO">
       <appender-ref ref="CONSOLE"/>
     </root>

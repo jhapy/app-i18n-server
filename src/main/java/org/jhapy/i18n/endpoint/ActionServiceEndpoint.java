@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.jhapy.commons.endpoint.BaseEndpoint;
-import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.domain.i18n.Action;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.generic.CountAnyMatchingQuery;
@@ -30,9 +29,9 @@ import org.jhapy.dto.serviceQuery.generic.DeleteByIdQuery;
 import org.jhapy.dto.serviceQuery.generic.FindAnyMatchingQuery;
 import org.jhapy.dto.serviceQuery.generic.GetByIdQuery;
 import org.jhapy.dto.serviceQuery.generic.SaveQuery;
+import org.jhapy.i18n.converter.I18NConverterV2;
 import org.jhapy.i18n.service.ActionService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,85 +52,67 @@ public class ActionServiceEndpoint extends BaseEndpoint {
   private final ActionService actionService;
 
   public ActionServiceEndpoint(ActionService actionService,
-      OrikaBeanMapper mapperFacade) {
-    super(mapperFacade);
+      I18NConverterV2 converter) {
+    super(converter);
     this.actionService = actionService;
+  }
+
+  protected I18NConverterV2 getConverter() {
+    return (I18NConverterV2) converter;
   }
 
   @PostMapping(value = "/findAnyMatching")
   public ResponseEntity<ServiceResult> findAnyMatching(
       @Parameter(name = "Query parameter", required = true) @RequestBody FindAnyMatchingQuery query) {
     var loggerPrefix = getLoggerPrefix("findAnyMatching");
-    try {
-      Page<org.jhapy.i18n.domain.Action> result = actionService
-          .findAnyMatching(query.getQueryUsername(), query.getFilter(), query.getShowInactive(),
-              mapperFacade.map(query.getPageable(),
-                  Pageable.class, getOrikaContext(query)));
-      return handleResult(loggerPrefix,
-          mapperFacade.map(result, org.jhapy.dto.utils.Page.class, getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    Page<org.jhapy.i18n.domain.Action> result = actionService
+        .findAnyMatching(query.getQueryUsername(), query.getFilter(), query.getShowInactive(),
+            converter.convert(query.getPageable()));
+    return handleResult(loggerPrefix,
+        toDtoPage(result, getConverter().convertToDtoActions(result.getContent())));
   }
 
   @PostMapping(value = "/countAnyMatching")
   public ResponseEntity<ServiceResult> countAnyMatching(@RequestBody CountAnyMatchingQuery query) {
     var loggerPrefix = getLoggerPrefix("countAnyMatching");
-    try {
-      return handleResult(loggerPrefix, actionService
-          .countAnyMatching(query.getQueryUsername(), query.getFilter(), query.getShowInactive()));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    return handleResult(loggerPrefix, actionService
+        .countAnyMatching(query.getQueryUsername(), query.getFilter(), query.getShowInactive()));
   }
 
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
     var loggerPrefix = getLoggerPrefix("getById");
-    try {
-      return handleResult(loggerPrefix, mapperFacade.map(actionService
-          .load(query.getId()), org.jhapy.i18n.domain.Action.class, getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    return handleResult(loggerPrefix,
+        getConverter().convertToDto(actionService.load(query.getId())));
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE",
+          "ROLE_I18N_ADMIN"})
   )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
       @RequestBody SaveQuery<Action> query) {
     var loggerPrefix = getLoggerPrefix("save");
-    try {
-      org.jhapy.i18n.domain.Action converted = mapperFacade
-          .map(query.getEntity(), org.jhapy.i18n.domain.Action.class, getOrikaContext(query));
-      if (query.getEntity().getTranslations() != null) {
-        converted.setTranslations(mapperFacade
-            .mapAsList(query.getEntity().getTranslations(), org.jhapy.i18n.domain.ActionTrl.class,
-                getOrikaContext(query)));
-      }
-      return handleResult(loggerPrefix,
-          mapperFacade.map(actionService.save(converted), Action.class, getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
+    org.jhapy.i18n.domain.Action converted = getConverter().convertToDomain(query.getEntity());
+    if (query.getEntity().getTranslations() != null) {
+      converted.setTranslations(
+          getConverter().convertToDomainActionTrls(query.getEntity().getTranslations()));
     }
+    return handleResult(loggerPrefix, getConverter().convertToDto(actionService.save(converted)));
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE",
+          "ROLE_I18N_ADMIN"})
   )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/delete")
   public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByIdQuery query) {
     var loggerPrefix = getLoggerPrefix("delete");
-    try {
-      actionService
-          .delete(query.getId());
-      return handleResult(loggerPrefix);
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    actionService
+        .delete(query.getId());
+    return handleResult(loggerPrefix);
   }
 }

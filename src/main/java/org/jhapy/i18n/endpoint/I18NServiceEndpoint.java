@@ -21,10 +21,10 @@ package org.jhapy.i18n.endpoint;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.jhapy.commons.endpoint.BaseEndpoint;
-import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.serviceQuery.BaseRemoteQuery;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.i18n.ImportI18NFileQuery;
+import org.jhapy.i18n.converter.I18NConverterV2;
 import org.jhapy.i18n.service.I18nService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,51 +46,45 @@ public class I18NServiceEndpoint extends BaseEndpoint {
   private final I18nService i18nService;
 
   public I18NServiceEndpoint(I18nService i18nService,
-      OrikaBeanMapper mapperFacade) {
-    super(mapperFacade);
+      I18NConverterV2 converter) {
+    super(converter);
     this.i18nService = i18nService;
   }
 
   @PostMapping(value = "/getExistingLanguages")
   public ResponseEntity<ServiceResult> getExistingLanguages(@RequestBody BaseRemoteQuery query) {
     var loggerPrefix = getLoggerPrefix("getExistingLanguages");
-    try {
-      return handleResult(loggerPrefix, i18nService.getExistingLanguages());
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+
+    return handleResult(loggerPrefix, i18nService.getExistingLanguages());
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE",
+          "ROLE_I18N_ADMIN"})
   )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getI18NFile")
   public ResponseEntity<ServiceResult> getI18NFile(@RequestBody BaseRemoteQuery query) {
     var loggerPrefix = getLoggerPrefix("getI18NFile");
-    try {
-      return handleResult(loggerPrefix, i18nService.getI18NFile());
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+
+    return handleResult(loggerPrefix, i18nService.getI18NFile());
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE",
+          "ROLE_I18N_ADMIN"})
   )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/importI18NFile")
   public ResponseEntity<ServiceResult> importI18NFile(@RequestBody ImportI18NFileQuery query) {
     var loggerPrefix = getLoggerPrefix("importI18NFile");
-    try {
-      String result = i18nService.importI18NFile(query.getFileContent());
-      if (result == null) {
-        return handleResult(loggerPrefix);
-      } else {
-        return handleResult(loggerPrefix, result);
-      }
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
+
+    String result = i18nService.importI18NFile(query.getFileContent());
+    if (result == null) {
+      return handleResult(loggerPrefix);
+    } else {
+      return handleResult(loggerPrefix, result);
     }
+
   }
 }

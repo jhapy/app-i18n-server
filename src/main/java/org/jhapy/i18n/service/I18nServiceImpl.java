@@ -76,7 +76,7 @@ public class I18nServiceImpl implements I18nService {
   private final VersionRepository versionRepository;
 
   private final static String[] i18nExportHeaders = new String[]{"Cat", "Name0", "Name1", "Name2",
-      "Name3","Name4", "Language", "Value", "Tooltip", "Key"};
+      "Name3", "Name4", "Language", "Value", "Tooltip", "Key"};
   private final static String[] i18nExportMessageHeaders = new String[]{"Cat", "Name0", "Name1",
       "Name2", "Name3", "Language", "Value", "Key"};
 

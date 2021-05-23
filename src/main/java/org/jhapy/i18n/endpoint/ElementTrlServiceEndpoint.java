@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.List;
 import org.jhapy.commons.endpoint.BaseEndpoint;
-import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.generic.DeleteByIdQuery;
 import org.jhapy.dto.serviceQuery.generic.GetByIdQuery;
@@ -31,6 +30,7 @@ import org.jhapy.dto.serviceQuery.i18n.FindByIso3Query;
 import org.jhapy.dto.serviceQuery.i18n.GetByNameAndIso3Query;
 import org.jhapy.dto.serviceQuery.i18n.elementTrl.CountByElementQuery;
 import org.jhapy.dto.serviceQuery.i18n.elementTrl.FindByElementQuery;
+import org.jhapy.i18n.converter.I18NConverterV2;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.service.ElementTrlService;
 import org.springframework.http.ResponseEntity;
@@ -53,106 +53,85 @@ public class ElementTrlServiceEndpoint extends BaseEndpoint {
   private final ElementTrlService elementTrlService;
 
   public ElementTrlServiceEndpoint(ElementTrlService elementTrlService,
-      OrikaBeanMapper mapperFacade) {
-    super(mapperFacade);
+      I18NConverterV2 converter) {
+    super(converter);
     this.elementTrlService = elementTrlService;
+  }
+
+  protected I18NConverterV2 getConverter() {
+    return (I18NConverterV2) converter;
   }
 
   @PostMapping(value = "/findByElement")
   public ResponseEntity<ServiceResult> findByElement(@RequestBody FindByElementQuery query) {
     var loggerPrefix = getLoggerPrefix("findByElement");
-    try {
-      List<ElementTrl> result = elementTrlService.findByElement(query.getElementId());
 
-      return handleResult(loggerPrefix, mapperFacade.mapAsList(result,
-          org.jhapy.dto.domain.i18n.ElementTrl.class, getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    List<ElementTrl> result = elementTrlService.findByElement(query.getElementId());
+
+    return handleResult(loggerPrefix, getConverter().convertToDtoElementTrls(result));
   }
 
   @PostMapping(value = "/countByElement")
   public ResponseEntity<ServiceResult> countByElement(@RequestBody CountByElementQuery query) {
     var loggerPrefix = getLoggerPrefix("countByElement");
-    try {
-      return handleResult(loggerPrefix, elementTrlService
-          .countByElement(query.getElementId()));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+
+    return handleResult(loggerPrefix, elementTrlService
+        .countByElement(query.getElementId()));
   }
 
   @PostMapping(value = "/findByIso3")
   public ResponseEntity<ServiceResult> findByIso3(@RequestBody FindByIso3Query query) {
     var loggerPrefix = getLoggerPrefix("findByIso3");
-    try {
-      List<ElementTrl> result = elementTrlService
-          .getByIso3Language(query.getIso3Language());
 
-      return handleResult(loggerPrefix, mapperFacade
-          .mapAsList(result, org.jhapy.dto.domain.i18n.ElementTrl.class, getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    List<ElementTrl> result = elementTrlService
+        .getByIso3Language(query.getIso3Language());
+
+    return handleResult(loggerPrefix, getConverter().convertToDtoElementTrls(result));
   }
 
   @PostMapping(value = "/getByNameAndIso3")
   public ResponseEntity<ServiceResult> getByNameAndIso3(@RequestBody GetByNameAndIso3Query query) {
     var loggerPrefix = getLoggerPrefix("getByNameAndIso3");
-    try {
-      ElementTrl result = elementTrlService
-          .getByNameAndIso3Language(query.getName(), query.getIso3Language());
 
-      return handleResult(loggerPrefix, mapperFacade
-          .map(result, org.jhapy.dto.domain.i18n.ElementTrl.class, getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+    ElementTrl result = elementTrlService
+        .getByNameAndIso3Language(query.getName(), query.getIso3Language());
+
+    return handleResult(loggerPrefix, getConverter().convertToDto(result));
   }
 
   @PostMapping(value = "/getById")
   public ResponseEntity<ServiceResult> getById(@RequestBody GetByIdQuery query) {
     var loggerPrefix = getLoggerPrefix("getById");
-    try {
-      return handleResult(loggerPrefix, mapperFacade.map(elementTrlService
-              .load(query.getId()), org.jhapy.dto.domain.i18n.ElementTrl.class,
-          getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+
+    return handleResult(loggerPrefix,
+        getConverter().convertToDto(elementTrlService.load(query.getId())));
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE",
+          "ROLE_I18N_ADMIN"})
   )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/save")
   public ResponseEntity<ServiceResult> save(
       @RequestBody SaveQuery<org.jhapy.dto.domain.i18n.ElementTrl> query) {
     var loggerPrefix = getLoggerPrefix("save");
-    try {
-      return handleResult(loggerPrefix, mapperFacade.map(elementTrlService
-              .save(mapperFacade
-                  .map(query.getEntity(), ElementTrl.class, getOrikaContext(query))),
-          org.jhapy.dto.domain.i18n.ElementTrl.class, getOrikaContext(query)));
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+
+    return handleResult(loggerPrefix, getConverter()
+        .convertToDto(elementTrlService.save(getConverter().convertToDomain(query.getEntity()))));
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"})
+      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE",
+          "ROLE_I18N_ADMIN"})
   )
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/delete")
   public ResponseEntity<ServiceResult> delete(@RequestBody DeleteByIdQuery query) {
     var loggerPrefix = getLoggerPrefix("delete");
-    try {
-      elementTrlService
-          .delete(query.getId());
-      return handleResult(loggerPrefix);
-    } catch (Throwable t) {
-      return handleResult(loggerPrefix, t);
-    }
+
+    elementTrlService
+        .delete(query.getId());
+    return handleResult(loggerPrefix);
   }
 }

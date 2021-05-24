@@ -11,6 +11,7 @@ import org.jhapy.dto.domain.i18n.Message;
 import org.jhapy.dto.domain.i18n.MessageTrl;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 /**
@@ -21,6 +22,7 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public abstract class I18NConverterV2 extends CommonsConverterV2 {
 
+  @Mapping(target="translations", ignore=true)
   public abstract Action convertToDto(org.jhapy.i18n.domain.Action domain);
 
   public abstract org.jhapy.i18n.domain.Action convertToDomain(Action dto);
@@ -41,6 +43,7 @@ public abstract class I18NConverterV2 extends CommonsConverterV2 {
   public abstract List<org.jhapy.i18n.domain.ActionTrl> convertToDomainActionTrls(
       Collection<ActionTrl> dtos);
 
+  @Mapping(target="translations", ignore=true)
   public abstract Element convertToDto(org.jhapy.i18n.domain.Element domain);
 
   public abstract org.jhapy.i18n.domain.Element convertToDomain(Element dto);
@@ -61,6 +64,7 @@ public abstract class I18NConverterV2 extends CommonsConverterV2 {
   public abstract List<org.jhapy.i18n.domain.ElementTrl> convertToDomainElementTrls(
       Collection<ElementTrl> dtos);
 
+  @Mapping(target="translations", ignore=true)
   public abstract Message convertToDto(org.jhapy.i18n.domain.Message domain);
 
   public abstract org.jhapy.i18n.domain.Message convertToDomain(Message dto);

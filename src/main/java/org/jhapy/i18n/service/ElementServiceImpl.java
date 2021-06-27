@@ -20,6 +20,7 @@ package org.jhapy.i18n.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -106,6 +107,11 @@ public class ElementServiceImpl implements ElementService {
   @Transactional
   public Element save(Element entity) {
     List<ElementTrl> translations = entity.getTranslations();
+    if ( entity.getId() == null ) {
+      Optional<Element> optExisting = elementRepository.getByName(entity.getName());
+      if ( optExisting.isPresent() )
+        entity.setId(optExisting.get().getId());
+    }
     entity = elementRepository.save(entity);
     for (ElementTrl elementTrl : translations) {
       elementTrl.setElement(entity);

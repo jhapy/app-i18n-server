@@ -28,10 +28,10 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
-import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NActionUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
+import org.jhapy.i18n.converter.I18NConverterV2;
 import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.repository.ActionRepository;
@@ -52,20 +52,21 @@ public class ActionServiceImpl implements ActionService {
   private final ActionRepository actionRepository;
   private final ActionTrlService actionTrlService;
   private final VersionRepository versionRepository;
-  private final OrikaBeanMapper mapperFacade;
   private final I18NQueue i18NQueue;
   private final EntityManager entityManager;
+  private final I18NConverterV2 i18NConverterV2;
 
   public ActionServiceImpl(ActionRepository actionRepository,
       ActionTrlService actionTrlService,
-      VersionRepository versionRepository, OrikaBeanMapper mapperFacade,
+      VersionRepository versionRepository,
+      I18NConverterV2 i18NConverterV2,
       I18NQueue i18NQueue, EntityManager entityManager) {
     this.actionRepository = actionRepository;
     this.actionTrlService = actionTrlService;
     this.versionRepository = versionRepository;
-    this.mapperFacade = mapperFacade;
     this.i18NQueue = i18NQueue;
     this.entityManager = entityManager;
+    this.i18NConverterV2 = i18NConverterV2;
   }
 
   @Override
@@ -88,7 +89,7 @@ public class ActionServiceImpl implements ActionService {
   public void postUpdate(Action action) {
     if (actionTrlService.hasBootstrapped()) {
       I18NActionUpdate actionUpdate = new I18NActionUpdate();
-      actionUpdate.setAction(mapperFacade.map(action, org.jhapy.dto.domain.i18n.Action.class));
+      actionUpdate.setAction(i18NConverterV2.convertToDto(action));
       actionUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
       i18NQueue.sendActionUpdate(actionUpdate);
     }
@@ -99,7 +100,7 @@ public class ActionServiceImpl implements ActionService {
   public void postPersist(Action action) {
     if (actionTrlService.hasBootstrapped()) {
       I18NActionUpdate actionUpdate = new I18NActionUpdate();
-      actionUpdate.setAction(mapperFacade.map(action, org.jhapy.dto.domain.i18n.Action.class));
+      actionUpdate.setAction(i18NConverterV2.convertToDto(action));
       actionUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
       i18NQueue.sendActionUpdate(actionUpdate);
     }
@@ -110,7 +111,7 @@ public class ActionServiceImpl implements ActionService {
   public void postRemove(Action action) {
     if (actionTrlService.hasBootstrapped()) {
       I18NActionUpdate actionUpdate = new I18NActionUpdate();
-      actionUpdate.setAction(mapperFacade.map(action, org.jhapy.dto.domain.i18n.Action.class));
+      actionUpdate.setAction(i18NConverterV2.convertToDto(action));
       actionUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
       i18NQueue.sendActionUpdate(actionUpdate);
     }

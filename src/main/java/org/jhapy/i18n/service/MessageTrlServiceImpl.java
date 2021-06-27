@@ -30,10 +30,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jhapy.commons.utils.HasLogger;
-import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NMessageTrlUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
+import org.jhapy.i18n.converter.I18NConverterV2;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
 import org.jhapy.i18n.repository.MessageRepository;
@@ -57,8 +57,8 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
   private final MessageRepository messageRepository;
   private final MessageTrlRepository messageTrlRepository;
-  private final OrikaBeanMapper mapperFacade;
   private final I18NQueue i18NQueue;
+  private final I18NConverterV2 i18NConverterV2;
 
   private boolean hasBootstrapped = false;
 
@@ -70,11 +70,10 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
 
   public MessageTrlServiceImpl(MessageRepository messageRepository,
       MessageTrlRepository messageTrlRepository,
-      OrikaBeanMapper mapperFacade,
-      I18NQueue i18NQueue) {
+      I18NQueue i18NQueue, I18NConverterV2 i18NConverterV2) {
     this.messageRepository = messageRepository;
     this.messageTrlRepository = messageTrlRepository;
-    this.mapperFacade = mapperFacade;
+    this.i18NConverterV2 = i18NConverterV2;
     this.i18NQueue = i18NQueue;
   }
 
@@ -196,7 +195,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
     }
     var messageTrlUpdate = new I18NMessageTrlUpdate();
     messageTrlUpdate
-        .setMessageTrl(mapperFacade.map(messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
+        .setMessageTrl(i18NConverterV2.convertToDto(messageTrl));
     messageTrlUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
     i18NQueue.sendMessageTrlUpdate(messageTrlUpdate);
   }
@@ -206,7 +205,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
   public void postPersist(MessageTrl messageTrl) {
     var messageTrlUpdate = new I18NMessageTrlUpdate();
     messageTrlUpdate
-        .setMessageTrl(mapperFacade.map(messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
+        .setMessageTrl(i18NConverterV2.convertToDto(messageTrl));
     messageTrlUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
     i18NQueue.sendMessageTrlUpdate(messageTrlUpdate);
   }
@@ -216,7 +215,7 @@ public class MessageTrlServiceImpl implements MessageTrlService, HasLogger {
   public void postRemove(MessageTrl messageTrl) {
     var messageTrlUpdate = new I18NMessageTrlUpdate();
     messageTrlUpdate
-        .setMessageTrl(mapperFacade.map(messageTrl, org.jhapy.dto.domain.i18n.MessageTrl.class));
+        .setMessageTrl(i18NConverterV2.convertToDto(messageTrl));
     messageTrlUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
     i18NQueue.sendMessageTrlUpdate(messageTrlUpdate);
   }

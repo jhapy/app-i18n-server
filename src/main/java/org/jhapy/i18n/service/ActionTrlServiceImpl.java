@@ -33,10 +33,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jhapy.commons.utils.HasLogger;
-import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NActionTrlUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
+import org.jhapy.i18n.converter.I18NConverterV2;
 import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.repository.ActionRepository;
@@ -62,8 +62,8 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
   private final ActionRepository actionRepository;
   private final ActionTrlRepository actionTrlRepository;
   private final VersionRepository versionRepository;
-  private final OrikaBeanMapper mapperFacade;
   private final I18NQueue i18NQueue;
+  private final I18NConverterV2 i18NConverterV2;
 
   private boolean hasBootstrapped = false;
 
@@ -76,12 +76,12 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
   public ActionTrlServiceImpl(ActionRepository actionRepository,
       ActionTrlRepository actionTrlRepository,
       VersionRepository versionRepository, VersionService versionService,
-      OrikaBeanMapper mapperFacade, I18NQueue i18NQueue) {
+      I18NQueue i18NQueue, I18NConverterV2 i18NConverterV2) {
     this.actionRepository = actionRepository;
     this.actionTrlRepository = actionTrlRepository;
     this.versionRepository = versionRepository;
-    this.mapperFacade = mapperFacade;
     this.i18NQueue = i18NQueue;
+    this.i18NConverterV2 = i18NConverterV2;
   }
 
   @Override
@@ -212,8 +212,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
 
     if (hasBootstrapped) {
       I18NActionTrlUpdate actionTrlUpdate = new I18NActionTrlUpdate();
-      actionTrlUpdate
-          .setActionTrl(mapperFacade.map(actionTrl, org.jhapy.dto.domain.i18n.ActionTrl.class));
+      actionTrlUpdate.setActionTrl(i18NConverterV2.convertToDto(actionTrl));
       actionTrlUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
       i18NQueue.sendActionTrlUpdate(actionTrlUpdate);
     }
@@ -224,8 +223,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
   public void postPersist(ActionTrl actionTrl) {
     if (hasBootstrapped) {
       I18NActionTrlUpdate actionTrlUpdate = new I18NActionTrlUpdate();
-      actionTrlUpdate
-          .setActionTrl(mapperFacade.map(actionTrl, org.jhapy.dto.domain.i18n.ActionTrl.class));
+      actionTrlUpdate.setActionTrl(i18NConverterV2.convertToDto(actionTrl));
       actionTrlUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
       i18NQueue.sendActionTrlUpdate(actionTrlUpdate);
     }
@@ -236,8 +234,7 @@ public class ActionTrlServiceImpl implements ActionTrlService, HasLogger {
   public void postRemove(ActionTrl actionTrl) {
     if (hasBootstrapped) {
       I18NActionTrlUpdate actionTrlUpdate = new I18NActionTrlUpdate();
-      actionTrlUpdate
-          .setActionTrl(mapperFacade.map(actionTrl, org.jhapy.dto.domain.i18n.ActionTrl.class));
+      actionTrlUpdate.setActionTrl(i18NConverterV2.convertToDto(actionTrl));
       actionTrlUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
       i18NQueue.sendActionTrlUpdate(actionTrlUpdate);
     }

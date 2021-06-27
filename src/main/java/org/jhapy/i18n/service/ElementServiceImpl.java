@@ -28,10 +28,10 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
-import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NElementUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
+import org.jhapy.i18n.converter.I18NConverterV2;
 import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.repository.ElementRepository;
@@ -52,18 +52,19 @@ public class ElementServiceImpl implements ElementService {
   private final ElementRepository elementRepository;
   private final ElementTrlService elementTrlService;
   private final VersionRepository versionRepository;
-  private final OrikaBeanMapper mapperFacade;
   private final I18NQueue i18NQueue;
   private final EntityManager entityManager;
+  private final I18NConverterV2 i18NConverterV2;
 
   public ElementServiceImpl(ElementRepository elementRepository,
       ElementTrlService elementTrlService,
-      VersionRepository versionRepository, OrikaBeanMapper mapperFacade,
-      I18NQueue i18NQueue, EntityManager entityManager) {
+      VersionRepository versionRepository,
+      I18NQueue i18NQueue, EntityManager entityManager,
+      I18NConverterV2 i18NConverterV2) {
     this.elementRepository = elementRepository;
     this.elementTrlService = elementTrlService;
     this.versionRepository = versionRepository;
-    this.mapperFacade = mapperFacade;
+    this.i18NConverterV2 = i18NConverterV2;
     this.i18NQueue = i18NQueue;
     this.entityManager = entityManager;
   }
@@ -73,7 +74,7 @@ public class ElementServiceImpl implements ElementService {
   public void postUpdate(Element element) {
     if (elementTrlService.hasBootstrapped()) {
       I18NElementUpdate elementUpdate = new I18NElementUpdate();
-      elementUpdate.setElement(mapperFacade.map(element, org.jhapy.dto.domain.i18n.Element.class));
+      elementUpdate.setElement(i18NConverterV2.convertToDto(element));
       elementUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
       i18NQueue.sendElementUpdate(elementUpdate);
     }
@@ -84,7 +85,7 @@ public class ElementServiceImpl implements ElementService {
   public void postPersist(Element element) {
     if (elementTrlService.hasBootstrapped()) {
       I18NElementUpdate elementUpdate = new I18NElementUpdate();
-      elementUpdate.setElement(mapperFacade.map(element, org.jhapy.dto.domain.i18n.Element.class));
+      elementUpdate.setElement(i18NConverterV2.convertToDto(element));
       elementUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
       i18NQueue.sendElementUpdate(elementUpdate);
     }
@@ -95,7 +96,7 @@ public class ElementServiceImpl implements ElementService {
   public void postRemove(Element element) {
     if (elementTrlService.hasBootstrapped()) {
       I18NElementUpdate elementUpdate = new I18NElementUpdate();
-      elementUpdate.setElement(mapperFacade.map(element, org.jhapy.dto.domain.i18n.Element.class));
+      elementUpdate.setElement(i18NConverterV2.convertToDto(element));
       elementUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
       i18NQueue.sendElementUpdate(elementUpdate);
     }

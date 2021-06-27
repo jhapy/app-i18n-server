@@ -33,10 +33,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jhapy.commons.utils.HasLogger;
-import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.messageQueue.I18NElementTrlUpdate;
 import org.jhapy.dto.messageQueue.I18NUpdateTypeEnum;
 import org.jhapy.i18n.client.I18NQueue;
+import org.jhapy.i18n.converter.I18NConverterV2;
 import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.repository.ElementRepository;
@@ -60,8 +60,8 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
 
   private final ElementRepository elementRepository;
   private final ElementTrlRepository elementTrlRepository;
-  private final OrikaBeanMapper mapperFacade;
   private final I18NQueue i18NQueue;
+  private final I18NConverterV2 i18NConverterV2;
 
   private boolean hasBootstrapped = false;
 
@@ -73,11 +73,10 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
 
   public ElementTrlServiceImpl(ElementRepository elementRepository,
       ElementTrlRepository elementTrlRepository,
-      OrikaBeanMapper mapperFacade,
-      I18NQueue i18NQueue) {
+      I18NQueue i18NQueue, I18NConverterV2 i18NConverterV2) {
     this.elementRepository = elementRepository;
     this.elementTrlRepository = elementTrlRepository;
-    this.mapperFacade = mapperFacade;
+    this.i18NConverterV2 = i18NConverterV2;
     this.i18NQueue = i18NQueue;
   }
 
@@ -200,7 +199,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
     if (hasBootstrapped) {
       I18NElementTrlUpdate elementTrlUpdate = new I18NElementTrlUpdate();
       elementTrlUpdate
-          .setElementTrl(mapperFacade.map(elementTrl, org.jhapy.dto.domain.i18n.ElementTrl.class));
+          .setElementTrl(i18NConverterV2.convertToDto(elementTrl));
       elementTrlUpdate.setUpdateType(I18NUpdateTypeEnum.UPDATE);
       i18NQueue.sendElementTrlUpdate(elementTrlUpdate);
     }
@@ -212,7 +211,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
     if (hasBootstrapped) {
       I18NElementTrlUpdate elementTrlUpdate = new I18NElementTrlUpdate();
       elementTrlUpdate
-          .setElementTrl(mapperFacade.map(elementTrl, org.jhapy.dto.domain.i18n.ElementTrl.class));
+          .setElementTrl(i18NConverterV2.convertToDto(elementTrl));
       elementTrlUpdate.setUpdateType(I18NUpdateTypeEnum.INSERT);
       i18NQueue.sendElementTrlUpdate(elementTrlUpdate);
     }
@@ -224,7 +223,7 @@ public class ElementTrlServiceImpl implements ElementTrlService, HasLogger {
     if (hasBootstrapped) {
       I18NElementTrlUpdate elementTrlUpdate = new I18NElementTrlUpdate();
       elementTrlUpdate
-          .setElementTrl(mapperFacade.map(elementTrl, org.jhapy.dto.domain.i18n.ElementTrl.class));
+          .setElementTrl(i18NConverterV2.convertToDto(elementTrl));
       elementTrlUpdate.setUpdateType(I18NUpdateTypeEnum.DELETE);
       i18NQueue.sendElementTrlUpdate(elementTrlUpdate);
     }

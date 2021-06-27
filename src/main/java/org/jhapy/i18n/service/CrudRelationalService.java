@@ -27,11 +27,9 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import org.jhapy.commons.exception.ServiceException;
 import org.jhapy.commons.security.SecurityUtils;
 import org.jhapy.commons.utils.BeanUtils;
 import org.jhapy.commons.utils.HasLogger;
-import org.jhapy.commons.utils.OrikaBeanMapper;
 import org.jhapy.dto.domain.exception.EntityNotFoundException;
 import org.jhapy.i18n.domain.BaseEntity;
 import org.springframework.data.domain.Page;
@@ -217,27 +215,6 @@ public interface CrudRelationalService<T extends BaseEntity> extends HasLogger {
 
   CriteriaQuery buildSearchQuery(CriteriaQuery query, Root<T> entity, CriteriaBuilder cb,
       String currentUserId, String filter, Boolean showInactive, Object... otherCriteria);
-
-  default T update(OrikaBeanMapper mapperFacade, Map<String, Object> entity)
-      throws ServiceException {
-    // Not working yet
-    if (!entity.containsKey("id") || entity.get("id") == null) {
-      throw new ServiceException("At least an ID attribute is required with a value",
-          "CrudRelationalService");
-    }
-
-    long id;
-    try {
-      id = Long.parseLong(entity.get("id").toString());
-    } catch (NumberFormatException nfe) {
-      throw new ServiceException("ID attribute value is invalid", "CrudRelationalService");
-    }
-    var existingRecord = getRepository().findById(id)
-        .orElseThrow(() -> new ServiceException("Record not found", "CrudRelationalService"));
-    convert(entity, existingRecord);
-
-    return save(existingRecord);
-  }
 
   default void convert(Map<String, Object> entity, T existingRecord) {
     BeanUtils.copyNonNullProperties(existingRecord, entity);

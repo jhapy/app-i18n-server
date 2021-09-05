@@ -19,11 +19,11 @@
 package org.jhapy.i18n.domain;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.TableGenerator;
+import java.util.Map;
+import javax.persistence.*;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -41,7 +41,13 @@ import org.javers.core.metamodel.annotation.TypeName;
 @ToString(exclude = "translations")
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-@TableGenerator(name = "ActionKeyGen", table = "Sequence", pkColumnName = "COLUMN_NAME", pkColumnValue = "ACTION_ID", valueColumnName = "SEQ_VAL", allocationSize = 1)
+@TableGenerator(
+    name = "ActionKeyGen",
+    table = "Sequence",
+    pkColumnName = "COLUMN_NAME",
+    pkColumnValue = "ACTION_ID",
+    valueColumnName = "SEQ_VAL",
+    allocationSize = 1)
 @TypeName("Action")
 public class Action extends BaseEntity {
 
@@ -52,6 +58,8 @@ public class Action extends BaseEntity {
 
   private Boolean isTranslated = Boolean.FALSE;
 
-  @OneToMany(mappedBy = "action")
-  private List<ActionTrl> translations = new ArrayList<>();
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "action_trl", joinColumns = @JoinColumn(name = "action_id"))
+  @MapKeyColumn(name = "iso3Language")
+  private Map<String, ActionTrl> translations = new HashMap<>();
 }

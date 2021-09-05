@@ -18,18 +18,14 @@
 
 package org.jhapy.i18n.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.javers.core.metamodel.annotation.ShallowReference;
 import org.javers.core.metamodel.annotation.TypeName;
-import org.jhapy.i18n.listeners.ActionTrlListener;
+import org.jhapy.i18n.listeners.ActionListener;
 
 /**
  * @author jHapy Lead Dev.
@@ -38,27 +34,13 @@ import org.jhapy.i18n.listeners.ActionTrlListener;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Entity
+@Embeddable
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-@EntityListeners(ActionTrlListener.class)
+@EntityListeners(ActionListener.class)
 @TypeName("ActionTrl")
-public class ActionTrl extends EntityTranslation {
+public class ActionTrl extends EntityTranslationV2 {
 
-  @ManyToOne
-  @JoinColumn(name = "ACTION_ID", nullable = false)
-  @ShallowReference
-  private Action action;
-
-  /**
-   * Action Value
-   */
   private String value;
 
   private String tooltip;
-
-  @EqualsAndHashCode.Include
-  @ToString.Include
-  private String action() {
-    return (action != null && action.getId() != null) ? action.getId().toString() : null;
-  }
 }

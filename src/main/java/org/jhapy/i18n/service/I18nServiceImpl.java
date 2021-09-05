@@ -39,13 +39,7 @@ import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.repository.ActionRepository;
-import org.jhapy.i18n.repository.ActionTrlRepository;
-import org.jhapy.i18n.repository.ElementRepository;
-import org.jhapy.i18n.repository.ElementTrlRepository;
-import org.jhapy.i18n.repository.MessageRepository;
-import org.jhapy.i18n.repository.MessageTrlRepository;
-import org.jhapy.i18n.repository.VersionRepository;
+import org.jhapy.i18n.repository.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
@@ -56,49 +50,42 @@ import org.springframework.transaction.annotation.Transactional;
  * @version 1.0
  * @since 11/04/2020
  */
-
 @Transactional(readOnly = true)
 @Service
 public class I18nServiceImpl implements I18nService {
 
-  private final ElementTrlService elementTrlService;
+  private final ElementService elementService;
   private final ElementRepository elementRepository;
-  private final ElementTrlRepository elementTrlRepository;
 
-  private final MessageTrlService messageTrlService;
+  private final MessageService messageService;
   private final MessageRepository messageRepository;
-  private final MessageTrlRepository messageTrlRepository;
 
-  private final ActionTrlService actionTrlService;
+  private final ActionService actionService;
   private final ActionRepository actionRepository;
-  private final ActionTrlRepository actionTrlRepository;
 
   private final VersionRepository versionRepository;
 
-  private final static String[] i18nExportHeaders = new String[]{"Cat", "Name0", "Name1", "Name2",
-      "Name3", "Name4", "Language", "Value", "Tooltip", "Key"};
-  private final static String[] i18nExportMessageHeaders = new String[]{"Cat", "Name0", "Name1",
-      "Name2", "Name3", "Language", "Value", "Key"};
+  private static final String[] i18nExportHeaders =
+      new String[] {
+        "Cat", "Name0", "Name1", "Name2", "Name3", "Name4", "Language", "Value", "Tooltip", "Key"
+      };
+  private static final String[] i18nExportMessageHeaders =
+      new String[] {"Cat", "Name0", "Name1", "Name2", "Name3", "Language", "Value", "Key"};
 
-  public I18nServiceImpl(ElementTrlService elementTrlService,
+  public I18nServiceImpl(
+      ElementService elementService,
       ElementRepository elementRepository,
-      ElementTrlRepository elementTrlRepository,
-      MessageTrlService messageTrlService,
+      MessageService messageService,
       MessageRepository messageRepository,
-      MessageTrlRepository messageTrlRepository,
-      ActionTrlService actionTrlService,
+      ActionService actionService,
       ActionRepository actionRepository,
-      ActionTrlRepository actionTrlRepository,
       VersionRepository versionRepository) {
-    this.elementTrlService = elementTrlService;
+    this.elementService = elementService;
     this.elementRepository = elementRepository;
-    this.elementTrlRepository = elementTrlRepository;
-    this.messageTrlService = messageTrlService;
+    this.messageService = messageService;
     this.messageRepository = messageRepository;
-    this.messageTrlRepository = messageTrlRepository;
-    this.actionTrlService = actionTrlService;
+    this.actionService = actionService;
     this.actionRepository = actionRepository;
-    this.actionTrlRepository = actionTrlRepository;
     this.versionRepository = versionRepository;
   }
 
@@ -118,7 +105,7 @@ public class I18nServiceImpl implements I18nService {
   }
 
   public List<String> getExistingLanguages() {
-    return elementTrlRepository.getIso3Languages();
+    return actionRepository.getIso3Languages();
   }
 
   private static Map<String, CellStyle> createStyles(Workbook wb) {
@@ -168,9 +155,9 @@ public class I18nServiceImpl implements I18nService {
       Row row;
       Cell cell;
       var rownum = 1;
-      List<Element> elementList = elementRepository
-          .findAll(Sort.by(Order.asc("category"), Order.asc("name")));
-      List<String> iso3Languages = elementTrlRepository.getIso3Languages();
+      List<Element> elementList =
+          elementRepository.findAll(Sort.by(Order.asc("category"), Order.asc("name")));
+      List<String> iso3Languages = actionRepository.getIso3Languages();
 
       for (Element element : elementList) {
         for (String iso3Language : iso3Languages) {
@@ -216,27 +203,37 @@ public class I18nServiceImpl implements I18nService {
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          Optional<ElementTrl> optElementTrl = elementTrlRepository
-              .getByElementAndIso3Language(element, iso3Language);
-          if (optElementTrl.isPresent() && !optElementTrl.get().getValue()
-              .equals(element.getName())) {
-            cell.setCellValue(optElementTrl.get().getValue());
+          var elementTrl =
+              elementService.getElementTrlByElementIdAndLanguage(element.getId(), iso3Language);
+          if (elementTrl != null && !elementTrl.getValue().equals(element.getName())) {
+            cell.setCellValue(elementTrl.getValue());
           }
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          if (optElementTrl.isPresent() && !optElementTrl.get().getValue()
-              .equals(element.getName())) {
-            cell.setCellValue(optElementTrl.get().getTooltip());
+          if (elementTrl != null && !elementTrl.getValue().equals(element.getName())) {
+            cell.setCellValue(elementTrl.getTooltip());
           }
 
           rownum++;
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_g"));
-          cell.setCellFormula("B" + rownum
-              + "&IF(C" + rownum + "<>\"\",\".\"&C" + rownum + ",\"\")&IF(D" + rownum
-              + "<>\"\",\".\"&D" + rownum + ",\"\")&IF(E" + rownum + "<>\"\",\".\"&E" + rownum
-              + ",\"\")");
+          cell.setCellFormula(
+              "B"
+                  + rownum
+                  + "&IF(C"
+                  + rownum
+                  + "<>\"\",\".\"&C"
+                  + rownum
+                  + ",\"\")&IF(D"
+                  + rownum
+                  + "<>\"\",\".\"&D"
+                  + rownum
+                  + ",\"\")&IF(E"
+                  + rownum
+                  + "<>\"\",\".\"&E"
+                  + rownum
+                  + ",\"\")");
         }
       }
       sheet.setColumnWidth(0, 256 * 10);
@@ -265,9 +262,9 @@ public class I18nServiceImpl implements I18nService {
       Row row;
       Cell cell;
       var rownum = 1;
-      List<Action> actionList = actionRepository
-          .findAll(Sort.by(Order.asc("category"), Order.asc("name")));
-      List<String> iso3Languages = actionTrlRepository.getIso3Languages();
+      List<Action> actionList =
+          actionRepository.findAll(Sort.by(Order.asc("category"), Order.asc("name")));
+      List<String> iso3Languages = actionRepository.getIso3Languages();
 
       for (Action action : actionList) {
         for (String iso3Language : iso3Languages) {
@@ -313,25 +310,37 @@ public class I18nServiceImpl implements I18nService {
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          Optional<ActionTrl> optActionTrl = actionTrlRepository
-              .getByActionAndIso3Language(action, iso3Language);
-          if (optActionTrl.isPresent() && !optActionTrl.get().getValue().equals(action.getName())) {
-            cell.setCellValue(optActionTrl.get().getValue());
+          var actionTrl =
+              actionService.getActionTrlByActionIdAndLanguage(action.getId(), iso3Language);
+          if (actionTrl != null && !actionTrl.getValue().equals(action.getName())) {
+            cell.setCellValue(actionTrl.getValue());
           }
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          if (optActionTrl.isPresent() && !optActionTrl.get().getValue().equals(action.getName())) {
-            cell.setCellValue(optActionTrl.get().getTooltip());
+          if (actionTrl != null && !actionTrl.getValue().equals(action.getName())) {
+            cell.setCellValue(actionTrl.getTooltip());
           }
 
           rownum++;
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_g"));
-          cell.setCellFormula("B" + rownum
-              + "&IF(C" + rownum + "<>\"\",\".\"&C" + rownum + ",\"\")&IF(D" + rownum
-              + "<>\"\",\".\"&D" + rownum + ",\"\")&IF(E" + rownum + "<>\"\",\".\"&E" + rownum
-              + ",\"\")");
+          cell.setCellFormula(
+              "B"
+                  + rownum
+                  + "&IF(C"
+                  + rownum
+                  + "<>\"\",\".\"&C"
+                  + rownum
+                  + ",\"\")&IF(D"
+                  + rownum
+                  + "<>\"\",\".\"&D"
+                  + rownum
+                  + ",\"\")&IF(E"
+                  + rownum
+                  + "<>\"\",\".\"&E"
+                  + rownum
+                  + ",\"\")");
         }
       }
       sheet.setColumnWidth(0, 256 * 10);
@@ -360,9 +369,9 @@ public class I18nServiceImpl implements I18nService {
       Row row;
       Cell cell;
       var rownum = 1;
-      List<Message> messageList = messageRepository
-          .findAll(Sort.by(Order.asc("category"), Order.asc("name")));
-      List<String> iso3Languages = messageTrlRepository.getIso3Languages();
+      List<Message> messageList =
+          messageRepository.findAll(Sort.by(Order.asc("category"), Order.asc("name")));
+      List<String> iso3Languages = actionRepository.getIso3Languages();
 
       for (Message message : messageList) {
         for (String iso3Language : iso3Languages) {
@@ -402,19 +411,30 @@ public class I18nServiceImpl implements I18nService {
 
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_normal"));
-          Optional<MessageTrl> optMessageTrl = messageTrlRepository
-              .getByMessageAndIso3Language(message, iso3Language);
-          if (optMessageTrl.isPresent() && !optMessageTrl.get().getValue()
-              .equals(message.getName())) {
-            cell.setCellValue(optMessageTrl.get().getValue());
+          var messageTrl =
+              messageService.getMessageTrlByMessageIdAndLanguage(message.getId(), iso3Language);
+          if (messageTrl != null && !messageTrl.getValue().equals(message.getName())) {
+            cell.setCellValue(messageTrl.getValue());
           }
           rownum++;
           cell = row.createCell(j++);
           cell.setCellStyle(styles.get("cell_g"));
-          cell.setCellFormula("B" + rownum
-              + "&IF(C" + rownum + "<>\"\",\".\"&C" + rownum + ",\"\")&IF(D" + rownum
-              + "<>\"\",\".\"&D" + rownum + ",\"\")&IF(E" + rownum + "<>\"\",\".\"&E" + rownum
-              + ",\"\")");
+          cell.setCellFormula(
+              "B"
+                  + rownum
+                  + "&IF(C"
+                  + rownum
+                  + "<>\"\",\".\"&C"
+                  + rownum
+                  + ",\"\")&IF(D"
+                  + rownum
+                  + "<>\"\",\".\"&D"
+                  + rownum
+                  + ",\"\")&IF(E"
+                  + rownum
+                  + "<>\"\",\".\"&E"
+                  + rownum
+                  + ",\"\")");
         }
       }
       sheet.setColumnWidth(0, 256 * 10);
@@ -438,20 +458,20 @@ public class I18nServiceImpl implements I18nService {
   @Transactional
   public String importI18NFile(Byte[] fileToImport) {
     byte[] fileContent = ArrayUtils.toPrimitive(fileToImport);
-    actionTrlService.reset();
-    String fileImportResult = actionTrlService.importExcelFile(fileContent);
+    actionService.reset();
+    String fileImportResult = actionService.importExcelFile(fileContent);
     if (fileImportResult != null) {
       return fileImportResult;
     }
 
-    elementTrlService.reset();
-    fileImportResult = elementTrlService.importExcelFile(fileContent);
+    elementService.reset();
+    fileImportResult = elementService.importExcelFile(fileContent);
     if (fileImportResult != null) {
       return fileImportResult;
     }
 
-    messageTrlService.reset();
-    fileImportResult = messageTrlService.importExcelFile(fileContent);
+    messageService.reset();
+    fileImportResult = messageService.importExcelFile(fileContent);
     return fileImportResult;
   }
 }

@@ -18,13 +18,18 @@
 
 package org.jhapy.i18n.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.jhapy.i18n.domain.Action;
+import org.jhapy.i18n.domain.ActionTrl;
+import org.jhapy.i18n.domain.ActionTrlProjection;
+import org.jhapy.i18n.domain.ElementTrlProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -34,7 +39,7 @@ import org.springframework.stereotype.Repository;
  */
 @JaversSpringDataAuditable
 @Repository
-public interface ActionRepository extends JpaRepository<Action, Long> {
+public interface ActionRepository extends BaseRepository<Action> {
 
   Optional<Action> getByName(String name);
 
@@ -42,9 +47,10 @@ public interface ActionRepository extends JpaRepository<Action, Long> {
 
   long countByNameLike(String name);
 
-  @Query("SELECT DISTINCT a FROM Action a INNER JOIN ActionTrl t ON a.id = t.action.id WHERE a.name like :filter or t.value like :filter")
-  Page<Action> findAnyMatching(String filter, Pageable pageable);
+  @Query(nativeQuery = true, value = "SELECT DISTINCT(iso3Language) FROM Action_Trl")
+  List<String> getIso3Languages();
 
-  @Query("SELECT COUNT(DISTINCT a) FROM Action a INNER JOIN ActionTrl t ON a.id = t.action.id WHERE a.name like :filter or t.value like :filter")
-  long countAnyMatching(String filter);
+  @Query(
+      "SELECT new org.jhapy.i18n.domain.ActionTrlProjection( e.name, t.value, t.tooltip, t.isDefault, t.isTranslated, e.id ) FROM Action e JOIN e.translations t WHERE KEY(t) = :iso3Language")
+  List<ActionTrlProjection> findByIso3(@Param("iso3Language") String iso3Language);
 }

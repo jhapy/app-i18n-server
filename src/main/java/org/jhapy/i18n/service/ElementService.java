@@ -18,19 +18,43 @@
 
 package org.jhapy.i18n.service;
 
+import org.jhapy.i18n.domain.Action;
+import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.domain.Element;
+import org.jhapy.i18n.domain.ElementTrl;
+
+import java.util.List;
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
  * @since 2019-07-16
  */
-
 public interface ElementService extends CrudRelationalService<Element> {
 
   void postUpdate(Element element);
 
+  void postUpdate(ElementTrl elementTrl);
+
   void postPersist(Element element);
 
+  void postPersist(ElementTrl elementTrl);
+
   void postRemove(Element element);
+
+  void postRemove(ElementTrl elementTrl);
+
+  ElementTrl getElementTrlByElementIdAndLanguage(Long elementId, String iso3Language);
+
+  ElementTrl getByElementTrlNameAndLanguage(String name, String iso3Language);
+
+  List<ElementTrl> getElementTrlByIso3Language(String iso3Language);
+
+  List<ElementTrl> getElementTrls(Long elementId);
+
+  boolean hasBootstrapped();
+
+  String importExcelFile(byte[] content);
+
+  void reset();
 }

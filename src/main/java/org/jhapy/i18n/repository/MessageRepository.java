@@ -18,13 +18,15 @@
 
 package org.jhapy.i18n.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.javers.spring.annotation.JaversSpringDataAuditable;
-import org.jhapy.i18n.domain.Message;
+import org.jhapy.i18n.domain.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -34,7 +36,7 @@ import org.springframework.stereotype.Repository;
  */
 @JaversSpringDataAuditable
 @Repository
-public interface MessageRepository extends JpaRepository<Message, Long> {
+public interface MessageRepository extends BaseRepository<Message> {
 
   Optional<Message> getByName(String name);
 
@@ -42,9 +44,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
   long countByNameLike(String name);
 
-  @Query("SELECT DISTINCT a FROM Message a INNER JOIN MessageTrl t ON a.id = t.message.id WHERE a.category like :filter or a.name like :filter or t.value like :filter")
-  Page<Message> findAnyMatching(String filter, Pageable pageable);
-
-  @Query("SELECT COUNT(DISTINCT a) FROM Message a INNER JOIN MessageTrl t ON a.id = t.message.id WHERE a.category like :filter or a.name like :filter or t.value like :filter")
-  long countAnyMatching(String filter);
+  @Query(
+      "SELECT new org.jhapy.i18n.domain.MessageTrlProjection( e.name, t.value, t.isDefault, t.isTranslated, e.id ) FROM Message e JOIN e.translations t WHERE KEY(t) = :iso3Language")
+  List<MessageTrlProjection> findByIso3(@Param("iso3Language") String iso3Language);
 }

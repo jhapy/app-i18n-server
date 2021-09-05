@@ -16,39 +16,17 @@
  * limitations under the License.
  */
 
-package org.jhapy.i18n.service;
+package org.jhapy.i18n.repository;
 
-import java.util.List;
-import org.jhapy.i18n.domain.ActionTrl;
+import org.jhapy.i18n.domain.BaseEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.query.QueryByExampleExecutor;
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
- * @since 2019-07-16
+ * @since 3/8/20
  */
-public interface ActionTrlService extends CrudService<ActionTrl> {
-
-  List<ActionTrl> findByAction(Long actionId);
-
-  long countByAction(Long actionId);
-
-  ActionTrl getByNameAndIso3Language(String name, String iso3Language);
-
-  List<ActionTrl> getByIso3Language(String iso3Language);
-
-  List<ActionTrl> saveAll(List<ActionTrl> translations);
-
-  void deleteAll(List<ActionTrl> actionTrls);
-
-  String importExcelFile(byte[] content);
-
-  void reset();
-
-  void postUpdate(ActionTrl actionTrl);
-
-  void postPersist(ActionTrl actionTrl);
-
-  void postRemove(ActionTrl actionTrl);
-
-  boolean hasBootstrapped();
-}
+public interface BaseRepository<T extends BaseEntity>
+    extends JpaRepository<T, Long>, QueryByExampleExecutor<T>, JpaSpecificationExecutor<T> {}

@@ -18,19 +18,40 @@
 
 package org.jhapy.i18n.service;
 
-import org.jhapy.i18n.domain.Message;
+import org.jhapy.i18n.domain.*;
+
+import java.util.List;
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
  * @since 2019-07-16
  */
-
 public interface MessageService extends CrudRelationalService<Message> {
 
   void postUpdate(Message message);
 
+  void postUpdate(MessageTrl messageTrl);
+
   void postPersist(Message message);
 
+  void postPersist(MessageTrl messageTrl);
+
   void postRemove(Message message);
+
+  void postRemove(MessageTrl messageTrl);
+
+  MessageTrl getMessageTrlByMessageIdAndLanguage(Long messageId, String iso3Language);
+
+  MessageTrl getByMessageTrlNameAndLanguage(String name, String iso3Language);
+
+  List<MessageTrl> getMessageTrlByIso3Language(String iso3Language);
+
+  List<MessageTrl> getMessageTrls(Long messageId);
+
+  boolean hasBootstrapped();
+
+  String importExcelFile(byte[] content);
+
+  void reset();
 }

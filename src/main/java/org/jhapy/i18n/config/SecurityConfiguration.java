@@ -69,7 +69,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
         .and()
         .csrf()
         .disable()
-        .cors().configurationSource(corsConfigurationSource())
+        .cors()
+        .configurationSource(corsConfigurationSource())
         .and()
         .exceptionHandling()
         .authenticationEntryPoint(problemSupport)
@@ -77,7 +78,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
         .and()
         .headers()
         .contentSecurityPolicy(
-            "default-src 'self' " + appProperties.getKeycloakAdmin().getServerUrl()
+            "default-src 'self' "
+                + appProperties.getKeycloakAdmin().getServerUrl()
                 + "; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:")
         .and()
         .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
@@ -92,17 +94,40 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeRequests()
-        .antMatchers("/api/auth-info").permitAll()
-        .antMatchers("/api/i18NService/getExistingLanguages").permitAll()
-        .antMatchers("/api/elementTrlService/**").permitAll()
-        .antMatchers("/api/actionTrlService/**").permitAll()
-        .antMatchers("/api/messageTrlService/**").permitAll()
-        .antMatchers("/api/**").authenticated()
-        .antMatchers("/management/health").permitAll()
-        .antMatchers("/management/health/**").permitAll()
-        .antMatchers("/management/info").permitAll()
-        .antMatchers("/management/prometheus").permitAll()
-        .antMatchers("/management/**").hasAuthority("ROLE_ADMIN")
+        .antMatchers("/api/auth-info")
+        .permitAll()
+        .antMatchers("/api/i18NService/getExistingLanguages")
+        .permitAll()
+        .antMatchers("/api/elementService/**")
+        .permitAll()
+        .antMatchers("/api/elementService/save*")
+        .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
+        .antMatchers("/api/elementService/delete*")
+        .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
+        .antMatchers("/api/actionService/**")
+        .permitAll()
+        .antMatchers("/api/actionService/save*")
+        .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
+        .antMatchers("/api/actionService/delete*")
+        .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
+        .antMatchers("/api/messageService/**")
+        .permitAll()
+        .antMatchers("/api/messageService/save*")
+        .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
+        .antMatchers("/api/messageService/delete*")
+        .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
+        .antMatchers("/api/**")
+        .authenticated()
+        .antMatchers("/management/health")
+        .permitAll()
+        .antMatchers("/management/health/**")
+        .permitAll()
+        .antMatchers("/management/info")
+        .permitAll()
+        .antMatchers("/management/prometheus")
+        .permitAll()
+        .antMatchers("/management/**")
+        .hasAuthority("ROLE_ADMIN")
         .and()
         .oauth2ResourceServer()
         .jwt()
@@ -115,8 +140,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
 
   Converter<Jwt, AbstractAuthenticationToken> authenticationConverter() {
     var jwtAuthenticationConverter = new JwtAuthenticationConverter();
-    jwtAuthenticationConverter
-        .setJwtGrantedAuthoritiesConverter(new JwtGrantedAuthorityConverter());
+    jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
+        new JwtGrantedAuthorityConverter());
     return jwtAuthenticationConverter;
   }
 
@@ -124,11 +149,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
   JwtDecoder jwtDecoder() {
     NimbusJwtDecoder jwtDecoder = JwtDecoders.fromOidcIssuerLocation(issuerUri);
 
-    OAuth2TokenValidator<Jwt> audienceValidator = new AudienceValidator(
-        appProperties.getSecurity().getOauth2().getAudience());
+    OAuth2TokenValidator<Jwt> audienceValidator =
+        new AudienceValidator(appProperties.getSecurity().getOauth2().getAudience());
     OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuerUri);
-    OAuth2TokenValidator<Jwt> withAudience = new DelegatingOAuth2TokenValidator<>(withIssuer,
-        audienceValidator);
+    OAuth2TokenValidator<Jwt> withAudience =
+        new DelegatingOAuth2TokenValidator<>(withIssuer, audienceValidator);
 
     jwtDecoder.setJwtValidator(withAudience);
 

@@ -18,18 +18,14 @@
 
 package org.jhapy.i18n.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.javers.core.metamodel.annotation.ShallowReference;
 import org.javers.core.metamodel.annotation.TypeName;
-import org.jhapy.i18n.listeners.MessageTrlListener;
+import org.jhapy.i18n.listeners.MessageListener;
 
 /**
  * @author jHapy Lead Dev.
@@ -38,25 +34,11 @@ import org.jhapy.i18n.listeners.MessageTrlListener;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Entity
+@Embeddable
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-@EntityListeners(MessageTrlListener.class)
+@EntityListeners(MessageListener.class)
 @TypeName("MessageTrl")
-public class MessageTrl extends EntityTranslation {
+public class MessageTrl extends EntityTranslationV2 {
 
-  @ManyToOne
-  @JoinColumn(name = "MESSAGE_ID", nullable = false)
-  @ShallowReference
-  private Message message;
-
-  /**
-   * ChatMessage Value
-   */
   private String value;
-
-  @EqualsAndHashCode.Include
-  @ToString.Include
-  private String message() {
-    return (message != null && message.getId() != null) ? message.getId().toString() : null;
-  }
 }

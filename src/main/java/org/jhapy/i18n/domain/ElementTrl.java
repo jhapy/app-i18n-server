@@ -18,18 +18,14 @@
 
 package org.jhapy.i18n.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.javers.core.metamodel.annotation.ShallowReference;
 import org.javers.core.metamodel.annotation.TypeName;
-import org.jhapy.i18n.listeners.ElementTrlListener;
+import org.jhapy.i18n.listeners.ElementListener;
 
 /**
  * @author jHapy Lead Dev.
@@ -38,26 +34,13 @@ import org.jhapy.i18n.listeners.ElementTrlListener;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Entity
+@Embeddable
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-@EntityListeners(ElementTrlListener.class)
+@EntityListeners(ElementListener.class)
 @TypeName("ElementTrl")
-public class ElementTrl extends EntityTranslation {
+public class ElementTrl extends EntityTranslationV2 {
 
-  @ManyToOne
-  @JoinColumn(name = "ELEMENT_ID", nullable = false)
-  @ShallowReference
-  private Element element;
-  /**
-   * Element Value
-   */
   private String value;
 
   private String tooltip;
-
-  @EqualsAndHashCode.Include
-  @ToString.Include
-  private String element() {
-    return (element != null && element.getId() != null) ? element.getId().toString() : null;
-  }
 }

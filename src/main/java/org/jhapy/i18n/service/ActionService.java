@@ -19,18 +19,43 @@
 package org.jhapy.i18n.service;
 
 import org.jhapy.i18n.domain.Action;
+import org.jhapy.i18n.domain.ActionTrl;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
  * @since 2019-07-16
  */
-
 public interface ActionService extends CrudRelationalService<Action> {
 
   void postUpdate(Action action);
 
+  void postUpdate(ActionTrl actionTrl);
+
   void postPersist(Action action);
 
+  void postPersist(ActionTrl actionTrl);
+
   void postRemove(Action action);
+
+  void postRemove(ActionTrl actionTrl);
+
+  ActionTrl getActionTrlByActionIdAndLanguage(Long actionId, String iso3Language);
+
+  ActionTrl getByActionTrlNameAndLanguage(String name, String iso3Language);
+
+  List<ActionTrl> getActionTrlByIso3Language(String iso3Language);
+
+  List<ActionTrl> getActionTrls(Long actionId);
+
+  boolean hasBootstrapped();
+
+  String importExcelFile(byte[] content);
+
+  void reset();
 }

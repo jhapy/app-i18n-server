@@ -23,6 +23,7 @@ import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
 import org.jhapy.i18n.domain.Element;
+import org.jhapy.i18n.domain.ElementTrl;
 import org.jhapy.i18n.service.ElementService;
 import org.springframework.stereotype.Component;
 
@@ -57,11 +58,31 @@ public class ElementListener {
     }
   }
 
+  @PostPersist
+  public void postPersist(ElementTrl elementTrl) {
+    if (getElementService() != null) {
+      getElementService().postPersist(elementTrl);
+    }
+  }
+
+  @PostUpdate
+  public void postUpdate(ElementTrl elementTrl) {
+    if (getElementService() != null) {
+      getElementService().postUpdate(elementTrl);
+    }
+  }
+
+  @PostRemove
+  public void postRemove(ElementTrl elementTrl) {
+    if (getElementService() != null) {
+      getElementService().postRemove(elementTrl);
+    }
+  }
+
   protected ElementService getElementService() {
     if (elementService == null) {
       elementService = SpringApplicationContext.getBean(ElementService.class);
     }
     return elementService;
   }
-
 }

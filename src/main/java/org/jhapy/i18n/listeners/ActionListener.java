@@ -23,6 +23,7 @@ import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
 import org.jhapy.i18n.domain.Action;
+import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.service.ActionService;
 import org.springframework.stereotype.Component;
 
@@ -57,11 +58,31 @@ public class ActionListener {
     }
   }
 
+  @PostPersist
+  public void postPersist(ActionTrl actionTrl) {
+    if (getActionService() != null) {
+      getActionService().postPersist(actionTrl);
+    }
+  }
+
+  @PostUpdate
+  public void postUpdate(ActionTrl actionTrl) {
+    if (getActionService() != null) {
+      getActionService().postUpdate(actionTrl);
+    }
+  }
+
+  @PostRemove
+  public void postRemove(ActionTrl actionTrl) {
+    if (getActionService() != null) {
+      getActionService().postRemove(actionTrl);
+    }
+  }
+
   protected ActionService getActionService() {
     if (actionService == null) {
       actionService = SpringApplicationContext.getBean(ActionService.class);
     }
     return actionService;
   }
-
 }

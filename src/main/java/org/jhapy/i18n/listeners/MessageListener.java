@@ -23,6 +23,7 @@ import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import org.jhapy.commons.utils.SpringApplicationContext;
 import org.jhapy.i18n.domain.Message;
+import org.jhapy.i18n.domain.MessageTrl;
 import org.jhapy.i18n.service.MessageService;
 import org.springframework.stereotype.Component;
 
@@ -57,11 +58,31 @@ public class MessageListener {
     }
   }
 
+  @PostPersist
+  public void postPersist(MessageTrl messageTrl) {
+    if (getMessageService() != null) {
+      getMessageService().postPersist(messageTrl);
+    }
+  }
+
+  @PostUpdate
+  public void postUpdate(MessageTrl messageTrl) {
+    if (getMessageService() != null) {
+      getMessageService().postUpdate(messageTrl);
+    }
+  }
+
+  @PostRemove
+  public void postRemove(MessageTrl messageTrl) {
+    if (getMessageService() != null) {
+      getMessageService().postRemove(messageTrl);
+    }
+  }
+
   protected MessageService getMessageService() {
     if (messageService == null) {
       messageService = SpringApplicationContext.getBean(MessageService.class);
     }
     return messageService;
   }
-
 }

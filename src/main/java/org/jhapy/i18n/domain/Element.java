@@ -19,10 +19,11 @@
 package org.jhapy.i18n.domain;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import java.util.Map;
+import javax.persistence.*;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -50,6 +51,8 @@ public class Element extends BaseEntity {
 
   private Boolean isTranslated = Boolean.FALSE;
 
-  @OneToMany(mappedBy = "element")
-  private List<ElementTrl> translations = new ArrayList<>();
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "element_trl", joinColumns = @JoinColumn(name = "element_id"))
+  @MapKeyColumn(name = "iso3Language")
+  private Map<String, ElementTrl> translations = new HashMap<>();
 }

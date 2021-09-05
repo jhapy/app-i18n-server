@@ -24,7 +24,6 @@ import org.jhapy.commons.endpoint.BaseEndpoint;
 import org.jhapy.dto.serviceQuery.BaseRemoteQuery;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.i18n.ImportI18NFileQuery;
-import org.jhapy.i18n.converter.I18NConverterV2;
 import org.jhapy.i18n.service.I18nService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,16 +37,14 @@ import org.springframework.web.bind.annotation.RestController;
  * @version 1.0
  * @since 2019-06-05
  */
-
 @RestController
 @RequestMapping("/api/i18NService")
 public class I18NServiceEndpoint extends BaseEndpoint {
 
   private final I18nService i18nService;
 
-  public I18NServiceEndpoint(I18nService i18nService,
-      I18NConverterV2 converter) {
-    super(converter);
+  public I18NServiceEndpoint(I18nService i18nService) {
+    super(null);
     this.i18nService = i18nService;
   }
 
@@ -59,9 +56,10 @@ public class I18NServiceEndpoint extends BaseEndpoint {
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE",
-          "ROLE_I18N_ADMIN"})
-  )
+      security =
+          @SecurityRequirement(
+              name = "openId",
+              scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"}))
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/getI18NFile")
   public ResponseEntity<ServiceResult> getI18NFile(@RequestBody BaseRemoteQuery query) {
@@ -71,9 +69,10 @@ public class I18NServiceEndpoint extends BaseEndpoint {
   }
 
   @Operation(
-      security = @SecurityRequirement(name = "openId", scopes = {"ROLE_I18N_WRITE",
-          "ROLE_I18N_ADMIN"})
-  )
+      security =
+          @SecurityRequirement(
+              name = "openId",
+              scopes = {"ROLE_I18N_WRITE", "ROLE_I18N_ADMIN"}))
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
   @PostMapping(value = "/importI18NFile")
   public ResponseEntity<ServiceResult> importI18NFile(@RequestBody ImportI18NFileQuery query) {
@@ -85,6 +84,5 @@ public class I18NServiceEndpoint extends BaseEndpoint {
     } else {
       return handleResult(loggerPrefix, result);
     }
-
   }
 }

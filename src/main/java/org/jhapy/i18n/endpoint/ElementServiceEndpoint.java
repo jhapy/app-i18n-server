@@ -18,35 +18,19 @@
 
 package org.jhapy.i18n.endpoint;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.jhapy.commons.endpoint.BaseEndpoint;
-import org.jhapy.dto.domain.i18n.ActionDTO;
 import org.jhapy.dto.domain.i18n.ElementDTO;
 import org.jhapy.dto.serviceQuery.ServiceResult;
-import org.jhapy.dto.serviceQuery.generic.CountAnyMatchingQuery;
-import org.jhapy.dto.serviceQuery.generic.DeleteByIdQuery;
-import org.jhapy.dto.serviceQuery.generic.FindAnyMatchingQuery;
-import org.jhapy.dto.serviceQuery.generic.GetByIdQuery;
-import org.jhapy.dto.serviceQuery.generic.SaveQuery;
 import org.jhapy.dto.serviceQuery.i18n.FindByIso3Query;
 import org.jhapy.dto.serviceQuery.i18n.GetByNameAndIso3Query;
-import org.jhapy.dto.serviceQuery.i18n.actionTrl.GetActionTrlQuery;
 import org.jhapy.dto.serviceQuery.i18n.elementTrl.GetElementTrlQuery;
-import org.jhapy.i18n.converter.ActionConverter;
-import org.jhapy.i18n.converter.ActionTrlConverter;
 import org.jhapy.i18n.converter.ElementConverter;
 import org.jhapy.i18n.converter.ElementTrlConverter;
-import org.jhapy.i18n.domain.Action;
-import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
-import org.jhapy.i18n.service.ActionService;
 import org.jhapy.i18n.service.CrudRelationalService;
 import org.jhapy.i18n.service.ElementService;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

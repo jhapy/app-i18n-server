@@ -20,18 +20,24 @@ package org.jhapy.i18n.config;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.micrometer.core.instrument.MeterRegistry;
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+
 @Configuration
 @EnableJpaRepositories("org.jhapy.i18n.repository")
 @EnableJpaAuditing(auditorAwareRef = "springSecurityAuditorAware")
-@EntityScan("org.jhapy.i18n.domain")
+@EntityScan({
+  "org.jhapy.i18n.domain",
+  "org.axonframework.eventhandling.tokenstore",
+  "org.axonframework.modelling.saga.repository.jpa",
+  "org.axonframework.eventsourcing.eventstore.jpa"
+})
 @EnableTransactionManagement
 public class DatabaseConfiguration {
 
@@ -39,8 +45,7 @@ public class DatabaseConfiguration {
 
   private final MeterRegistry meterRegistry;
 
-  public DatabaseConfiguration(DataSource dataSource,
-      MeterRegistry meterRegistry) {
+  public DatabaseConfiguration(DataSource dataSource, MeterRegistry meterRegistry) {
     this.dataSource = dataSource;
     this.meterRegistry = meterRegistry;
   }

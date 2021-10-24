@@ -18,19 +18,16 @@
 
 package org.jhapy.i18n.domain;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
-import org.javers.core.metamodel.annotation.DiffIgnore;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.hibernate.Hibernate;
 
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
 import java.io.Serializable;
-import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Base class for all translations
@@ -39,31 +36,31 @@ import java.time.Instant;
  * @version 1.0
  * @since 2019-09-29
  */
-@Data
-@EqualsAndHashCode(exclude = {"createdBy", "modifiedBy", "created", "modified"})
+@Getter
+@Setter
+@RequiredArgsConstructor
 @ToString
 @MappedSuperclass
-public abstract class EntityTranslationV2 implements Serializable {
+public abstract class EntityTranslationV2 extends BaseEntity implements Serializable {
 
   private Boolean isDefault;
 
   private Boolean isTranslated;
 
-  @Transient private String iso3Language;
+  private String iso3Language;
 
-  @Transient private Long relatedEntityId;
+  private UUID parentId;
 
-  @Transient private String name;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    EntityTranslationV2 that = (EntityTranslationV2) o;
+    return Objects.equals(getId(), that.getId());
+  }
 
-  /** Who create this record (no ID, use username) */
-  @DiffIgnore @CreatedBy private String createdBy;
-
-  /** When this record has been created */
-  @DiffIgnore @CreatedDate private Instant created;
-
-  /** How did the last modification of this record (no ID, use username) */
-  @DiffIgnore @LastModifiedBy private String modifiedBy;
-
-  /** When this record was last updated */
-  @DiffIgnore @LastModifiedDate private Instant modified;
+  @Override
+  public int hashCode() {
+    return 0;
+  }
 }

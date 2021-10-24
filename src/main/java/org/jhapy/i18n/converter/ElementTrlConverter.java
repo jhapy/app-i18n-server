@@ -1,48 +1,91 @@
 package org.jhapy.i18n.converter;
 
-import org.apache.commons.lang3.StringUtils;
-import org.jhapy.dto.domain.i18n.ActionTrlDTO;
+import org.jhapy.cqrs.event.i18n.ElementTrlCreatedEvent;
+import org.jhapy.cqrs.event.i18n.ElementTrlUpdatedEvent;
 import org.jhapy.dto.domain.i18n.ElementTrlDTO;
-import org.jhapy.i18n.domain.ActionTrl;
+import org.jhapy.i18n.command.ElementTrlAggregate;
 import org.jhapy.i18n.domain.ElementTrl;
-import org.jhapy.i18n.service.ElementService;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Context;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
+import org.jhapy.i18n.repository.ElementRepository;
+import org.mapstruct.*;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
 @Mapper(
     config = BaseRelationalDbConverterConfig.class,
     componentModel = "spring",
     uses = RelationalDbReferenceMapper.class)
 public abstract class ElementTrlConverter extends GenericMapper<ElementTrl, ElementTrlDTO> {
-  @Autowired private ElementService elementService;
+  public static ElementTrlConverter INSTANCE = Mappers.getMapper(ElementTrlConverter.class);
+  @Autowired private ElementRepository elementRepository;
+
+  public abstract ElementTrlCreatedEvent toElementTrlCreatedEvent(ElementTrlDTO dto);
+
+  public abstract ElementTrlAggregate toElementTrlAggregate(ElementTrlCreatedEvent dto);
+
+  public abstract ElementTrlAggregate toElementTrlAggregate(ElementTrlUpdatedEvent dto);
+
+  public abstract ElementTrlUpdatedEvent toElementTrlUpdatedEvent(ElementTrlDTO dto);
+
+  public abstract void updateAggregateFromElementTrlCreatedEvent(
+      ElementTrlCreatedEvent event, @MappingTarget ElementTrlAggregate aggregate);
+
+  public abstract void updateAggregateFromElementTrlUpdatedEvent(
+      ElementTrlUpdatedEvent event, @MappingTarget ElementTrlAggregate aggregate);
+
+  @Mapping(target = "created", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)
+  @Mapping(target = "modified", ignore = true)
+  @Mapping(target = "modifiedBy", ignore = true)
+  @Mapping(target = "isActive", ignore = true)
+  public abstract ElementTrl asEntity(ElementTrlCreatedEvent event);
+
+  @Mapping(target = "created", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)
+  @Mapping(target = "modified", ignore = true)
+  @Mapping(target = "modifiedBy", ignore = true)
+  @Mapping(target = "isActive", ignore = true)
+  public abstract ElementTrl asEntity(ElementTrlUpdatedEvent event);
 
   public abstract ElementTrl asEntity(ElementTrlDTO dto, @Context Map<String, Object> context);
 
+  @Mapping(target = "temporaryId", ignore = true)
+  @Mapping(target = "name", ignore = true)
   public abstract ElementTrlDTO asDTO(ElementTrl domain, @Context Map<String, Object> context);
 
-  public List<ElementTrlDTO> asDTOList(
-      Iterable<ElementTrl> entityList, @Context Map<String, Object> context) {
-    if (entityList == null) {
-      return null;
-    }
-    long id = 1;
-    var list = new ArrayList<ElementTrlDTO>();
-    for (ElementTrl elementTrl : entityList) {
-      var elementTrlDTO = asDTO(elementTrl, context);
-      elementTrlDTO.setId(id++);
-      list.add(elementTrlDTO);
-    }
+  public Map<String, ElementTrl> asEntityMap(
+      List<ElementTrlDTO> dtoList, @Context Map<String, Object> context) {
+    Map<String, ElementTrl> result = new HashMap<>();
+    dtoList.forEach(
+        elementTrlDTO ->
+            result.put(elementTrlDTO.getIso3Language(), asEntity(elementTrlDTO, context)));
+    return result;
+  }
 
-    return list;
+  public Map<String, ElementTrlAggregate> asAggregateMapFromCreatedEvent(
+      List<ElementTrlCreatedEvent> createdEventList) {
+    Map<String, ElementTrlAggregate> result = new HashMap<>();
+    createdEventList.forEach(
+        createdEvent ->
+            result.put(createdEvent.getIso3Language(), toElementTrlAggregate(createdEvent)));
+    return result;
+  }
+
+  public Map<String, ElementTrlAggregate> asAggregateMapFromUpdatedEvent(
+      List<ElementTrlUpdatedEvent> updatedEventList) {
+    Map<String, ElementTrlAggregate> result = new HashMap<>();
+    updatedEventList.forEach(
+        updatedEvent ->
+            result.put(updatedEvent.getIso3Language(), toElementTrlAggregate(updatedEvent)));
+    return result;
+  }
+
+  public List<ElementTrlDTO> asDTOList(
+      Map<String, ElementTrl> value, @Context Map<String, Object> context) {
+    return value.values().stream().map(elementTrl -> asDTO(elementTrl, context)).toList();
   }
 
   @AfterMapping
@@ -52,7 +95,6 @@ public abstract class ElementTrlConverter extends GenericMapper<ElementTrl, Elem
   @AfterMapping
   protected void afterConvert(
       ElementTrl domain, @MappingTarget ElementTrlDTO dto, @Context Map<String, Object> context) {
-    if (domain.getRelatedEntityId() != null && StringUtils.isBlank(domain.getName()))
-      dto.setName(elementService.load(domain.getRelatedEntityId()).getName());
+    dto.setName(elementRepository.getById(domain.getParentId()).getName());
   }
 }

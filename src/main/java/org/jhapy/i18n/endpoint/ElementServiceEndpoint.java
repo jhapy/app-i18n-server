@@ -18,25 +18,28 @@
 
 package org.jhapy.i18n.endpoint;
 
-import org.jhapy.commons.endpoint.BaseEndpoint;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.messaging.responsetypes.ResponseTypes;
+import org.axonframework.queryhandling.QueryGateway;
+import org.jhapy.cqrs.query.i18n.GetElementByNameQuery;
+import org.jhapy.cqrs.query.i18n.GetElementTrlByNameAndIso3LanguageQuery;
+import org.jhapy.cqrs.query.i18n.GetElementTrlsByElementIdQuery;
+import org.jhapy.cqrs.query.i18n.GetElementTrlsByIso3LanguageQuery;
 import org.jhapy.dto.domain.i18n.ElementDTO;
+import org.jhapy.dto.domain.i18n.ElementTrlDTO;
 import org.jhapy.dto.serviceQuery.ServiceResult;
+import org.jhapy.dto.serviceQuery.generic.GetByNameQuery;
 import org.jhapy.dto.serviceQuery.i18n.FindByIso3Query;
 import org.jhapy.dto.serviceQuery.i18n.GetByNameAndIso3Query;
 import org.jhapy.dto.serviceQuery.i18n.elementTrl.GetElementTrlQuery;
-import org.jhapy.i18n.converter.ElementConverter;
-import org.jhapy.i18n.converter.ElementTrlConverter;
 import org.jhapy.i18n.domain.Element;
-import org.jhapy.i18n.domain.ElementTrl;
-import org.jhapy.i18n.service.CrudRelationalService;
-import org.jhapy.i18n.service.ElementService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import javax.validation.Valid;
 
 /**
  * @author jHapy Lead Dev.
@@ -47,50 +50,54 @@ import java.util.List;
 @RequestMapping("/api/elementService")
 public class ElementServiceEndpoint extends BaseRelationaldbV2Endpoint<Element, ElementDTO> {
 
-  private final ElementService elementService;
-  private final ElementTrlConverter elementTrlConverter;
-
-  public ElementServiceEndpoint(
-      ElementService elementService,
-      ElementConverter converter,
-      ElementTrlConverter elementTrlConverter) {
-    super(converter);
-    this.elementService = elementService;
-    this.elementTrlConverter = elementTrlConverter;
+  public ElementServiceEndpoint(CommandGateway commandGateway, QueryGateway queryGateway) {
+    super(commandGateway, queryGateway);
   }
 
   @PostMapping(value = "/getElementTrls")
-  public ResponseEntity<ServiceResult> getElementTrls(@RequestBody GetElementTrlQuery query) {
+  public ResponseEntity<ServiceResult> getElementTrls(
+      @Valid @RequestBody GetElementTrlQuery query) {
     var loggerPrefix = getLoggerPrefix("getElementTrls");
-
     return handleResult(
         loggerPrefix,
-        elementTrlConverter.asDTOList(
-            elementService.getElementTrls(query.getElementId()), getContext(query)));
+        queryGateway
+            .query(
+                new GetElementTrlsByElementIdQuery(query.getElementId()),
+                ResponseTypes.multipleInstancesOf(ElementTrlDTO.class))
+            .join());
   }
 
   @PostMapping(value = "/findByIso3")
-  public ResponseEntity<ServiceResult> findByIso3(@RequestBody FindByIso3Query query) {
+  public ResponseEntity<ServiceResult> findByIso3(@Valid @RequestBody FindByIso3Query query) {
     var loggerPrefix = getLoggerPrefix("findByIso3");
-
-    List<ElementTrl> result = elementService.getElementTrlByIso3Language(query.getIso3Language());
-
-    return handleResult(loggerPrefix, elementTrlConverter.asDTOList(result, getContext(query)));
+    return handleResult(
+        loggerPrefix,
+        queryGateway
+            .query(
+                new GetElementTrlsByIso3LanguageQuery(query.getIso3Language()),
+                ResponseTypes.multipleInstancesOf(ElementTrlDTO.class))
+            .join());
   }
 
   @PostMapping(value = "/getElementTrlByNameAndIso3")
   public ResponseEntity<ServiceResult> getElementTrlByNameAndIso3(
-      @RequestBody GetByNameAndIso3Query query) {
+      @Valid @RequestBody GetByNameAndIso3Query query) {
     var loggerPrefix = getLoggerPrefix("getElementTrlByNameAndIso3");
-
-    ElementTrl result =
-        elementService.getByElementTrlNameAndLanguage(query.getName(), query.getIso3Language());
-
-    return handleResult(loggerPrefix, elementTrlConverter.asDTO(result, getContext(query)));
+    return handleResult(
+        loggerPrefix,
+        queryGateway
+            .query(
+                new GetElementTrlByNameAndIso3LanguageQuery(
+                    query.getName(), query.getIso3Language()),
+                ElementTrlDTO.class)
+            .join());
   }
 
-  @Override
-  protected CrudRelationalService<Element> getService() {
-    return elementService;
+  @PostMapping(value = "/getByName")
+  public ResponseEntity<ServiceResult> getByName(@Valid @RequestBody GetByNameQuery query) {
+    var loggerPrefix = getLoggerPrefix("getByName");
+    return handleResult(
+        loggerPrefix,
+        queryGateway.query(new GetElementByNameQuery(query.getName()), ElementDTO.class).join());
   }
 }

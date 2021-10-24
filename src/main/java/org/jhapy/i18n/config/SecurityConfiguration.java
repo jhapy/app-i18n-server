@@ -34,11 +34,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtDecoders;
-import org.springframework.security.oauth2.jwt.JwtValidators;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -51,11 +47,11 @@ import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 @Import(SecurityProblemSupport.class)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter implements HasLogger {
 
-  @Value("${spring.security.oauth2.client.provider.oidc.issuer-uri}")
-  private String issuerUri;
-
   private final AppProperties appProperties;
   private final SecurityProblemSupport problemSupport;
+
+  @Value("${spring.security.oauth2.client.provider.oidc.issuer-uri}")
+  private String issuerUri;
 
   public SecurityConfiguration(AppProperties appProperties, SecurityProblemSupport problemSupport) {
     this.problemSupport = problemSupport;
@@ -98,24 +94,24 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
         .permitAll()
         .antMatchers("/api/i18NService/getExistingLanguages")
         .permitAll()
-        .antMatchers("/api/elementService/**")
-        .permitAll()
         .antMatchers("/api/elementService/save*")
         .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
         .antMatchers("/api/elementService/delete*")
         .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
-        .antMatchers("/api/actionService/**")
+        .antMatchers("/api/elementService/**")
         .permitAll()
         .antMatchers("/api/actionService/save*")
         .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
         .antMatchers("/api/actionService/delete*")
         .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
-        .antMatchers("/api/messageService/**")
+        .antMatchers("/api/actionService/**")
         .permitAll()
         .antMatchers("/api/messageService/save*")
         .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
         .antMatchers("/api/messageService/delete*")
         .hasAnyAuthority("ROLE_I18N_ADMIN", "ROLE_I18N_WRITE")
+        .antMatchers("/api/messageService/**")
+        .permitAll()
         .antMatchers("/api/**")
         .authenticated()
         .antMatchers("/management/health")
@@ -168,7 +164,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter implemen
     config.applyPermitDefaultValues();
 
     if (config.getAllowedOrigins() != null && !config.getAllowedOrigins().isEmpty()) {
-      logger().debug(loggerPrefix + "Registering CORS filter");
+      debug(loggerPrefix, "Registering CORS filter");
       source.registerCorsConfiguration("/config/**", config);
       source.registerCorsConfiguration("/eureka/**", config);
       source.registerCorsConfiguration("/api/**", config);

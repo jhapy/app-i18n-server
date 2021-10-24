@@ -1,48 +1,91 @@
 package org.jhapy.i18n.converter;
 
-import org.apache.commons.lang3.StringUtils;
-import org.jhapy.dto.domain.i18n.ElementTrlDTO;
+import org.jhapy.cqrs.event.i18n.MessageTrlCreatedEvent;
+import org.jhapy.cqrs.event.i18n.MessageTrlUpdatedEvent;
 import org.jhapy.dto.domain.i18n.MessageTrlDTO;
-import org.jhapy.i18n.domain.ElementTrl;
+import org.jhapy.i18n.command.MessageTrlAggregate;
 import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.service.MessageService;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Context;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
+import org.jhapy.i18n.repository.MessageRepository;
+import org.mapstruct.*;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
 @Mapper(
     config = BaseRelationalDbConverterConfig.class,
     componentModel = "spring",
     uses = RelationalDbReferenceMapper.class)
 public abstract class MessageTrlConverter extends GenericMapper<MessageTrl, MessageTrlDTO> {
-  @Autowired private MessageService messageService;
+  public static MessageTrlConverter INSTANCE = Mappers.getMapper(MessageTrlConverter.class);
+  @Autowired private MessageRepository messageRepository;
+
+  public abstract MessageTrlCreatedEvent toMessageTrlCreatedEvent(MessageTrlDTO dto);
+
+  public abstract MessageTrlAggregate toMessageTrlAggregate(MessageTrlCreatedEvent dto);
+
+  public abstract MessageTrlAggregate toMessageTrlAggregate(MessageTrlUpdatedEvent dto);
+
+  public abstract MessageTrlUpdatedEvent toMessageTrlUpdatedEvent(MessageTrlDTO dto);
+
+  public abstract void updateAggregateFromMessageTrlCreatedEvent(
+      MessageTrlCreatedEvent event, @MappingTarget MessageTrlAggregate aggregate);
+
+  public abstract void updateAggregateFromMessageTrlUpdatedEvent(
+      MessageTrlUpdatedEvent event, @MappingTarget MessageTrlAggregate aggregate);
+
+  @Mapping(target = "created", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)
+  @Mapping(target = "modified", ignore = true)
+  @Mapping(target = "modifiedBy", ignore = true)
+  @Mapping(target = "isActive", ignore = true)
+  public abstract MessageTrl asEntity(MessageTrlCreatedEvent event);
+
+  @Mapping(target = "created", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)
+  @Mapping(target = "modified", ignore = true)
+  @Mapping(target = "modifiedBy", ignore = true)
+  @Mapping(target = "isActive", ignore = true)
+  public abstract MessageTrl asEntity(MessageTrlUpdatedEvent event);
 
   public abstract MessageTrl asEntity(MessageTrlDTO dto, @Context Map<String, Object> context);
 
+  @Mapping(target = "temporaryId", ignore = true)
+  @Mapping(target = "name", ignore = true)
   public abstract MessageTrlDTO asDTO(MessageTrl domain, @Context Map<String, Object> context);
 
-  public List<MessageTrlDTO> asDTOList(
-      Iterable<MessageTrl> entityList, @Context Map<String, Object> context) {
-    if (entityList == null) {
-      return null;
-    }
-    long id = 1;
-    var list = new ArrayList<MessageTrlDTO>();
-    for (MessageTrl messageTrl : entityList) {
-      var messageTrlDTO = asDTO(messageTrl, context);
-      messageTrlDTO.setId(id++);
-      list.add(messageTrlDTO);
-    }
+  public Map<String, MessageTrl> asEntityMap(
+      List<MessageTrlDTO> dtoList, @Context Map<String, Object> context) {
+    Map<String, MessageTrl> result = new HashMap<>();
+    dtoList.forEach(
+        messageTrlDTO ->
+            result.put(messageTrlDTO.getIso3Language(), asEntity(messageTrlDTO, context)));
+    return result;
+  }
 
-    return list;
+  public Map<String, MessageTrlAggregate> asAggregateMapFromCreatedEvent(
+      List<MessageTrlCreatedEvent> createdEventList) {
+    Map<String, MessageTrlAggregate> result = new HashMap<>();
+    createdEventList.forEach(
+        createdEvent ->
+            result.put(createdEvent.getIso3Language(), toMessageTrlAggregate(createdEvent)));
+    return result;
+  }
+
+  public Map<String, MessageTrlAggregate> asAggregateMapFromUpdatedEvent(
+      List<MessageTrlUpdatedEvent> updatedEventList) {
+    Map<String, MessageTrlAggregate> result = new HashMap<>();
+    updatedEventList.forEach(
+        updatedEvent ->
+            result.put(updatedEvent.getIso3Language(), toMessageTrlAggregate(updatedEvent)));
+    return result;
+  }
+
+  public List<MessageTrlDTO> asDTOList(
+      Map<String, MessageTrl> value, @Context Map<String, Object> context) {
+    return value.values().stream().map(messageTrl -> asDTO(messageTrl, context)).toList();
   }
 
   @AfterMapping
@@ -52,7 +95,6 @@ public abstract class MessageTrlConverter extends GenericMapper<MessageTrl, Mess
   @AfterMapping
   protected void afterConvert(
       MessageTrl domain, @MappingTarget MessageTrlDTO dto, @Context Map<String, Object> context) {
-    if (domain.getRelatedEntityId() != null && StringUtils.isBlank(domain.getName()))
-      dto.setName(messageService.load(domain.getRelatedEntityId()).getName());
+    dto.setName(messageRepository.getById(domain.getParentId()).getName());
   }
 }

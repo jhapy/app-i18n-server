@@ -18,36 +18,31 @@
 
 package org.jhapy.i18n.domain;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.*;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.javers.core.metamodel.annotation.TypeName;
+
+import javax.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
  * @since 2019-04-18
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-@ToString(exclude = "translations")
+@Getter
+@Setter
+@ToString(callSuper = true)
+@NoArgsConstructor
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-@TableGenerator(
-    name = "ActionKeyGen",
-    table = "Sequence",
-    pkColumnName = "COLUMN_NAME",
-    pkColumnValue = "ACTION_ID",
-    valueColumnName = "SEQ_VAL",
-    allocationSize = 1)
 @TypeName("Action")
 public class Action extends BaseEntity {
 
@@ -58,8 +53,22 @@ public class Action extends BaseEntity {
 
   private Boolean isTranslated = Boolean.FALSE;
 
-  @ElementCollection(fetch = FetchType.LAZY)
-  @CollectionTable(name = "action_trl", joinColumns = @JoinColumn(name = "action_id"))
-  @MapKeyColumn(name = "iso3Language")
+  @OneToMany(cascade = CascadeType.ALL)
+  @JoinColumn(name = "parentId")
+  @MapKey(name = "iso3Language")
+  @ToString.Exclude
   private Map<String, ActionTrl> translations = new HashMap<>();
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    Action action = (Action) o;
+    return Objects.equals(getId(), action.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    return 0;
+  }
 }

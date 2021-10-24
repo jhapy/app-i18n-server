@@ -18,16 +18,11 @@
 
 package org.jhapy.i18n.repository;
 
-import java.util.List;
-import java.util.Optional;
 import org.javers.spring.annotation.JaversSpringDataAuditable;
-import org.jhapy.i18n.domain.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.jhapy.i18n.domain.Message;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 /**
  * @author jHapy Lead Dev.
@@ -37,14 +32,5 @@ import org.springframework.stereotype.Repository;
 @JaversSpringDataAuditable
 @Repository
 public interface MessageRepository extends BaseRepository<Message> {
-
   Optional<Message> getByName(String name);
-
-  Page<Message> findByNameLike(String name, Pageable pageable);
-
-  long countByNameLike(String name);
-
-  @Query(
-      "SELECT new org.jhapy.i18n.domain.MessageTrlProjection( e.name, t.value, t.isDefault, t.isTranslated, e.id ) FROM Message e JOIN e.translations t WHERE KEY(t) = :iso3Language")
-  List<MessageTrlProjection> findByIso3(@Param("iso3Language") String iso3Language);
 }

@@ -18,12 +18,6 @@
 
 package org.jhapy.i18n;
 
-import java.io.File;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collection;
-import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.javers.spring.boot.mongo.JaversMongoAutoConfiguration;
 import org.jhapy.commons.config.AppProperties;
@@ -40,6 +34,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collection;
+
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
@@ -49,7 +50,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @EnableDiscoveryClient
 @EnableConfigurationProperties(AppProperties.class)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@ComponentScan({"org.jhapy.i18n", "org.jhapy.commons"})
+@ComponentScan({"org.jhapy.i18n", "org.jhapy.cqrs", "org.jhapy.dto", "java.util"})
 public class Application implements InitializingBean {
 
   private static final Logger logger = LoggerFactory.getLogger(Application.class);

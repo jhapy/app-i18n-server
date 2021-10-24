@@ -18,27 +18,44 @@
 
 package org.jhapy.i18n.domain;
 
-import javax.persistence.*;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.javers.core.metamodel.annotation.TypeName;
-import org.jhapy.i18n.listeners.MessageListener;
+
+import javax.persistence.Entity;
+import java.util.Objects;
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
  * @since 2019-03-30
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-@Embeddable
+@Getter
+@Setter
+@ToString(callSuper = true)
+@NoArgsConstructor
+@Entity
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-@EntityListeners(MessageListener.class)
 @TypeName("MessageTrl")
 public class MessageTrl extends EntityTranslationV2 {
 
   private String value;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    MessageTrl that = (MessageTrl) o;
+    return Objects.equals(getId(), that.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    return 0;
+  }
 }

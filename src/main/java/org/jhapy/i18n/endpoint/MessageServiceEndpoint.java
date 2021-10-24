@@ -18,25 +18,28 @@
 
 package org.jhapy.i18n.endpoint;
 
-import org.jhapy.commons.endpoint.BaseEndpoint;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.messaging.responsetypes.ResponseTypes;
+import org.axonframework.queryhandling.QueryGateway;
+import org.jhapy.cqrs.query.i18n.GetMessageByNameQuery;
+import org.jhapy.cqrs.query.i18n.GetMessageTrlByNameAndIso3LanguageQuery;
+import org.jhapy.cqrs.query.i18n.GetMessageTrlsByIso3LanguageQuery;
+import org.jhapy.cqrs.query.i18n.GetMessageTrlsByMessageIdQuery;
 import org.jhapy.dto.domain.i18n.MessageDTO;
+import org.jhapy.dto.domain.i18n.MessageTrlDTO;
 import org.jhapy.dto.serviceQuery.ServiceResult;
+import org.jhapy.dto.serviceQuery.generic.GetByNameQuery;
 import org.jhapy.dto.serviceQuery.i18n.FindByIso3Query;
 import org.jhapy.dto.serviceQuery.i18n.GetByNameAndIso3Query;
 import org.jhapy.dto.serviceQuery.i18n.messageTrl.GetMessageTrlQuery;
-import org.jhapy.i18n.converter.MessageConverter;
-import org.jhapy.i18n.converter.MessageTrlConverter;
 import org.jhapy.i18n.domain.Message;
-import org.jhapy.i18n.domain.MessageTrl;
-import org.jhapy.i18n.service.CrudRelationalService;
-import org.jhapy.i18n.service.MessageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import javax.validation.Valid;
 
 /**
  * @author jHapy Lead Dev.
@@ -47,50 +50,54 @@ import java.util.List;
 @RequestMapping("/api/messageService")
 public class MessageServiceEndpoint extends BaseRelationaldbV2Endpoint<Message, MessageDTO> {
 
-  private final MessageService messageService;
-  private final MessageTrlConverter messageTrlConverter;
-
-  public MessageServiceEndpoint(
-      MessageService messageService,
-      MessageConverter converter,
-      MessageTrlConverter messageTrlConverter) {
-    super(converter);
-    this.messageService = messageService;
-    this.messageTrlConverter = messageTrlConverter;
+  public MessageServiceEndpoint(CommandGateway commandGateway, QueryGateway queryGateway) {
+    super(commandGateway, queryGateway);
   }
 
   @PostMapping(value = "/getMessageTrls")
-  public ResponseEntity<ServiceResult> getMessageTrls(@RequestBody GetMessageTrlQuery query) {
+  public ResponseEntity<ServiceResult> getMessageTrls(
+      @Valid @RequestBody GetMessageTrlQuery query) {
     var loggerPrefix = getLoggerPrefix("getMessageTrls");
-
     return handleResult(
         loggerPrefix,
-        messageTrlConverter.asDTOList(
-            messageService.getMessageTrls(query.getMessageId()), getContext(query)));
+        queryGateway
+            .query(
+                new GetMessageTrlsByMessageIdQuery(query.getMessageId()),
+                ResponseTypes.multipleInstancesOf(MessageTrlDTO.class))
+            .join());
   }
 
   @PostMapping(value = "/findByIso3")
-  public ResponseEntity<ServiceResult> findByIso3(@RequestBody FindByIso3Query query) {
+  public ResponseEntity<ServiceResult> findByIso3(@Valid @RequestBody FindByIso3Query query) {
     var loggerPrefix = getLoggerPrefix("findByIso3");
-
-    List<MessageTrl> result = messageService.getMessageTrlByIso3Language(query.getIso3Language());
-
-    return handleResult(loggerPrefix, messageTrlConverter.asDTOList(result, getContext(query)));
+    return handleResult(
+        loggerPrefix,
+        queryGateway
+            .query(
+                new GetMessageTrlsByIso3LanguageQuery(query.getIso3Language()),
+                ResponseTypes.multipleInstancesOf(MessageTrlDTO.class))
+            .join());
   }
 
   @PostMapping(value = "/getMessageTrlByNameAndIso3")
   public ResponseEntity<ServiceResult> getMessageTrlByNameAndIso3(
-      @RequestBody GetByNameAndIso3Query query) {
+      @Valid @RequestBody GetByNameAndIso3Query query) {
     var loggerPrefix = getLoggerPrefix("getMessageTrlByNameAndIso3");
-
-    MessageTrl result =
-        messageService.getByMessageTrlNameAndLanguage(query.getName(), query.getIso3Language());
-
-    return handleResult(loggerPrefix, messageTrlConverter.asDTO(result, getContext(query)));
+    return handleResult(
+        loggerPrefix,
+        queryGateway
+            .query(
+                new GetMessageTrlByNameAndIso3LanguageQuery(
+                    query.getName(), query.getIso3Language()),
+                MessageTrlDTO.class)
+            .join());
   }
 
-  @Override
-  protected CrudRelationalService<Message> getService() {
-    return messageService;
+  @PostMapping(value = "/getByName")
+  public ResponseEntity<ServiceResult> getByName(@Valid @RequestBody GetByNameQuery query) {
+    var loggerPrefix = getLoggerPrefix("getByName");
+    return handleResult(
+        loggerPrefix,
+        queryGateway.query(new GetMessageByNameQuery(query.getName()), MessageDTO.class).join());
   }
 }

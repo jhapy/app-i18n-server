@@ -18,14 +18,6 @@
 
 package org.jhapy.i18n.domain;
 
-import java.io.Serializable;
-import java.time.Instant;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Version;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.javers.core.metamodel.annotation.DiffIgnore;
@@ -34,6 +26,14 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.EntityListeners;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Version;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.UUID;
 
 /**
  * @author jHapy Lead Dev.
@@ -46,47 +46,25 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity implements Serializable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  private Long id;
+  @Id private UUID id;
 
-  /**
-   * Who create this record (no ID, use username)
-   */
-  @DiffIgnore
-  @CreatedBy
-  private String createdBy;
+  private UUID clientId;
 
-  /**
-   * When this record has been created
-   */
-  @DiffIgnore
-  @CreatedDate
-  private Instant created;
+  /** Who create this record (no ID, use username) */
+  @DiffIgnore @CreatedBy private String createdBy;
 
-  /**
-   * How did the last modification of this record (no ID, use username)
-   */
-  @DiffIgnore
-  @LastModifiedBy
-  private String modifiedBy;
+  /** When this record has been created */
+  @DiffIgnore @CreatedDate private Instant created;
 
-  /**
-   * When this record was last updated
-   */
-  @DiffIgnore
-  @LastModifiedDate
-  private Instant modified;
+  /** How did the last modification of this record (no ID, use username) */
+  @DiffIgnore @LastModifiedBy private String modifiedBy;
 
-  /**
-   * Version of the record. Used for synchronization and concurrent access.
-   */
-  @DiffIgnore
-  @Version
-  private Long version;
+  /** When this record was last updated */
+  @DiffIgnore @LastModifiedDate private Instant modified;
 
-  /**
-   * Indicate if the current record is active (deactivate instead of delete)
-   */
+  /** Version of the record. Used for synchronization and concurrent access. */
+  @DiffIgnore @Version private Long version;
+
+  /** Indicate if the current record is active (deactivate instead of delete) */
   private Boolean isActive = Boolean.TRUE;
 }

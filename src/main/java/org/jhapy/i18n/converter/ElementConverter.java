@@ -1,52 +1,72 @@
 package org.jhapy.i18n.converter;
 
+import org.jhapy.cqrs.event.i18n.ElementCreatedEvent;
+import org.jhapy.cqrs.event.i18n.ElementTrlCreatedEvent;
+import org.jhapy.cqrs.event.i18n.ElementUpdatedEvent;
 import org.jhapy.dto.domain.i18n.ElementDTO;
+import org.jhapy.i18n.command.ElementAggregate;
 import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.ElementTrl;
-import org.jhapy.i18n.service.ElementService;
 import org.mapstruct.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.mapstruct.factory.Mappers;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-@Component
 @Mapper(
     config = BaseRelationalDbConverterConfig.class,
     componentModel = "spring",
     uses = {RelationalDbReferenceMapper.class, ElementTrlConverter.class})
 public abstract class ElementConverter extends GenericMapper<Element, ElementDTO> {
-  @Autowired private ElementService elementService;
+  public static ElementConverter INSTANCE = Mappers.getMapper(ElementConverter.class);
 
-  @Mapping(target = "translations", ignore = true)
+  public abstract ElementCreatedEvent toElementCreatedEvent(ElementDTO dto);
+
+  public abstract ElementUpdatedEvent toElementUpdatedEvent(ElementDTO dto);
+
+  @Mapping(target = "converter", ignore = true)
+  @Mapping(target = "trlConverter", ignore = true)
+  public abstract void updateAggregateFromElementCreatedEvent(
+      ElementCreatedEvent event, @MappingTarget ElementAggregate aggregate);
+
+  @Mapping(target = "converter", ignore = true)
+  @Mapping(target = "trlConverter", ignore = true)
+  public abstract void updateAggregateFromElementUpdatedEvent(
+      ElementUpdatedEvent event, @MappingTarget ElementAggregate aggregate);
+
+  @Mapping(target = "created", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)
+  @Mapping(target = "modified", ignore = true)
+  @Mapping(target = "modifiedBy", ignore = true)
+  public abstract Element toEntity(ElementCreatedEvent event);
+
   public abstract Element asEntity(ElementDTO dto, @Context Map<String, Object> context);
 
+  public Map<String, ElementTrl> toElementTrlMap(List<ElementTrlCreatedEvent> value) {
+    Map<String, ElementTrl> result = new HashMap<>();
+    value.forEach(
+        elementTrlCreatedEvent ->
+            result.put(
+                elementTrlCreatedEvent.getIso3Language(),
+                ElementTrlConverter.INSTANCE.asEntity(elementTrlCreatedEvent)));
+    return result;
+  }
+
   @Mapping(target = "translations", ignore = true)
+  @Mapping(target = "temporaryId", ignore = true)
   public abstract ElementDTO asDTO(Element domain, @Context Map<String, Object> context);
 
-  @AfterMapping
-  protected void afterConvert(
-      ElementDTO dto, @MappingTarget Element domain, @Context Map<String, Object> context) {
-    if (context != null && context.get("iso3Language") != null && domain.getId() != null) {
-      ElementTrl elementTrl =
-          elementService.getElementTrlByElementIdAndLanguage(
-              domain.getId(), (String) context.get("iso3Language"));
-      if (elementTrl == null) {
-        elementTrl = new ElementTrl();
-      }
-      elementTrl.setValue(dto.getName());
-      domain.getTranslations().put((String) context.get("iso3Language"), elementTrl);
-    }
-  }
+  @Named(value = "withTranslation")
+  @Mapping(target = "temporaryId", ignore = true)
+  public abstract ElementDTO asDTOWithTranslations(
+      Element domain, @Context Map<String, Object> context);
 
   @AfterMapping
   protected void afterConvert(
-      Element domain, @MappingTarget ElementDTO dto, @Context Map<String, Object> context) {
-    if (context != null && context.get("iso3Language") != null) {
-      ElementTrl trainingTrl =
-          elementService.getElementTrlByElementIdAndLanguage(
-              domain.getId(), (String) context.get("iso3Language"));
-      dto.setName(trainingTrl.getValue());
-    }
-  }
+      ElementDTO dto, @MappingTarget Element domain, @Context Map<String, Object> context) {}
+
+  @AfterMapping
+  protected void afterConvert(
+      Element domain, @MappingTarget ElementDTO dto, @Context Map<String, Object> context) {}
 }

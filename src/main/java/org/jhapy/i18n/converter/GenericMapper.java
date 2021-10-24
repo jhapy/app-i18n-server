@@ -1,11 +1,8 @@
 package org.jhapy.i18n.converter;
 
 import org.apache.commons.lang3.StringUtils;
-import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;

@@ -18,25 +18,28 @@
 
 package org.jhapy.i18n.endpoint;
 
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.messaging.responsetypes.ResponseTypes;
+import org.axonframework.queryhandling.QueryGateway;
+import org.jhapy.cqrs.query.i18n.GetActionByNameQuery;
+import org.jhapy.cqrs.query.i18n.GetActionTrlByNameAndIso3LanguageQuery;
+import org.jhapy.cqrs.query.i18n.GetActionTrlsByActionIdQuery;
+import org.jhapy.cqrs.query.i18n.GetActionTrlsByIso3LanguageQuery;
 import org.jhapy.dto.domain.i18n.ActionDTO;
+import org.jhapy.dto.domain.i18n.ActionTrlDTO;
 import org.jhapy.dto.serviceQuery.ServiceResult;
+import org.jhapy.dto.serviceQuery.generic.GetByNameQuery;
 import org.jhapy.dto.serviceQuery.i18n.FindByIso3Query;
 import org.jhapy.dto.serviceQuery.i18n.GetByNameAndIso3Query;
 import org.jhapy.dto.serviceQuery.i18n.actionTrl.GetActionTrlQuery;
-import org.jhapy.i18n.converter.ActionConverter;
-import org.jhapy.i18n.converter.ActionTrlConverter;
 import org.jhapy.i18n.domain.Action;
-import org.jhapy.i18n.domain.ActionTrl;
-import org.jhapy.i18n.service.ActionService;
-import org.jhapy.i18n.service.CrudRelationalService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import javax.validation.Valid;
 
 /**
  * @author jHapy Lead Dev.
@@ -47,50 +50,53 @@ import java.util.List;
 @RequestMapping("/api/actionService")
 public class ActionServiceEndpoint extends BaseRelationaldbV2Endpoint<Action, ActionDTO> {
 
-  private final ActionService actionService;
-  private final ActionTrlConverter actionTrlConverter;
-
-  public ActionServiceEndpoint(
-      ActionService actionService,
-      ActionConverter converter,
-      ActionTrlConverter actionTrlConverter) {
-    super(converter);
-    this.actionService = actionService;
-    this.actionTrlConverter = actionTrlConverter;
+  public ActionServiceEndpoint(CommandGateway commandGateway, QueryGateway queryGateway) {
+    super(commandGateway, queryGateway);
   }
 
   @PostMapping(value = "/getActionTrls")
-  public ResponseEntity<ServiceResult> getActionTrls(@RequestBody GetActionTrlQuery query) {
+  public ResponseEntity<ServiceResult> getActionTrls(@Valid @RequestBody GetActionTrlQuery query) {
     var loggerPrefix = getLoggerPrefix("getActionTrls");
-
     return handleResult(
         loggerPrefix,
-        actionTrlConverter.asDTOList(
-            actionService.getActionTrls(query.getActionId()), getContext(query)));
+        queryGateway
+            .query(
+                new GetActionTrlsByActionIdQuery(query.getActionId()),
+                ResponseTypes.multipleInstancesOf(ActionTrlDTO.class))
+            .join());
   }
 
   @PostMapping(value = "/findByIso3")
-  public ResponseEntity<ServiceResult> findByIso3(@RequestBody FindByIso3Query query) {
+  public ResponseEntity<ServiceResult> findByIso3(@Valid @RequestBody FindByIso3Query query) {
     var loggerPrefix = getLoggerPrefix("findByIso3");
-
-    List<ActionTrl> result = actionService.getActionTrlByIso3Language(query.getIso3Language());
-
-    return handleResult(loggerPrefix, actionTrlConverter.asDTOList(result, getContext(query)));
+    return handleResult(
+        loggerPrefix,
+        queryGateway
+            .query(
+                new GetActionTrlsByIso3LanguageQuery(query.getIso3Language()),
+                ResponseTypes.multipleInstancesOf(ActionTrlDTO.class))
+            .join());
   }
 
   @PostMapping(value = "/getActionTrlByNameAndIso3")
   public ResponseEntity<ServiceResult> getActionTrlByNameAndIso3(
-      @RequestBody GetByNameAndIso3Query query) {
+      @Valid @RequestBody GetByNameAndIso3Query query) {
     var loggerPrefix = getLoggerPrefix("getActionTrlByNameAndIso3");
-
-    ActionTrl result =
-        actionService.getByActionTrlNameAndLanguage(query.getName(), query.getIso3Language());
-
-    return handleResult(loggerPrefix, actionTrlConverter.asDTO(result, getContext(query)));
+    return handleResult(
+        loggerPrefix,
+        queryGateway
+            .query(
+                new GetActionTrlByNameAndIso3LanguageQuery(
+                    query.getName(), query.getIso3Language()),
+                ActionTrlDTO.class)
+            .join());
   }
 
-  @Override
-  protected CrudRelationalService<Action> getService() {
-    return actionService;
+  @PostMapping(value = "/getByName")
+  public ResponseEntity<ServiceResult> getByName(@Valid @RequestBody GetByNameQuery query) {
+    var loggerPrefix = getLoggerPrefix("getByName");
+    return handleResult(
+        loggerPrefix,
+        queryGateway.query(new GetActionByNameQuery(query.getName()), ActionDTO.class).join());
   }
 }

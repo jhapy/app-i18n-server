@@ -18,19 +18,11 @@
 
 package org.jhapy.i18n.repository;
 
-import java.util.List;
-import java.util.Optional;
 import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.jhapy.i18n.domain.Action;
-import org.jhapy.i18n.domain.ActionTrl;
-import org.jhapy.i18n.domain.ActionTrlProjection;
-import org.jhapy.i18n.domain.ElementTrlProjection;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 /**
  * @author jHapy Lead Dev.
@@ -40,17 +32,5 @@ import org.springframework.stereotype.Repository;
 @JaversSpringDataAuditable
 @Repository
 public interface ActionRepository extends BaseRepository<Action> {
-
   Optional<Action> getByName(String name);
-
-  Page<Action> findByNameLike(String name, Pageable pageable);
-
-  long countByNameLike(String name);
-
-  @Query(nativeQuery = true, value = "SELECT DISTINCT(iso3Language) FROM Action_Trl")
-  List<String> getIso3Languages();
-
-  @Query(
-      "SELECT new org.jhapy.i18n.domain.ActionTrlProjection( e.name, t.value, t.tooltip, t.isDefault, t.isTranslated, e.id ) FROM Action e JOIN e.translations t WHERE KEY(t) = :iso3Language")
-  List<ActionTrlProjection> findByIso3(@Param("iso3Language") String iso3Language);
 }

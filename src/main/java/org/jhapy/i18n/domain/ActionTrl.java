@@ -18,29 +18,46 @@
 
 package org.jhapy.i18n.domain;
 
-import javax.persistence.*;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.javers.core.metamodel.annotation.TypeName;
-import org.jhapy.i18n.listeners.ActionListener;
+
+import javax.persistence.Entity;
+import java.util.Objects;
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
  * @since 2019-03-30
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-@Embeddable
+@Getter
+@Setter
+@ToString(callSuper = true)
+@NoArgsConstructor
+@Entity
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-@EntityListeners(ActionListener.class)
 @TypeName("ActionTrl")
 public class ActionTrl extends EntityTranslationV2 {
 
   private String value;
 
   private String tooltip;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+    ActionTrl actionTrl = (ActionTrl) o;
+    return Objects.equals(getId(), actionTrl.getId());
+  }
+
+  @Override
+  public int hashCode() {
+    return 0;
+  }
 }

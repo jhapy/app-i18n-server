@@ -37,22 +37,4 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
   public Optional<String> getCurrentAuditor() {
     return Optional.of(SecurityUtils.getCurrentUserLogin().orElse(Constants.SYSTEM_ACCOUNT));
   }
-
-  /*
-  public Optional<String> getCurrentAuditor() {
-    String currentUsername = "Unknown";
-    try {
-      RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
-      if (requestAttributes instanceof ServletRequestAttributes) {
-        HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes)
-            .getRequest();
-        currentUsername = servletRequest.getHeader("X-SecUsername");
-      } else {
-        currentUsername = SecurityUtils.getUsername();
-      }
-    } catch (java.lang.IllegalStateException e) {
-    }
-    return Optional.ofNullable(currentUsername);
-  }
-   */
 }

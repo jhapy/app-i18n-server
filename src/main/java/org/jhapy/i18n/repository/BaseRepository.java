@@ -23,10 +23,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.query.QueryByExampleExecutor;
 
+import java.util.UUID;
+
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
  * @since 3/8/20
  */
 public interface BaseRepository<T extends BaseEntity>
-    extends JpaRepository<T, Long>, QueryByExampleExecutor<T>, JpaSpecificationExecutor<T> {}
+    extends JpaRepository<T, UUID>, QueryByExampleExecutor<T>, JpaSpecificationExecutor<T> {}

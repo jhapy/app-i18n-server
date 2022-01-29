@@ -20,6 +20,7 @@ package org.jhapy.i18n.repository;
 
 import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.jhapy.i18n.domain.ElementTrl;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -41,4 +42,7 @@ public interface ElementTrlRepository extends BaseRepository<ElementTrl> {
   List<ElementTrl> findByIso3Language(String iso3Language);
 
   List<ElementTrl> findByParentId(UUID parentId);
+
+  @Query("SELECT DISTINCT iso3Language FROM ElementTrl")
+  List<String> getDistinctIso3Language();
 }

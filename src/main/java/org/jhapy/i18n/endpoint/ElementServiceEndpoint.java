@@ -21,12 +21,8 @@ package org.jhapy.i18n.endpoint;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.queryhandling.QueryGateway;
-import org.jhapy.cqrs.query.i18n.GetElementByNameQuery;
-import org.jhapy.cqrs.query.i18n.GetElementTrlByNameAndIso3LanguageQuery;
-import org.jhapy.cqrs.query.i18n.GetElementTrlsByElementIdQuery;
-import org.jhapy.cqrs.query.i18n.GetElementTrlsByIso3LanguageQuery;
+import org.jhapy.cqrs.query.i18n.*;
 import org.jhapy.dto.domain.i18n.ElementDTO;
-import org.jhapy.dto.domain.i18n.ElementTrlDTO;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.generic.GetByNameQuery;
 import org.jhapy.dto.serviceQuery.i18n.FindByIso3Query;
@@ -63,7 +59,7 @@ public class ElementServiceEndpoint extends BaseRelationaldbV2Endpoint<Element, 
         queryGateway
             .query(
                 new GetElementTrlsByElementIdQuery(query.getElementId()),
-                ResponseTypes.multipleInstancesOf(ElementTrlDTO.class))
+                ResponseTypes.instanceOf(GetElementTrlsByElementIdQuery.Response.class))
             .join());
   }
 
@@ -75,7 +71,7 @@ public class ElementServiceEndpoint extends BaseRelationaldbV2Endpoint<Element, 
         queryGateway
             .query(
                 new GetElementTrlsByIso3LanguageQuery(query.getIso3Language()),
-                ResponseTypes.multipleInstancesOf(ElementTrlDTO.class))
+                ResponseTypes.instanceOf(GetElementTrlsByIso3LanguageQuery.Response.class))
             .join());
   }
 
@@ -89,7 +85,7 @@ public class ElementServiceEndpoint extends BaseRelationaldbV2Endpoint<Element, 
             .query(
                 new GetElementTrlByNameAndIso3LanguageQuery(
                     query.getName(), query.getIso3Language()),
-                ElementTrlDTO.class)
+                ResponseTypes.instanceOf(GetElementTrlByNameAndIso3LanguageQuery.Response.class))
             .join());
   }
 
@@ -98,6 +94,10 @@ public class ElementServiceEndpoint extends BaseRelationaldbV2Endpoint<Element, 
     var loggerPrefix = getLoggerPrefix("getByName");
     return handleResult(
         loggerPrefix,
-        queryGateway.query(new GetElementByNameQuery(query.getName()), ElementDTO.class).join());
+        queryGateway
+            .query(
+                new GetElementByNameQuery(query.getName()),
+                ResponseTypes.instanceOf(GetElementByNameResponse.class))
+            .join());
   }
 }

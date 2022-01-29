@@ -10,6 +10,8 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.modelling.command.AggregateMember;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.jhapy.commons.utils.HasLogger;
+import org.jhapy.cqrs.command.AbstractBaseAggregate;
 import org.jhapy.cqrs.command.i18n.CreateElementCommand;
 import org.jhapy.cqrs.command.i18n.DeleteElementCommand;
 import org.jhapy.cqrs.command.i18n.UpdateElementCommand;
@@ -30,12 +32,12 @@ import static org.axonframework.modelling.command.AggregateLifecycle.markDeleted
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class ElementAggregate extends AbstractBaseAggregate {
+public class ElementAggregate extends AbstractBaseAggregate implements HasLogger {
   private String name;
 
   private String category;
 
-  private Boolean isTranslated = Boolean.FALSE;
+  private Boolean translated = Boolean.FALSE;
 
   private transient ElementConverter converter;
   private transient ElementTrlConverter trlConverter;
@@ -48,14 +50,19 @@ public class ElementAggregate extends AbstractBaseAggregate {
           CreateElementCommand command,
       @Autowired ElementConverter elementConverter,
       @Autowired ElementTrlConverter elementTrlConverter) {
+    String loggerPrefix = getLoggerPrefix("ElementAggregate");
     this.converter = elementConverter;
     this.trlConverter = elementTrlConverter;
 
     if (StringUtils.isBlank(command.getEntity().getName())) {
       throw new IllegalArgumentException("Entity name can not be empty");
     }
+    debug(
+        loggerPrefix,
+        "Element ID {0}, Command ID {1}",
+        command.getId(),
+        command.getEntity().getId());
 
-    if (command.getEntity().getTranslations() != null)
       command
           .getEntity()
           .getTranslations()
@@ -87,22 +94,17 @@ public class ElementAggregate extends AbstractBaseAggregate {
 
   @CommandHandler
   public void handle(UpdateElementCommand command) {
-    if (command.getEntity().getTranslations() != null)
       command
           .getEntity()
           .getTranslations()
           .forEach(elementTrlDTO -> elementTrlDTO.setParentId(command.getId()));
 
-    ElementUpdatedEvent event =
-        ElementConverter.INSTANCE.toElementUpdatedEvent(command.getEntity());
+    ElementUpdatedEvent event = converter.toElementUpdatedEvent(command.getEntity());
     AggregateLifecycle.apply(event);
   }
 
   @CommandHandler
   public void handle(DeleteElementCommand command) {
-    if (command.getId() == null) {
-      throw new IllegalArgumentException("ID can not be empty");
-    }
     ElementDeletedEvent event = new ElementDeletedEvent(command.getId());
     AggregateLifecycle.apply(event);
   }

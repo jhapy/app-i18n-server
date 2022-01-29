@@ -10,6 +10,7 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.modelling.command.AggregateMember;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.jhapy.cqrs.command.AbstractBaseAggregate;
 import org.jhapy.cqrs.command.i18n.CreateMessageCommand;
 import org.jhapy.cqrs.command.i18n.DeleteMessageCommand;
 import org.jhapy.cqrs.command.i18n.UpdateMessageCommand;
@@ -35,7 +36,7 @@ public class MessageAggregate extends AbstractBaseAggregate {
 
   private String category;
 
-  private Boolean isTranslated = Boolean.FALSE;
+  private Boolean translated = Boolean.FALSE;
 
   private transient MessageConverter converter;
   private transient MessageTrlConverter trlConverter;
@@ -55,21 +56,20 @@ public class MessageAggregate extends AbstractBaseAggregate {
       throw new IllegalArgumentException("Entity name can not be empty");
     }
 
-    if (command.getEntity().getTranslations() != null)
-      command
-          .getEntity()
-          .getTranslations()
-          .forEach(
-              messageTrlDTO -> {
-                if (StringUtils.isBlank(messageTrlDTO.getValue())) {
-                  throw new IllegalArgumentException("Entity Trl Value can not be empty");
-                }
-                if (StringUtils.isBlank(messageTrlDTO.getIso3Language())) {
-                  throw new IllegalArgumentException("Entity Trl Iso3 Langage can not be empty");
-                }
-                messageTrlDTO.setId(UUID.randomUUID());
-                messageTrlDTO.setParentId(command.getId());
-              });
+    command
+        .getEntity()
+        .getTranslations()
+        .forEach(
+            messageTrlDTO -> {
+              if (StringUtils.isBlank(messageTrlDTO.getValue())) {
+                throw new IllegalArgumentException("Entity Trl Value can not be empty");
+              }
+              if (StringUtils.isBlank(messageTrlDTO.getIso3Language())) {
+                throw new IllegalArgumentException("Entity Trl Iso3 Language can not be empty");
+              }
+              messageTrlDTO.setId(UUID.randomUUID());
+              messageTrlDTO.setParentId(command.getId());
+            });
     MessageCreatedEvent event = converter.toMessageCreatedEvent(command.getEntity());
     event.setId(command.getId());
     AggregateLifecycle.apply(event);
@@ -87,22 +87,17 @@ public class MessageAggregate extends AbstractBaseAggregate {
 
   @CommandHandler
   public void handle(UpdateMessageCommand command) {
-    if (command.getEntity().getTranslations() != null)
       command
           .getEntity()
           .getTranslations()
           .forEach(messageTrlDTO -> messageTrlDTO.setParentId(command.getId()));
 
-    MessageUpdatedEvent event =
-        MessageConverter.INSTANCE.toMessageUpdatedEvent(command.getEntity());
+    MessageUpdatedEvent event = converter.toMessageUpdatedEvent(command.getEntity());
     AggregateLifecycle.apply(event);
   }
 
   @CommandHandler
   public void handle(DeleteMessageCommand command) {
-    if (command.getId() == null) {
-      throw new IllegalArgumentException("ID can not be empty");
-    }
     MessageDeletedEvent event = new MessageDeletedEvent(command.getId());
     AggregateLifecycle.apply(event);
   }

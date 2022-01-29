@@ -6,12 +6,10 @@ import org.axonframework.messaging.MessageDispatchInterceptor;
 import org.jhapy.commons.utils.HasLogger;
 import org.jhapy.cqrs.command.i18n.CreateActionCommand;
 import org.jhapy.cqrs.command.i18n.UpdateActionCommand;
-import org.jhapy.i18n.domain.ActionLookup;
 import org.jhapy.i18n.repository.ActionLookupRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 @Component
@@ -32,11 +30,11 @@ public class CreateOrUpdateActionCommandInterceptor
         debug(loggerPrefix, "Intercepted command type: {0}", command.getPayloadType());
         CreateActionCommand createActionCommand = (CreateActionCommand) command.getPayload();
 
-        Optional<ActionLookup> actionLookupEntity =
+        var actionLookupEntity =
             lookupRepository.findByActionIdOrName(
                 createActionCommand.getId(), createActionCommand.getEntity().getName());
 
-        if (actionLookupEntity.isPresent()) {
+        if (actionLookupEntity != null) {
           throw new IllegalArgumentException(
               String.format(
                   ACTION_EXISTS_PATTERN,
@@ -47,11 +45,11 @@ public class CreateOrUpdateActionCommandInterceptor
         debug(loggerPrefix, "Intercepted command type: {0}", command.getPayloadType());
         UpdateActionCommand updateActionCommand = (UpdateActionCommand) command.getPayload();
 
-        Optional<ActionLookup> elementLookupEntity =
+        var elementLookupEntity =
             lookupRepository.findByName(updateActionCommand.getEntity().getName());
 
-        if (elementLookupEntity.isPresent()
-            && !elementLookupEntity.get().getActionId().equals(updateActionCommand.getId())) {
+        if (elementLookupEntity != null
+            && !elementLookupEntity.getActionId().equals(updateActionCommand.getId())) {
           throw new IllegalArgumentException(
               String.format(
                   ACTION_EXISTS_PATTERN,

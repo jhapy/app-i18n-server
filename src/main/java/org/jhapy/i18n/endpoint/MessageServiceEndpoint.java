@@ -21,12 +21,8 @@ package org.jhapy.i18n.endpoint;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.queryhandling.QueryGateway;
-import org.jhapy.cqrs.query.i18n.GetMessageByNameQuery;
-import org.jhapy.cqrs.query.i18n.GetMessageTrlByNameAndIso3LanguageQuery;
-import org.jhapy.cqrs.query.i18n.GetMessageTrlsByIso3LanguageQuery;
-import org.jhapy.cqrs.query.i18n.GetMessageTrlsByMessageIdQuery;
+import org.jhapy.cqrs.query.i18n.*;
 import org.jhapy.dto.domain.i18n.MessageDTO;
-import org.jhapy.dto.domain.i18n.MessageTrlDTO;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.generic.GetByNameQuery;
 import org.jhapy.dto.serviceQuery.i18n.FindByIso3Query;
@@ -63,7 +59,7 @@ public class MessageServiceEndpoint extends BaseRelationaldbV2Endpoint<Message, 
         queryGateway
             .query(
                 new GetMessageTrlsByMessageIdQuery(query.getMessageId()),
-                ResponseTypes.multipleInstancesOf(MessageTrlDTO.class))
+                ResponseTypes.instanceOf(GetMessageTrlsByMessageIdQuery.Response.class))
             .join());
   }
 
@@ -75,7 +71,7 @@ public class MessageServiceEndpoint extends BaseRelationaldbV2Endpoint<Message, 
         queryGateway
             .query(
                 new GetMessageTrlsByIso3LanguageQuery(query.getIso3Language()),
-                ResponseTypes.multipleInstancesOf(MessageTrlDTO.class))
+                ResponseTypes.instanceOf(GetMessageTrlsByIso3LanguageQuery.Response.class))
             .join());
   }
 
@@ -89,7 +85,7 @@ public class MessageServiceEndpoint extends BaseRelationaldbV2Endpoint<Message, 
             .query(
                 new GetMessageTrlByNameAndIso3LanguageQuery(
                     query.getName(), query.getIso3Language()),
-                MessageTrlDTO.class)
+                ResponseTypes.instanceOf(GetMessageTrlByNameAndIso3LanguageQuery.Response.class))
             .join());
   }
 
@@ -98,6 +94,10 @@ public class MessageServiceEndpoint extends BaseRelationaldbV2Endpoint<Message, 
     var loggerPrefix = getLoggerPrefix("getByName");
     return handleResult(
         loggerPrefix,
-        queryGateway.query(new GetMessageByNameQuery(query.getName()), MessageDTO.class).join());
+        queryGateway
+            .query(
+                new GetMessageByNameQuery(query.getName()),
+                ResponseTypes.instanceOf(GetMessageByNameResponse.class))
+            .join());
   }
 }

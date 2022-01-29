@@ -7,6 +7,7 @@ import org.axonframework.messaging.interceptors.ExceptionHandler;
 import org.axonframework.queryhandling.QueryUpdateEmitter;
 import org.jhapy.commons.utils.HasLogger;
 import org.jhapy.cqrs.event.i18n.ElementTrlCreatedEvent;
+import org.jhapy.cqrs.event.i18n.ElementTrlDeletedEvent;
 import org.jhapy.cqrs.event.i18n.ElementTrlUpdatedEvent;
 import org.jhapy.cqrs.query.i18n.GetElementByIdQuery;
 import org.jhapy.i18n.converter.ElementTrlConverter;
@@ -48,5 +49,10 @@ public class ElementTrlEventHandler implements HasLogger {
     entity = repository.save(entity);
     queryUpdateEmitter.emit(
         GetElementByIdQuery.class, query -> true, converter.asDTO(entity, null));
+  }
+
+  @EventHandler
+  public void on(ElementTrlDeletedEvent event) throws Exception {
+    repository.deleteById(event.getId());
   }
 }

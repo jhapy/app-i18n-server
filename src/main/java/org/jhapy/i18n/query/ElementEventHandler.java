@@ -9,7 +9,10 @@ import org.jhapy.commons.utils.HasLogger;
 import org.jhapy.cqrs.event.i18n.ElementCreatedEvent;
 import org.jhapy.cqrs.event.i18n.ElementDeletedEvent;
 import org.jhapy.cqrs.event.i18n.ElementImportedEvent;
+import org.jhapy.cqrs.event.i18n.ElementUpdatedEvent;
+import org.jhapy.cqrs.query.i18n.CountAnyMatchingElementQuery;
 import org.jhapy.cqrs.query.i18n.GetElementByIdQuery;
+import org.jhapy.dto.serviceQuery.CountChangeResult;
 import org.jhapy.i18n.converter.ElementConverter;
 import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.repository.ElementRepository;
@@ -39,6 +42,19 @@ public class ElementEventHandler implements HasLogger {
 
   @EventHandler
   public void on(ElementCreatedEvent event) throws Exception {
+    String loggerPrefix = getLoggerPrefix("onElementCreatedEvent");
+    Element entity = converter.toEntity(event);
+    debug(loggerPrefix, "Entity ID = {0}", entity.getId());
+    entity = repository.save(entity);
+    queryUpdateEmitter.emit(
+        GetElementByIdQuery.class, query -> true, converter.asDTOWithTranslations(entity, null));
+
+    queryUpdateEmitter.emit(
+        CountAnyMatchingElementQuery.class, query -> true, new CountChangeResult());
+  }
+
+  @EventHandler
+  public void on(ElementUpdatedEvent event) throws Exception {
     Element entity = converter.toEntity(event);
     entity = repository.save(entity);
     queryUpdateEmitter.emit(

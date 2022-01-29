@@ -2,8 +2,10 @@ package org.jhapy.i18n.converter;
 
 import org.jhapy.cqrs.event.i18n.ActionTrlCreatedEvent;
 import org.jhapy.cqrs.event.i18n.ActionTrlUpdatedEvent;
+import org.jhapy.dto.domain.exception.EntityNotFoundException;
 import org.jhapy.dto.domain.i18n.ActionTrlDTO;
 import org.jhapy.i18n.command.ActionTrlAggregate;
+import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.domain.ActionTrl;
 import org.jhapy.i18n.repository.ActionRepository;
 import org.mapstruct.*;
@@ -40,19 +42,18 @@ public abstract class ActionTrlConverter extends GenericMapper<ActionTrl, Action
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "modified", ignore = true)
   @Mapping(target = "modifiedBy", ignore = true)
-  @Mapping(target = "isActive", ignore = true)
+  @Mapping(target = "active", ignore = true)
   public abstract ActionTrl asEntity(ActionTrlCreatedEvent event);
 
   @Mapping(target = "created", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "modified", ignore = true)
   @Mapping(target = "modifiedBy", ignore = true)
-  @Mapping(target = "isActive", ignore = true)
+  @Mapping(target = "active", ignore = true)
   public abstract ActionTrl asEntity(ActionTrlUpdatedEvent event);
 
   public abstract ActionTrl asEntity(ActionTrlDTO dto, @Context Map<String, Object> context);
 
-  @Mapping(target = "temporaryId", ignore = true)
   @Mapping(target = "name", ignore = true)
   public abstract ActionTrlDTO asDTO(ActionTrl domain, @Context Map<String, Object> context);
 
@@ -95,6 +96,11 @@ public abstract class ActionTrlConverter extends GenericMapper<ActionTrl, Action
   @AfterMapping
   protected void afterConvert(
       ActionTrl domain, @MappingTarget ActionTrlDTO dto, @Context Map<String, Object> context) {
-    dto.setName(actionRepository.getById(domain.getParentId()).getName());
+    Action parent = null;
+    try {
+      parent = actionRepository.getById(domain.getParentId());
+    } catch (EntityNotFoundException ignored) {
+    }
+    if (parent != null) dto.setName(parent.getName());
   }
 }

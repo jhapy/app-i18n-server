@@ -2,6 +2,7 @@ package org.jhapy.i18n.converter;
 
 import org.jhapy.cqrs.event.i18n.ActionCreatedEvent;
 import org.jhapy.cqrs.event.i18n.ActionTrlCreatedEvent;
+import org.jhapy.cqrs.event.i18n.ActionTrlUpdatedEvent;
 import org.jhapy.cqrs.event.i18n.ActionUpdatedEvent;
 import org.jhapy.dto.domain.i18n.ActionDTO;
 import org.jhapy.i18n.command.ActionAggregate;
@@ -41,9 +42,25 @@ public abstract class ActionConverter extends GenericMapper<Action, ActionDTO> {
   @Mapping(target = "modifiedBy", ignore = true)
   public abstract Action toEntity(ActionCreatedEvent event);
 
+  @Mapping(target = "created", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)
+  @Mapping(target = "modified", ignore = true)
+  @Mapping(target = "modifiedBy", ignore = true)
+  public abstract Action toEntity(ActionUpdatedEvent event);
+
   public abstract Action asEntity(ActionDTO dto, @Context Map<String, Object> context);
 
-  public Map<String, ActionTrl> toActionTrlMap(List<ActionTrlCreatedEvent> value) {
+  public Map<String, ActionTrl> toActionTrlCreatedMap(List<ActionTrlCreatedEvent> value) {
+    Map<String, ActionTrl> result = new HashMap<>();
+    value.forEach(
+        actionTrlCreatedEvent ->
+            result.put(
+                actionTrlCreatedEvent.getIso3Language(),
+                ActionTrlConverter.INSTANCE.asEntity(actionTrlCreatedEvent)));
+    return result;
+  }
+
+  public Map<String, ActionTrl> toActionTrlUpdatedMap(List<ActionTrlUpdatedEvent> value) {
     Map<String, ActionTrl> result = new HashMap<>();
     value.forEach(
         actionTrlCreatedEvent ->
@@ -54,11 +71,9 @@ public abstract class ActionConverter extends GenericMapper<Action, ActionDTO> {
   }
 
   @Mapping(target = "translations", ignore = true)
-  @Mapping(target = "temporaryId", ignore = true)
   public abstract ActionDTO asDTO(Action domain, @Context Map<String, Object> context);
 
   @Named(value = "withTranslation")
-  @Mapping(target = "temporaryId", ignore = true)
   public abstract ActionDTO asDTOWithTranslations(
       Action domain, @Context Map<String, Object> context);
 

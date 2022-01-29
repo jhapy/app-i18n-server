@@ -847,7 +847,6 @@ public class ElementServiceEndpointIT extends AbstractGlobalAxonServerTest {
 
   protected UUID createDummyElementDTO(String name, String category) {
     Element element = new Element();
-    element.setId(UUID.randomUUID());
     element.setName(name);
     element.setCategory(category);
 
@@ -857,18 +856,15 @@ public class ElementServiceEndpointIT extends AbstractGlobalAxonServerTest {
   protected UUID createDummyElementDTOWithTranslations(
       String name, String category, String value, String tooltip, String iso1, String iso2) {
     Element element = new Element();
-    element.setId(UUID.randomUUID());
     element.setName(name);
     element.setCategory(category);
 
     ElementTrl elementTrl1 = new ElementTrl();
-    elementTrl1.setId(UUID.randomUUID());
     elementTrl1.setValue(value + "-1");
     elementTrl1.setTooltip(tooltip + "-1");
     elementTrl1.setIso3Language(iso1);
 
     ElementTrl elementTrl2 = new ElementTrl();
-    elementTrl2.setId(UUID.randomUUID());
     elementTrl2.setValue(value + "-2");
     elementTrl2.setTooltip(tooltip + "-2");
     elementTrl2.setIso3Language(iso2);

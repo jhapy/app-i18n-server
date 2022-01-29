@@ -2,6 +2,7 @@ package org.jhapy.i18n.converter;
 
 import org.jhapy.cqrs.event.i18n.ElementCreatedEvent;
 import org.jhapy.cqrs.event.i18n.ElementTrlCreatedEvent;
+import org.jhapy.cqrs.event.i18n.ElementTrlUpdatedEvent;
 import org.jhapy.cqrs.event.i18n.ElementUpdatedEvent;
 import org.jhapy.dto.domain.i18n.ElementDTO;
 import org.jhapy.i18n.command.ElementAggregate;
@@ -41,9 +42,25 @@ public abstract class ElementConverter extends GenericMapper<Element, ElementDTO
   @Mapping(target = "modifiedBy", ignore = true)
   public abstract Element toEntity(ElementCreatedEvent event);
 
+  @Mapping(target = "created", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)
+  @Mapping(target = "modified", ignore = true)
+  @Mapping(target = "modifiedBy", ignore = true)
+  public abstract Element toEntity(ElementUpdatedEvent event);
+
   public abstract Element asEntity(ElementDTO dto, @Context Map<String, Object> context);
 
-  public Map<String, ElementTrl> toElementTrlMap(List<ElementTrlCreatedEvent> value) {
+  public Map<String, ElementTrl> toElementTrlCreatedMap(List<ElementTrlCreatedEvent> value) {
+    Map<String, ElementTrl> result = new HashMap<>();
+    value.forEach(
+        elementTrlCreatedEvent ->
+            result.put(
+                elementTrlCreatedEvent.getIso3Language(),
+                ElementTrlConverter.INSTANCE.asEntity(elementTrlCreatedEvent)));
+    return result;
+  }
+
+  public Map<String, ElementTrl> toElementTrlUpdatedMap(List<ElementTrlUpdatedEvent> value) {
     Map<String, ElementTrl> result = new HashMap<>();
     value.forEach(
         elementTrlCreatedEvent ->
@@ -54,11 +71,9 @@ public abstract class ElementConverter extends GenericMapper<Element, ElementDTO
   }
 
   @Mapping(target = "translations", ignore = true)
-  @Mapping(target = "temporaryId", ignore = true)
   public abstract ElementDTO asDTO(Element domain, @Context Map<String, Object> context);
 
   @Named(value = "withTranslation")
-  @Mapping(target = "temporaryId", ignore = true)
   public abstract ElementDTO asDTOWithTranslations(
       Element domain, @Context Map<String, Object> context);
 

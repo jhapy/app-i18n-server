@@ -15,22 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jhapy.i18n.domain
 
-package org.jhapy.i18n.repository;
-
-import org.javers.spring.annotation.JaversSpringDataAuditable;
-import org.jhapy.i18n.domain.Message;
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import java.io.Serializable
+import java.util.*
+import javax.persistence.Column
+import javax.persistence.MappedSuperclass
 
 /**
+ * Base class for all translations
+ *
  * @author jHapy Lead Dev.
  * @version 1.0
- * @since 2019-07-16
+ * @since 2019-09-29
  */
-@JaversSpringDataAuditable
-@Repository
-public interface MessageRepository extends BaseRepository<Message> {
-  Optional<Message> getByName(String name);
+@MappedSuperclass
+abstract class EntityTranslationV2 : BaseEntity(), Serializable {
+    var isDefault: Boolean? = null
+    var isTranslated: Boolean? = null
+    var iso3Language: String? = null
+
+    @Column(columnDefinition = "BINARY(16)")
+    lateinit var parentId: UUID
 }

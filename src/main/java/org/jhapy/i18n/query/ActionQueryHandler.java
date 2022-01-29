@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.axonframework.queryhandling.QueryHandler;
 import org.jhapy.cqrs.query.i18n.*;
 import org.jhapy.dto.domain.i18n.ActionDTO;
-import org.jhapy.dto.utils.PageDTO;
 import org.jhapy.i18n.converter.ActionConverter;
 import org.jhapy.i18n.converter.GenericMapper;
 import org.jhapy.i18n.domain.Action;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -30,31 +28,33 @@ public class ActionQueryHandler implements BaseQueryHandler<Action, ActionDTO> {
   private final EntityManager entityManager;
 
   @QueryHandler
-  public ActionDTO getById(GetActionByIdQuery query) {
-    return converter.asDTO(repository.getById(query.getId()), null);
+  public GetActionByIdResponse getById(GetActionByIdQuery query) {
+    return new GetActionByIdResponse(converter.asDTO(repository.getById(query.getId()), null));
   }
 
   @QueryHandler
-  public ActionDTO getByName(GetActionByNameQuery query) {
-    return converter.asDTO(repository.getByName(query.getName()).orElseThrow(), null);
+  public GetActionByNameResponse getByName(GetActionByNameQuery query) {
+    return new GetActionByNameResponse(
+        converter.asDTO(repository.getByName(query.getName()).orElseThrow(), null));
   }
 
   @QueryHandler
-  public List getAll(GetAllActionsQuery query) {
-    return converter.asDTOList(repository.findAll(), null);
+  public GetAllActionsResponse getAll(GetAllActionsQuery query) {
+    return new GetAllActionsResponse(converter.asDTOList(repository.findAll(), null));
   }
 
   @QueryHandler
-  public PageDTO findAnyMatchingAction(FindAnyMatchingActionQuery query) {
+  public FindAnyMatchingActionResponse findAnyMatchingAction(FindAnyMatchingActionQuery query) {
     Page<Action> result =
         BaseQueryHandler.super.findAnyMatching(
             query.getFilter(), query.getShowInactive(), converter.convert(query.getPageable()));
-    return toDtoPage(result, converter.asDTOList(result.getContent(), null));
+    return new FindAnyMatchingActionResponse(converter.asDTOList(result.getContent(), null));
   }
 
   @QueryHandler
-  public long countAnyMatchingAction(CountAnyMatchingActionQuery query) {
-    return BaseQueryHandler.super.countAnyMatching(query.getFilter(), query.getShowInactive());
+  public CountAnyMatchingActionResponse countAnyMatchingAction(CountAnyMatchingActionQuery query) {
+    return new CountAnyMatchingActionResponse(
+        BaseQueryHandler.super.countAnyMatching(query.getFilter(), query.getShowInactive()));
   }
 
   @Override

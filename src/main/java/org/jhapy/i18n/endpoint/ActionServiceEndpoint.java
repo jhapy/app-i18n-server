@@ -21,12 +21,8 @@ package org.jhapy.i18n.endpoint;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.queryhandling.QueryGateway;
-import org.jhapy.cqrs.query.i18n.GetActionByNameQuery;
-import org.jhapy.cqrs.query.i18n.GetActionTrlByNameAndIso3LanguageQuery;
-import org.jhapy.cqrs.query.i18n.GetActionTrlsByActionIdQuery;
-import org.jhapy.cqrs.query.i18n.GetActionTrlsByIso3LanguageQuery;
+import org.jhapy.cqrs.query.i18n.*;
 import org.jhapy.dto.domain.i18n.ActionDTO;
-import org.jhapy.dto.domain.i18n.ActionTrlDTO;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.generic.GetByNameQuery;
 import org.jhapy.dto.serviceQuery.i18n.FindByIso3Query;
@@ -62,7 +58,7 @@ public class ActionServiceEndpoint extends BaseRelationaldbV2Endpoint<Action, Ac
         queryGateway
             .query(
                 new GetActionTrlsByActionIdQuery(query.getActionId()),
-                ResponseTypes.multipleInstancesOf(ActionTrlDTO.class))
+                ResponseTypes.instanceOf(GetActionTrlsByActionIdQuery.Response.class))
             .join());
   }
 
@@ -74,7 +70,7 @@ public class ActionServiceEndpoint extends BaseRelationaldbV2Endpoint<Action, Ac
         queryGateway
             .query(
                 new GetActionTrlsByIso3LanguageQuery(query.getIso3Language()),
-                ResponseTypes.multipleInstancesOf(ActionTrlDTO.class))
+                ResponseTypes.instanceOf(GetActionTrlsByIso3LanguageQuery.Response.class))
             .join());
   }
 
@@ -88,7 +84,7 @@ public class ActionServiceEndpoint extends BaseRelationaldbV2Endpoint<Action, Ac
             .query(
                 new GetActionTrlByNameAndIso3LanguageQuery(
                     query.getName(), query.getIso3Language()),
-                ActionTrlDTO.class)
+                ResponseTypes.instanceOf(GetActionTrlByNameAndIso3LanguageQuery.Response.class))
             .join());
   }
 
@@ -97,6 +93,10 @@ public class ActionServiceEndpoint extends BaseRelationaldbV2Endpoint<Action, Ac
     var loggerPrefix = getLoggerPrefix("getByName");
     return handleResult(
         loggerPrefix,
-        queryGateway.query(new GetActionByNameQuery(query.getName()), ActionDTO.class).join());
+        queryGateway
+            .query(
+                new GetActionByNameQuery(query.getName()),
+                ResponseTypes.instanceOf(GetActionByNameResponse.class))
+            .join());
   }
 }

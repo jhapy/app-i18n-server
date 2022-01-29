@@ -6,15 +6,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.queryhandling.QueryGateway;
 import org.jhapy.cqrs.command.SubmitUploadCommand;
-import org.jhapy.cqrs.command.i18n.CreateActionCommand;
-import org.jhapy.cqrs.command.i18n.CreateElementCommand;
-import org.jhapy.cqrs.command.i18n.CreateMessageCommand;
+import org.jhapy.cqrs.command.i18n.*;
+import org.jhapy.cqrs.query.i18n.*;
 import org.jhapy.dto.domain.i18n.*;
 import org.jhapy.dto.serviceResponse.FileUploadStatusResponse;
 import org.jhapy.i18n.domain.FileUpload;
 import org.jhapy.i18n.errorHandeling.FileValidationError;
 import org.jhapy.i18n.repository.BaseRepository;
+import org.jhapy.i18n.repository.ElementLookupRepository;
 import org.jhapy.i18n.repository.FileUploadRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -36,6 +37,8 @@ public class FileUploadServiceImpl implements FileUploadService {
   private final FileUploadRepository repository;
   private final EntityManager entityManager;
   private final CommandGateway commandGateway;
+  private final QueryGateway queryGateway;
+  private final ElementLookupRepository elementLookupRepository;
 
   private boolean hasBootstrapped = false;
 
@@ -50,7 +53,6 @@ public class FileUploadServiceImpl implements FileUploadService {
     var fileUpload = new FileUpload();
     fileUpload.setFilename(filename);
     fileUpload.setFileContent(ArrayUtils.toPrimitive(fileContent));
-    fileUpload.setId(UUID.randomUUID());
     return repository.save(fileUpload).getId();
   }
 
@@ -272,6 +274,42 @@ public class FileUploadServiceImpl implements FileUploadService {
     return errorMessages.toString();
   }
 
+  @Override
+  public void cleanDatabase() {
+    var loggerPrefix = getLoggerPrefix("cleanDatabase");
+
+    List<CompletableFuture<UUID>> deletingList = new ArrayList<>();
+
+    GetAllElementsResponse existingElements =
+        queryGateway.query(new GetAllElementsQuery(), GetAllElementsResponse.class).join();
+    existingElements
+        .getData()
+        .forEach(
+            elementDTO ->
+                deletingList.add(
+                    commandGateway.send(new DeleteElementCommand(elementDTO.getId()))));
+
+    GetAllActionsResponse existingActions =
+        queryGateway.query(new GetAllActionsQuery(), GetAllActionsResponse.class).join();
+    existingActions
+        .getData()
+        .forEach(
+            actionDTO ->
+                deletingList.add(commandGateway.send(new DeleteActionCommand(actionDTO.getId()))));
+
+    GetAllMessagesResponse existingMessages =
+        queryGateway.query(new GetAllMessagesQuery(), GetAllMessagesResponse.class).join();
+    existingMessages
+        .getData()
+        .forEach(
+            messageDTO ->
+                deletingList.add(
+                    commandGateway.send(new DeleteMessageCommand(messageDTO.getId()))));
+
+    debug(loggerPrefix, "Wait for completion");
+    CompletableFuture.allOf(deletingList.toArray(new CompletableFuture[0])).join();
+  }
+
   public void importFile(UUID id) throws IOException {
     var loggerPrefix = getLoggerPrefix("importElementsFromExcel");
 
@@ -301,6 +339,7 @@ public class FileUploadServiceImpl implements FileUploadService {
       }
       messages = importMessageSheet(sheet);
     }
+
     List<CompletableFuture<UUID>> savingList = new ArrayList<>();
     elements
         .values()
@@ -318,6 +357,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             messageDTO ->
                 savingList.add(commandGateway.send(new CreateMessageCommand(messageDTO))));
 
+    debug(loggerPrefix, "Wait for completion");
     var allFuturesResult = CompletableFuture.allOf(savingList.toArray(new CompletableFuture[0]));
     allFuturesResult.whenComplete(
         (unused, throwable) -> {
@@ -391,7 +431,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         elementDTO = new ElementDTO();
         elementDTO.setName(name);
         elementDTO.setCategory(category);
-        elementDTO.setIsTranslated(true);
+        elementDTO.setTranslated(true);
 
         elements.put(name, elementDTO);
       }
@@ -400,8 +440,8 @@ public class FileUploadServiceImpl implements FileUploadService {
       elementTrlDTO.setValue(valueCell == null ? "" : valueCell.getStringCellValue());
       elementTrlDTO.setTooltip(tooltipCell == null ? null : tooltipCell.getStringCellValue());
       elementTrlDTO.setIso3Language(language);
-
-      elementTrlDTO.setIsTranslated(true);
+      elementTrlDTO.setParentId(elementDTO.getId());
+      elementTrlDTO.setTranslated(true);
       elementDTO.getTranslations().add(elementTrlDTO);
     }
 
@@ -467,17 +507,18 @@ public class FileUploadServiceImpl implements FileUploadService {
         actionDTO = new ActionDTO();
         actionDTO.setName(name);
         actionDTO.setCategory(category);
-        actionDTO.setIsTranslated(true);
+        actionDTO.setTranslated(true);
 
         actions.put(name, actionDTO);
       }
 
       var actionTrlDTO = new ActionTrlDTO();
+      actionTrlDTO.setId(UUID.randomUUID());
       actionTrlDTO.setValue(valueCell == null ? "" : valueCell.getStringCellValue());
       actionTrlDTO.setTooltip(tooltipCell == null ? null : tooltipCell.getStringCellValue());
       actionTrlDTO.setIso3Language(language);
-
-      actionTrlDTO.setIsTranslated(true);
+      actionTrlDTO.setParentId(actionDTO.getId());
+      actionTrlDTO.setTranslated(true);
       actionDTO.getTranslations().add(actionTrlDTO);
     }
 
@@ -542,16 +583,17 @@ public class FileUploadServiceImpl implements FileUploadService {
         messageDTO = new MessageDTO();
         messageDTO.setName(name);
         messageDTO.setCategory(category);
-        messageDTO.setIsTranslated(true);
+        messageDTO.setTranslated(true);
 
         messages.put(name, messageDTO);
       }
 
       var messageTrlDTO = new MessageTrlDTO();
+      messageTrlDTO.setId(UUID.randomUUID());
       messageTrlDTO.setValue(valueCell == null ? "" : valueCell.getStringCellValue());
       messageTrlDTO.setIso3Language(language);
-
-      messageTrlDTO.setIsTranslated(true);
+      messageTrlDTO.setParentId(messageDTO.getId());
+      messageTrlDTO.setTranslated(true);
       messageDTO.getTranslations().add(messageTrlDTO);
     }
 
@@ -579,9 +621,7 @@ public class FileUploadServiceImpl implements FileUploadService {
       byte[] content = Files.readAllBytes(Path.of(bootstrapFile));
 
       UUID uploadId = uploadFile(bootstrapFile, ArrayUtils.toObject(content));
-      SubmitUploadCommand submitUploadCommand = new SubmitUploadCommand();
-      submitUploadCommand.setUploadId(uploadId);
-      submitUploadCommand.setFilename(bootstrapFile);
+      SubmitUploadCommand submitUploadCommand = new SubmitUploadCommand(uploadId, bootstrapFile);
 
       commandGateway.sendAndWait(submitUploadCommand);
 

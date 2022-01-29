@@ -845,7 +845,6 @@ public class ActionServiceEndpointIT extends AbstractGlobalAxonServerTest {
 
   protected UUID createDummyActionDTO(String name, String category) {
     Action action = new Action();
-    action.setId(UUID.randomUUID());
     action.setName(name);
     action.setCategory(category);
 
@@ -855,18 +854,15 @@ public class ActionServiceEndpointIT extends AbstractGlobalAxonServerTest {
   protected UUID createDummyActionDTOWithTranslations(
       String name, String category, String value, String tooltip, String iso1, String iso2) {
     Action action = new Action();
-    action.setId(UUID.randomUUID());
     action.setName(name);
     action.setCategory(category);
 
     ActionTrl actionTrl1 = new ActionTrl();
-    actionTrl1.setId(UUID.randomUUID());
     actionTrl1.setValue(value + "-1");
     actionTrl1.setTooltip(tooltip + "-1");
     actionTrl1.setIso3Language(iso1);
 
     ActionTrl actionTrl2 = new ActionTrl();
-    actionTrl2.setId(UUID.randomUUID());
     actionTrl2.setValue(value + "-2");
     actionTrl2.setTooltip(tooltip + "-2");
     actionTrl2.setIso3Language(iso2);

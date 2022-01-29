@@ -2,6 +2,7 @@ package org.jhapy.i18n.converter;
 
 import org.jhapy.cqrs.event.i18n.MessageCreatedEvent;
 import org.jhapy.cqrs.event.i18n.MessageTrlCreatedEvent;
+import org.jhapy.cqrs.event.i18n.MessageTrlUpdatedEvent;
 import org.jhapy.cqrs.event.i18n.MessageUpdatedEvent;
 import org.jhapy.dto.domain.i18n.MessageDTO;
 import org.jhapy.i18n.command.MessageAggregate;
@@ -41,9 +42,25 @@ public abstract class MessageConverter extends GenericMapper<Message, MessageDTO
   @Mapping(target = "modifiedBy", ignore = true)
   public abstract Message toEntity(MessageCreatedEvent event);
 
+  @Mapping(target = "created", ignore = true)
+  @Mapping(target = "createdBy", ignore = true)
+  @Mapping(target = "modified", ignore = true)
+  @Mapping(target = "modifiedBy", ignore = true)
+  public abstract Message toEntity(MessageUpdatedEvent event);
+
   public abstract Message asEntity(MessageDTO dto, @Context Map<String, Object> context);
 
-  public Map<String, MessageTrl> toMessageTrlMap(List<MessageTrlCreatedEvent> value) {
+  public Map<String, MessageTrl> toMessageTrlCreatedMap(List<MessageTrlCreatedEvent> value) {
+    Map<String, MessageTrl> result = new HashMap<>();
+    value.forEach(
+        elementTrlCreatedEvent ->
+            result.put(
+                elementTrlCreatedEvent.getIso3Language(),
+                MessageTrlConverter.INSTANCE.asEntity(elementTrlCreatedEvent)));
+    return result;
+  }
+
+  public Map<String, MessageTrl> toMessageTrlUpdatedMap(List<MessageTrlUpdatedEvent> value) {
     Map<String, MessageTrl> result = new HashMap<>();
     value.forEach(
         elementTrlCreatedEvent ->
@@ -54,11 +71,9 @@ public abstract class MessageConverter extends GenericMapper<Message, MessageDTO
   }
 
   @Mapping(target = "translations", ignore = true)
-  @Mapping(target = "temporaryId", ignore = true)
   public abstract MessageDTO asDTO(Message domain, @Context Map<String, Object> context);
 
   @Named(value = "withTranslation")
-  @Mapping(target = "temporaryId", ignore = true)
   public abstract MessageDTO asDTOWithTranslations(
       Message domain, @Context Map<String, Object> context);
 

@@ -404,7 +404,7 @@ public class I18NServiceEndpointIT extends AbstractGlobalAxonServerTest {
 
     entity.setTranslations(Arrays.asList(elementTrlEngDTO, elementTrlFreDTO));
 
-    return CreateElementCommand.builder().id(UUID.randomUUID()).entity(entity).build();
+    return new CreateElementCommand(entity);
   }
 
   private CreateActionCommand createOneAction(int i) {
@@ -422,7 +422,7 @@ public class I18NServiceEndpointIT extends AbstractGlobalAxonServerTest {
 
     entity.setTranslations(Arrays.asList(actionTrlEngDTO, actionTrlFreDTO));
 
-    return CreateActionCommand.builder().id(UUID.randomUUID()).entity(entity).build();
+    return new CreateActionCommand(entity);
   }
 
   private CreateMessageCommand createOneMessage(int i) {
@@ -440,6 +440,6 @@ public class I18NServiceEndpointIT extends AbstractGlobalAxonServerTest {
 
     entity.setTranslations(Arrays.asList(messageTrlEngDTO, messageTrlFreDTO));
 
-    return CreateMessageCommand.builder().id(UUID.randomUUID()).entity(entity).build();
+    return new CreateMessageCommand(entity);
   }
 }

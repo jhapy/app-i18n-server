@@ -6,9 +6,11 @@ import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.spring.stereotype.Saga;
 import org.jhapy.commons.utils.HasLogger;
+import org.jhapy.cqrs.command.DatabaseCleanCommand;
 import org.jhapy.cqrs.command.ImportUploadCommand;
 import org.jhapy.cqrs.command.ValidateUploadCommand;
-import org.jhapy.cqrs.event.*;
+import org.jhapy.cqrs.event.DatabaseCleanedEvent;
+import org.jhapy.cqrs.event.i18n.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Saga
@@ -27,9 +29,8 @@ public class UploadProcessorSaga implements HasLogger {
 
     debug(loggerPrefix, "UploadSubmittedEvent is handled for uploadId: {0}", event.getUploadId());
 
-    ValidateUploadCommand validateUploadCommand = new ValidateUploadCommand();
-    validateUploadCommand.setId(event.getId());
-    validateUploadCommand.setUploadId(event.getUploadId());
+    ValidateUploadCommand validateUploadCommand =
+        new ValidateUploadCommand(event.getId(), event.getUploadId());
 
     commandGateway.send(validateUploadCommand);
   }
@@ -40,9 +41,20 @@ public class UploadProcessorSaga implements HasLogger {
 
     debug(loggerPrefix, "FileValidatedEvent is handled for uploadId: {0}", event.getUploadId());
 
-    ImportUploadCommand importUploadCommand = new ImportUploadCommand();
-    importUploadCommand.setId(event.getId());
-    importUploadCommand.setUploadId(event.getUploadId());
+    DatabaseCleanCommand databaseCleanCommand =
+        new DatabaseCleanCommand(event.getId(), event.getUploadId());
+
+    commandGateway.send(databaseCleanCommand);
+  }
+
+  @SagaEventHandler(associationProperty = "uploadId")
+  public void handle(DatabaseCleanedEvent event) {
+    String loggerPrefix = getLoggerPrefix("databaseCleanedEvent");
+
+    debug(loggerPrefix, "FileValidatedEvent is handled for uploadId: {0}", event.getUploadId());
+
+    ImportUploadCommand importUploadCommand =
+        new ImportUploadCommand(event.getId(), event.getUploadId());
 
     commandGateway.send(importUploadCommand);
   }

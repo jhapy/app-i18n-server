@@ -17,8 +17,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ElementLookup implements Serializable {
-
-  @Id private UUID elementId;
+  @Column(columnDefinition = "BINARY(16)")
+  @Id
+  private UUID elementId;
 
   @Column(unique = true)
   private String name;

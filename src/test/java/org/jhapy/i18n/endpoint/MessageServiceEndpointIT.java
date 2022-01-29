@@ -811,7 +811,6 @@ public class MessageServiceEndpointIT extends AbstractGlobalAxonServerTest {
 
   protected UUID createDummyMessageDTO(String name, String category) {
     Message message = new Message();
-    message.setId(UUID.randomUUID());
     message.setName(name);
     message.setCategory(category);
 
@@ -821,17 +820,14 @@ public class MessageServiceEndpointIT extends AbstractGlobalAxonServerTest {
   protected UUID createDummyMessageDTOWithTranslations(
       String name, String category, String value, String iso1, String iso2) {
     Message message = new Message();
-    message.setId(UUID.randomUUID());
     message.setName(name);
     message.setCategory(category);
 
     MessageTrl messageTrl1 = new MessageTrl();
-    messageTrl1.setId(UUID.randomUUID());
     messageTrl1.setValue(value + "-1");
     messageTrl1.setIso3Language(iso1);
 
     MessageTrl messageTrl2 = new MessageTrl();
-    messageTrl2.setId(UUID.randomUUID());
     messageTrl2.setValue(value + "-2");
     messageTrl2.setIso3Language(iso2);
 

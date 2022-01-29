@@ -15,20 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jhapy.i18n.repository
 
-package org.jhapy.i18n.repository;
-
-import org.jhapy.i18n.domain.BaseEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.query.QueryByExampleExecutor;
-
-import java.util.UUID;
+import org.javers.spring.annotation.JaversSpringDataAuditable
+import org.jhapy.i18n.domain.Message
+import org.springframework.stereotype.Repository
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
- * @since 3/8/20
+ * @since 2019-07-16
  */
-public interface BaseRepository<T extends BaseEntity>
-    extends JpaRepository<T, UUID>, QueryByExampleExecutor<T>, JpaSpecificationExecutor<T> {}
+@JaversSpringDataAuditable
+@Repository
+interface MessageRepository : BaseRepository<Message> {
+    fun getByName(name: String): Message?
+}

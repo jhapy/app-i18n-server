@@ -2,8 +2,10 @@ package org.jhapy.i18n.converter;
 
 import org.jhapy.cqrs.event.i18n.MessageTrlCreatedEvent;
 import org.jhapy.cqrs.event.i18n.MessageTrlUpdatedEvent;
+import org.jhapy.dto.domain.exception.EntityNotFoundException;
 import org.jhapy.dto.domain.i18n.MessageTrlDTO;
 import org.jhapy.i18n.command.MessageTrlAggregate;
+import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.domain.MessageTrl;
 import org.jhapy.i18n.repository.MessageRepository;
 import org.mapstruct.*;
@@ -40,19 +42,18 @@ public abstract class MessageTrlConverter extends GenericMapper<MessageTrl, Mess
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "modified", ignore = true)
   @Mapping(target = "modifiedBy", ignore = true)
-  @Mapping(target = "isActive", ignore = true)
+  @Mapping(target = "active", ignore = true)
   public abstract MessageTrl asEntity(MessageTrlCreatedEvent event);
 
   @Mapping(target = "created", ignore = true)
   @Mapping(target = "createdBy", ignore = true)
   @Mapping(target = "modified", ignore = true)
   @Mapping(target = "modifiedBy", ignore = true)
-  @Mapping(target = "isActive", ignore = true)
+  @Mapping(target = "active", ignore = true)
   public abstract MessageTrl asEntity(MessageTrlUpdatedEvent event);
 
   public abstract MessageTrl asEntity(MessageTrlDTO dto, @Context Map<String, Object> context);
 
-  @Mapping(target = "temporaryId", ignore = true)
   @Mapping(target = "name", ignore = true)
   public abstract MessageTrlDTO asDTO(MessageTrl domain, @Context Map<String, Object> context);
 
@@ -95,6 +96,11 @@ public abstract class MessageTrlConverter extends GenericMapper<MessageTrl, Mess
   @AfterMapping
   protected void afterConvert(
       MessageTrl domain, @MappingTarget MessageTrlDTO dto, @Context Map<String, Object> context) {
-    dto.setName(messageRepository.getById(domain.getParentId()).getName());
+    Message parent = null;
+    try {
+      parent = messageRepository.getById(domain.getParentId());
+    } catch (EntityNotFoundException ignored) {
+    }
+    if (parent != null) dto.setName(parent.getName());
   }
 }

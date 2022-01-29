@@ -15,28 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jhapy.i18n.repository
 
-package org.jhapy.i18n.command;
-
-import lombok.Data;
-import org.axonframework.modelling.command.EntityId;
-
-import java.util.UUID;
+import org.javers.spring.annotation.JaversSpringDataAuditable
+import org.jhapy.i18n.domain.MessageTrl
+import org.springframework.data.jpa.repository.Query
+import org.springframework.stereotype.Repository
+import java.util.*
 
 /**
- * Base class for all translations
- *
  * @author jHapy Lead Dev.
  * @version 1.0
- * @since 2019-09-29
+ * @since 2019-07-16
  */
-@Data
-public abstract class AbstractEntityTranslationAggregate {
-  @EntityId private UUID id;
+@JaversSpringDataAuditable
+@Repository
+interface MessageTrlRepository : BaseRepository<MessageTrl> {
+    fun getByParentIdAndIso3Language(parentId: UUID, iso3Language: String): MessageTrl?
+    fun getByParentIdAndIsDefaultIsTrue(parentId: UUID): MessageTrl?
+    fun findByIso3Language(iso3Language: String): Iterable<MessageTrl>
+    fun findByParentId(parentId: UUID): Collection<MessageTrl>
 
-  private UUID parentId;
-
-  private Boolean isDefault;
-
-  private Boolean isTranslated;
+    @get:Query("SELECT DISTINCT iso3Language FROM MessageTrl")
+    val distinctIso3Language: Collection<String>
 }

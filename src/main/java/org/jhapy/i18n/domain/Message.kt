@@ -15,27 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jhapy.i18n.domain
 
-package org.jhapy.i18n.command;
-
-import lombok.Data;
-import org.axonframework.modelling.command.AggregateIdentifier;
-import org.axonframework.modelling.command.AggregateVersion;
-import org.jhapy.commons.utils.HasLogger;
-
-import java.util.UUID;
+import org.hibernate.annotations.Cache
+import org.hibernate.annotations.CacheConcurrencyStrategy
+import org.javers.core.metamodel.annotation.TypeName
+import javax.persistence.*
 
 /**
  * @author jHapy Lead Dev.
  * @version 1.0
- * @since 2019-03-06
+ * @since 2019-04-18
  */
-@Data
-public abstract class AbstractBaseAggregate implements HasLogger {
+@Entity
+@Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
+@TypeName("Message")
+class Message : BaseEntity() {
+    @Column(unique = true, nullable = false)
+    var name: String? = null
+    var category: String? = null
+    var isTranslated = false
 
-  @AggregateIdentifier private UUID id;
-
-  @AggregateVersion private Long version;
-
-  private Boolean isActive = Boolean.TRUE;
+    @OneToMany(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "parentId")
+    @MapKey(name = "iso3Language")
+    var translations: MutableMap<String, MessageTrl> = mutableMapOf()
 }

@@ -21,8 +21,12 @@ package org.jhapy.i18n.endpoint;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.config.EventProcessingConfiguration;
 import org.axonframework.eventhandling.TrackingEventProcessor;
+import org.axonframework.messaging.responsetypes.ResponseTypes;
+import org.axonframework.queryhandling.QueryGateway;
 import org.jhapy.commons.endpoint.BaseEndpoint;
 import org.jhapy.cqrs.command.SubmitUploadCommand;
+import org.jhapy.cqrs.query.i18n.GetExistingLanguagesQuery;
+import org.jhapy.cqrs.query.i18n.GetExistingLanguagesResponse;
 import org.jhapy.dto.serviceQuery.BaseRemoteQuery;
 import org.jhapy.dto.serviceQuery.ServiceResult;
 import org.jhapy.dto.serviceQuery.i18n.ImportI18NFileQuery;
@@ -50,23 +54,33 @@ public class I18NServiceEndpoint extends BaseEndpoint {
 
   private final FileUploadService fileUploadService;
   private final CommandGateway commandGateway;
+  private final QueryGateway queryGateway;
   private final EventProcessingConfiguration eventProcessingConfiguration;
 
   public I18NServiceEndpoint(
       FileUploadService fileUploadService,
       CommandGateway commandGateway,
+      QueryGateway queryGateway,
       EventProcessingConfiguration eventProcessingConfiguration) {
     super(null);
     this.fileUploadService = fileUploadService;
     this.commandGateway = commandGateway;
+    this.queryGateway = queryGateway;
     this.eventProcessingConfiguration = eventProcessingConfiguration;
   }
 
   @PostMapping(value = "/getExistingLanguages")
-  public ResponseEntity<ServiceResult> getExistingLanguages(@RequestBody BaseRemoteQuery query) {
+  public ResponseEntity<ServiceResult> getExistingLanguages(
+      @RequestBody GetExistingLanguagesQuery query) {
     var loggerPrefix = getLoggerPrefix("getExistingLanguages");
 
-    return handleResult(loggerPrefix, "N/A");
+    return handleResult(
+        loggerPrefix,
+        queryGateway
+            .query(
+                new GetExistingLanguagesQuery(),
+                ResponseTypes.instanceOf(GetExistingLanguagesResponse.class))
+            .join());
   }
 
   @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")
@@ -83,9 +97,8 @@ public class I18NServiceEndpoint extends BaseEndpoint {
     var loggerPrefix = getLoggerPrefix("importI18NFile");
 
     UUID uploadId = fileUploadService.uploadFile(query.getFilename(), query.getFileContent());
-    SubmitUploadCommand submitUploadCommand = new SubmitUploadCommand();
-    submitUploadCommand.setUploadId(uploadId);
-    submitUploadCommand.setFilename(query.getFilename());
+    SubmitUploadCommand submitUploadCommand =
+        new SubmitUploadCommand(uploadId, query.getFilename());
 
     UUID result = commandGateway.sendAndWait(submitUploadCommand);
 

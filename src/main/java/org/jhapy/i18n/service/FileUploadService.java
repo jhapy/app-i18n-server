@@ -13,5 +13,7 @@ public interface FileUploadService extends CrudRelationalService<FileUpload> {
 
   void importFile(UUID id) throws IOException;
 
+  void cleanDatabase();
+
   FileUploadStatusResponse getFileUploadStatus(UUID id);
 }

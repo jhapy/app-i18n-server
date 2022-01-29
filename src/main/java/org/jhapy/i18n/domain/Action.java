@@ -51,7 +51,7 @@ public class Action extends BaseEntity {
 
   private String category;
 
-  private Boolean isTranslated = Boolean.FALSE;
+  private Boolean translated = Boolean.FALSE;
 
   @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "parentId")

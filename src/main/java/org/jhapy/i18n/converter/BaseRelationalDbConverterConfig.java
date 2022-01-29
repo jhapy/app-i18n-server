@@ -11,7 +11,6 @@ import java.util.Map;
     builder = @Builder(disableBuilder = true))
 public interface BaseRelationalDbConverterConfig {
 
-  @Mapping(target = "isNew", ignore = true)
   @Mapping(target = "clientName", ignore = true)
   BaseEntity asDTO(org.jhapy.i18n.domain.BaseEntity domain, @Context Map<String, Object> context);
 

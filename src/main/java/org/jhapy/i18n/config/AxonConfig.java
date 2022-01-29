@@ -1,5 +1,8 @@
 package org.jhapy.i18n.config;
 
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.security.TypeHierarchyPermission;
+import com.thoughtworks.xstream.security.WildcardTypePermission;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.config.EventProcessingConfigurer;
 import org.axonframework.eventhandling.EventBus;
@@ -7,10 +10,16 @@ import org.axonframework.eventhandling.PropagatingErrorHandler;
 import org.axonframework.messaging.Message;
 import org.axonframework.messaging.interceptors.LoggingInterceptor;
 import org.axonframework.queryhandling.QueryBus;
+import org.axonframework.serialization.Serializer;
+import org.axonframework.serialization.xml.XStreamSerializer;
+import org.jhapy.cqrs.query.AbstractBaseQuery;
+import org.jhapy.dto.domain.BaseEntity;
+import org.jhapy.dto.serviceQuery.BaseRemoteQuery;
 import org.jhapy.i18n.command.interceptor.CreateOrUpdateActionCommandInterceptor;
 import org.jhapy.i18n.command.interceptor.CreateOrUpdateElementCommandInterceptor;
 import org.jhapy.i18n.command.interceptor.CreateOrUpdateMessageCommandInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -79,5 +88,18 @@ public class AxonConfig {
       CreateOrUpdateMessageCommandInterceptor createOrUpdateMessageCommandInterceptor,
       CommandBus commandBus) {
     commandBus.registerDispatchInterceptor(createOrUpdateMessageCommandInterceptor);
+  }
+
+  @Bean
+  @Qualifier("messageSerializer")
+  public Serializer messageSerializer() {
+    XStream xStream = new XStream();
+    xStream.addPermission(new TypeHierarchyPermission(BaseEntity.class));
+    xStream.addPermission(new TypeHierarchyPermission(BaseRemoteQuery.class));
+    xStream.addPermission(new TypeHierarchyPermission(AbstractBaseQuery.class));
+    xStream.addPermission(
+        new WildcardTypePermission(new String[] {"org.jhapy.dto.**", "org.jhapy.cqrs.**"}));
+
+    return XStreamSerializer.builder().xStream(xStream).build();
   }
 }

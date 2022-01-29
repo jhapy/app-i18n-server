@@ -17,8 +17,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ActionLookup implements Serializable {
-
-  @Id private UUID actionId;
+  @Column(columnDefinition = "BINARY(16)")
+  @Id
+  private UUID actionId;
 
   @Column(unique = true)
   private String name;

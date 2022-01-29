@@ -9,7 +9,10 @@ import org.jhapy.commons.utils.HasLogger;
 import org.jhapy.cqrs.event.i18n.ActionCreatedEvent;
 import org.jhapy.cqrs.event.i18n.ActionDeletedEvent;
 import org.jhapy.cqrs.event.i18n.ActionImportedEvent;
+import org.jhapy.cqrs.event.i18n.ActionUpdatedEvent;
+import org.jhapy.cqrs.query.i18n.CountAnyMatchingActionQuery;
 import org.jhapy.cqrs.query.i18n.GetActionByIdQuery;
+import org.jhapy.dto.serviceQuery.CountChangeResult;
 import org.jhapy.i18n.converter.ActionConverter;
 import org.jhapy.i18n.domain.Action;
 import org.jhapy.i18n.repository.ActionRepository;
@@ -39,6 +42,17 @@ public class ActionEventHandler implements HasLogger {
 
   @EventHandler
   public void on(ActionCreatedEvent event) throws Exception {
+    Action entity = converter.toEntity(event);
+    entity = repository.save(entity);
+    queryUpdateEmitter.emit(
+        GetActionByIdQuery.class, query -> true, converter.asDTOWithTranslations(entity, null));
+
+    queryUpdateEmitter.emit(
+        CountAnyMatchingActionQuery.class, query -> true, new CountChangeResult());
+  }
+
+  @EventHandler
+  public void on(ActionUpdatedEvent event) throws Exception {
     Action entity = converter.toEntity(event);
     entity = repository.save(entity);
     queryUpdateEmitter.emit(

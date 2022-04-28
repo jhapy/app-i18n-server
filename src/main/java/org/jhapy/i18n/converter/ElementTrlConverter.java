@@ -1,5 +1,8 @@
 package org.jhapy.i18n.converter;
 
+import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.proxy.HibernateProxyHelper;
 import org.jhapy.cqrs.event.i18n.ElementTrlCreatedEvent;
 import org.jhapy.cqrs.event.i18n.ElementTrlUpdatedEvent;
 import org.jhapy.dto.domain.exception.EntityNotFoundException;
@@ -99,6 +102,7 @@ public abstract class ElementTrlConverter extends GenericMapper<ElementTrl, Elem
     Element parent = null;
     try {
       parent = elementRepository.getById(domain.getParentId());
+
     } catch (EntityNotFoundException ignored) {
     }
     if (parent != null) dto.setName(parent.getName());

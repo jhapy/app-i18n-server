@@ -34,7 +34,7 @@ public class CreateOrUpdateMessageCommandInterceptor
             lookupRepository.findByMessageIdOrName(
                 createMessageCommand.getId(), createMessageCommand.getEntity().getName());
 
-        if (actionLookupEntity != null) {
+        if (actionLookupEntity.isPresent()) {
           throw new IllegalArgumentException(
               String.format(
                   MESSAGE_EXISTS_PATTERN,
@@ -49,7 +49,7 @@ public class CreateOrUpdateMessageCommandInterceptor
             lookupRepository.findByName(updateMessageCommand.getEntity().getName());
 
         if (messageLookupEntity != null
-            && !messageLookupEntity.getMessageId().equals(updateMessageCommand.getId())) {
+            && !messageLookupEntity.get().getMessageId().equals(updateMessageCommand.getId())) {
           throw new IllegalArgumentException(
               String.format(
                   MESSAGE_EXISTS_PATTERN,

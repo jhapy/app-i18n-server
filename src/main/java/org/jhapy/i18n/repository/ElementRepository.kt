@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jhapy.i18n.repository
 
-package org.jhapy.i18n.repository;
-
-import org.javers.spring.annotation.JaversSpringDataAuditable;
-import org.jhapy.i18n.domain.Action;
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import org.javers.spring.annotation.JaversSpringDataAuditable
+import org.jhapy.i18n.domain.Element
+import org.springframework.stereotype.Repository
+import java.util.*
 
 /**
  * @author jHapy Lead Dev.
@@ -31,6 +29,6 @@ import java.util.Optional;
  */
 @JaversSpringDataAuditable
 @Repository
-public interface ActionRepository extends BaseRepository<Action> {
-  Optional<Action> getByName(String name);
+interface ElementRepository : BaseRepository<Element> {
+    fun getByName(name: String?): Optional<Element>
 }

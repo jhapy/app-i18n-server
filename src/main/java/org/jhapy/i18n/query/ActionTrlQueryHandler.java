@@ -28,12 +28,8 @@ public class ActionTrlQueryHandler implements HasLogger {
 
     var optActionTrl =
         repository.getByParentIdAndIso3Language(query.getActionId(), query.getIso3Language());
-    if (optActionTrl.isPresent())
-      return new GetActionTrlByActionIdAndIso3LanguageQuery.Response(
-          converter.asDTO(optActionTrl.get(), null));
-    else {
-      return new GetActionTrlByActionIdAndIso3LanguageQuery.Response(null);
-    }
+    return optActionTrl.map(actionTrl -> new GetActionTrlByActionIdAndIso3LanguageQuery.Response(
+            converter.asDTO(actionTrl, null))).orElseGet(() -> new GetActionTrlByActionIdAndIso3LanguageQuery.Response(null));
   }
 
   @QueryHandler

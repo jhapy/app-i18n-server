@@ -34,8 +34,8 @@ public class MessageQueryHandler implements BaseQueryHandler<Message, MessageDTO
 
   @QueryHandler
   public GetMessageByNameResponse getByName(GetMessageByNameQuery query) {
-    Message message = repository.getByName(query.getName());
-    return new GetMessageByNameResponse(message == null ? null : converter.asDTO(message, null));
+    return new GetMessageByNameResponse(
+            converter.asDTO(repository.getByName(query.getName()).orElseThrow(), null));
   }
 
   @QueryHandler

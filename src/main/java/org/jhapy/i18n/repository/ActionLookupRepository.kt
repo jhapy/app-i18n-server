@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 
 interface ActionLookupRepository : JpaRepository<ActionLookup, UUID> {
-    fun findByActionIdOrName(actionId: UUID, name: String): ActionLookup?
-    fun findByName(name: String): ActionLookup?
+    fun findByActionIdOrName(actionId: UUID, name: String): Optional<ActionLookup>
+    fun findByName(name: String): Optional<ActionLookup>
 }

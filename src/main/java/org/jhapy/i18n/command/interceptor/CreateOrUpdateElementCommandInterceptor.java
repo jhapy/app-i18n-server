@@ -32,7 +32,7 @@ public class CreateOrUpdateElementCommandInterceptor
         debug(loggerPrefix, "Intercepted command type: {0}", command.getPayloadType());
         CreateElementCommand createElementCommand = (CreateElementCommand) command.getPayload();
 
-        Optional<ElementLookup> elementLookupEntity =
+        var elementLookupEntity =
             lookupRepository.findByElementIdOrName(
                 createElementCommand.getId(), createElementCommand.getEntity().getName());
 

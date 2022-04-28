@@ -15,17 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jhapy.i18n.repository
 
-package org.jhapy.i18n.repository;
-
-import org.javers.spring.annotation.JaversSpringDataAuditable;
-import org.jhapy.i18n.domain.ActionTrl;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import org.javers.spring.annotation.JaversSpringDataAuditable
+import org.jhapy.i18n.domain.Action
+import org.springframework.stereotype.Repository
+import java.util.*
 
 /**
  * @author jHapy Lead Dev.
@@ -34,15 +29,6 @@ import java.util.UUID;
  */
 @JaversSpringDataAuditable
 @Repository
-public interface ActionTrlRepository extends BaseRepository<ActionTrl> {
-  Optional<ActionTrl> getByParentIdAndIso3Language(UUID parentId, String iso3Language);
-
-  Optional<ActionTrl> getByParentIdAndIsDefaultIsTrue(UUID parentId);
-
-  List<ActionTrl> findByIso3Language(String iso3Language);
-
-  List<ActionTrl> findByParentId(UUID parentId);
-
-  @Query("SELECT DISTINCT iso3Language FROM ActionTrl")
-  List<String> getDistinctIso3Language();
+interface ActionRepository : BaseRepository<Action> {
+    fun getByName(name: String?): Optional<Action>
 }

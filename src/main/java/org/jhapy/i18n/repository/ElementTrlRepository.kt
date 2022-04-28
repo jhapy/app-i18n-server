@@ -15,17 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jhapy.i18n.repository
 
-package org.jhapy.i18n.repository;
-
-import org.javers.spring.annotation.JaversSpringDataAuditable;
-import org.jhapy.i18n.domain.ElementTrl;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import org.javers.spring.annotation.JaversSpringDataAuditable
+import org.jhapy.i18n.domain.ElementTrl
+import org.springframework.data.jpa.repository.Query
+import org.springframework.stereotype.Repository
+import java.util.*
 
 /**
  * @author jHapy Lead Dev.
@@ -34,15 +30,12 @@ import java.util.UUID;
  */
 @JaversSpringDataAuditable
 @Repository
-public interface ElementTrlRepository extends BaseRepository<ElementTrl> {
-  Optional<ElementTrl> getByParentIdAndIso3Language(UUID parentId, String iso3Language);
+interface ElementTrlRepository : BaseRepository<ElementTrl> {
+    fun getByParentIdAndIso3Language(parentId: UUID, iso3Language: String): Optional<ElementTrl>
+    fun getByParentIdAndIsDefaultIsTrue(parentId: UUID): Optional<ElementTrl>
+    fun findByIso3Language(iso3Language: String): Iterable<ElementTrl>
+    fun findByParentId(parentId: UUID): Collection<ElementTrl>
 
-  Optional<ElementTrl> getByParentIdAndIsDefaultIsTrue(UUID parentId);
-
-  List<ElementTrl> findByIso3Language(String iso3Language);
-
-  List<ElementTrl> findByParentId(UUID parentId);
-
-  @Query("SELECT DISTINCT iso3Language FROM ElementTrl")
-  List<String> getDistinctIso3Language();
+    @get:Query("SELECT DISTINCT iso3Language FROM ElementTrl")
+    val distinctIso3Language: List<String>
 }

@@ -9,6 +9,8 @@ import java.util.UUID;
 public interface FileUploadService extends CrudRelationalService<FileUpload> {
   UUID uploadFile(String filename, Byte[] fileContent);
 
+  Byte[] getI18NFile();
+
   void validate(UUID id);
 
   void importFile(UUID id) throws IOException;

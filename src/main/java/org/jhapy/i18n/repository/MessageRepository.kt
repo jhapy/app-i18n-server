@@ -20,6 +20,7 @@ package org.jhapy.i18n.repository
 import org.javers.spring.annotation.JaversSpringDataAuditable
 import org.jhapy.i18n.domain.Message
 import org.springframework.stereotype.Repository
+import java.util.*
 
 /**
  * @author jHapy Lead Dev.
@@ -29,5 +30,5 @@ import org.springframework.stereotype.Repository
 @JaversSpringDataAuditable
 @Repository
 interface MessageRepository : BaseRepository<Message> {
-    fun getByName(name: String): Message?
+    fun getByName(name: String): Optional<Message>
 }

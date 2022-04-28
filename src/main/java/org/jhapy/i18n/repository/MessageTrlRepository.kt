@@ -31,11 +31,11 @@ import java.util.*
 @JaversSpringDataAuditable
 @Repository
 interface MessageTrlRepository : BaseRepository<MessageTrl> {
-    fun getByParentIdAndIso3Language(parentId: UUID, iso3Language: String): MessageTrl?
-    fun getByParentIdAndIsDefaultIsTrue(parentId: UUID): MessageTrl?
+    fun getByParentIdAndIso3Language(parentId: UUID, iso3Language: String): Optional<MessageTrl>
+    fun getByParentIdAndIsDefaultIsTrue(parentId: UUID): Optional<MessageTrl>
     fun findByIso3Language(iso3Language: String): Iterable<MessageTrl>
     fun findByParentId(parentId: UUID): Collection<MessageTrl>
 
     @get:Query("SELECT DISTINCT iso3Language FROM MessageTrl")
-    val distinctIso3Language: Collection<String>
+    val distinctIso3Language: List<String>
 }

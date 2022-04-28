@@ -28,12 +28,8 @@ public class ElementTrlQueryHandler implements HasLogger {
 
     var optElementTrl =
         repository.getByParentIdAndIso3Language(query.getElementId(), query.getIso3Language());
-    if (optElementTrl.isPresent())
-      return new GetElementTrlByElementIdAndIso3LanguageQuery.Response(
-          converter.asDTO(optElementTrl.get(), null));
-    else {
-      return new GetElementTrlByElementIdAndIso3LanguageQuery.Response(null);
-    }
+    return optElementTrl.map(elementTrl -> new GetElementTrlByElementIdAndIso3LanguageQuery.Response(
+            converter.asDTO(elementTrl, null))).orElseGet(() -> new GetElementTrlByElementIdAndIso3LanguageQuery.Response(null));
   }
 
   @QueryHandler

@@ -88,7 +88,8 @@ public class I18NServiceEndpoint extends BaseEndpoint {
   public ResponseEntity<ServiceResult> getI18NFile(@RequestBody BaseRemoteQuery query) {
     var loggerPrefix = getLoggerPrefix("getI18NFile");
 
-    return handleResult(loggerPrefix, "N/A");
+
+    return  handleResult(loggerPrefix, fileUploadService.getI18NFile());
   }
 
   // @PreAuthorize("hasAnyAuthority('ROLE_I18N_ADMIN', 'ROLE_I18N_WRITE')")

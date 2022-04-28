@@ -28,12 +28,8 @@ public class MessageTrlQueryHandler implements HasLogger {
 
     var messageTrl =
         repository.getByParentIdAndIso3Language(query.getMessageId(), query.getIso3Language());
-    if (messageTrl != null)
-      return new GetMessageTrlByMessageIdAndIso3LanguageQuery.Response(
-          converter.asDTO(messageTrl, null));
-    else {
-      return new GetMessageTrlByMessageIdAndIso3LanguageQuery.Response(null);
-    }
+    return messageTrl.map(trl -> new GetMessageTrlByMessageIdAndIso3LanguageQuery.Response(
+            converter.asDTO(trl, null))).orElseGet(() -> new GetMessageTrlByMessageIdAndIso3LanguageQuery.Response(null));
   }
 
   @QueryHandler
@@ -45,11 +41,11 @@ public class MessageTrlQueryHandler implements HasLogger {
     var loggerPrefix = getLoggerPrefix("getByMessageTrlNameAndLanguage");
 
     var message = messageRepository.getByName(query.getName());
-    if (message != null) {
+    if (message.isPresent()) {
       return new GetMessageTrlByNameAndIso3LanguageQuery.Response(
           getMessageTrlByMessageIdAndIso3Language(
                   new GetMessageTrlByMessageIdAndIso3LanguageQuery(
-                      message.getId(), query.getIso3Language()))
+                      message.get().getId(), query.getIso3Language()))
               .getData());
     } else {
       warn(loggerPrefix, "Message '{0}' not found", query.getName());

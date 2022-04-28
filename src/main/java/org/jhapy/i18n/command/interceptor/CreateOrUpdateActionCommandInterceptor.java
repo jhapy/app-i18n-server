@@ -34,7 +34,7 @@ public class CreateOrUpdateActionCommandInterceptor
             lookupRepository.findByActionIdOrName(
                 createActionCommand.getId(), createActionCommand.getEntity().getName());
 
-        if (actionLookupEntity != null) {
+        if (actionLookupEntity.isPresent()) {
           throw new IllegalArgumentException(
               String.format(
                   ACTION_EXISTS_PATTERN,
@@ -49,7 +49,7 @@ public class CreateOrUpdateActionCommandInterceptor
             lookupRepository.findByName(updateActionCommand.getEntity().getName());
 
         if (elementLookupEntity != null
-            && !elementLookupEntity.getActionId().equals(updateActionCommand.getId())) {
+            && !elementLookupEntity.get().getActionId().equals(updateActionCommand.getId())) {
           throw new IllegalArgumentException(
               String.format(
                   ACTION_EXISTS_PATTERN,

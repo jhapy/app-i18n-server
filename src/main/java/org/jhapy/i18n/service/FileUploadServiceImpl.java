@@ -3,8 +3,8 @@ package org.jhapy.i18n.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.queryhandling.QueryGateway;
 import org.jhapy.cqrs.command.SubmitUploadCommand;
@@ -12,19 +12,26 @@ import org.jhapy.cqrs.command.i18n.*;
 import org.jhapy.cqrs.query.i18n.*;
 import org.jhapy.dto.domain.i18n.*;
 import org.jhapy.dto.serviceResponse.FileUploadStatusResponse;
+import org.jhapy.i18n.domain.Action;
+import org.jhapy.i18n.domain.Element;
 import org.jhapy.i18n.domain.FileUpload;
+import org.jhapy.i18n.domain.Message;
 import org.jhapy.i18n.errorHandeling.FileValidationError;
-import org.jhapy.i18n.repository.BaseRepository;
-import org.jhapy.i18n.repository.ElementLookupRepository;
-import org.jhapy.i18n.repository.FileUploadRepository;
+import org.jhapy.i18n.query.ActionQueryHandler;
+import org.jhapy.i18n.query.ActionTrlQueryHandler;
+import org.jhapy.i18n.query.ElementTrlQueryHandler;
+import org.jhapy.i18n.query.MessageTrlQueryHandler;
+import org.jhapy.i18n.repository.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,14 +46,376 @@ public class FileUploadServiceImpl implements FileUploadService {
   private final CommandGateway commandGateway;
   private final QueryGateway queryGateway;
   private final ElementLookupRepository elementLookupRepository;
+private final ElementRepository elementRepository;
+private final ElementTrlRepository elementTrlRepository;
+private final ActionRepository actionRepository;
+private final ActionTrlRepository actionTrlRepository;
+private final MessageRepository messageRepository;
+private final MessageTrlRepository messageTrlRepository;
+
+private final ElementTrlQueryHandler elementTrlQueryHandler;
+private final ActionTrlQueryHandler actionTrlQueryHandler;
+private final MessageTrlQueryHandler messageTrlQueryHandler;
 
   private boolean hasBootstrapped = false;
+
+  private static final String[] i18nExportHeaders =
+          new String[] {
+                  "Cat", "Name0", "Name1", "Name2", "Name3", "Name4", "Language", "Value", "Tooltip", "Key"
+          };
+  private static final String[] i18nExportMessageHeaders =
+          new String[] {"Cat", "Name0", "Name1", "Name2", "Name3", "Language", "Value", "Key"};
 
   @Value("${jhapy.bootstrap.i18n.file}")
   private String bootstrapFile;
 
   @Value("${jhapy.bootstrap.i18n.enabled}")
   private boolean isBootstrapEnabled;
+
+  public Byte[] getI18NFile() {
+    Workbook wb = new XSSFWorkbook();
+
+    Map<String, CellStyle> styles = createStyles(wb);
+    {
+      var sheet = wb.createSheet("Elements");
+
+      var headerRow = sheet.createRow(0);
+      headerRow.setHeightInPoints(12.75f);
+      for (var i = 0; i < i18nExportHeaders.length; i++) {
+        var cell = headerRow.createCell(i);
+        cell.setCellValue(i18nExportHeaders[i]);
+        cell.setCellStyle(styles.get("header"));
+      }
+
+      sheet.createFreezePane(0, 1);
+
+      Row row;
+      Cell cell;
+      var rownum = 1;
+      List<Element> elementList =
+              elementRepository.findAll(Sort.by(Sort.Order.asc("category"), Sort.Order.asc("name")));
+      List<String> iso3Languages = elementTrlRepository.getDistinctIso3Language();
+
+      for (Element element : elementList) {
+        for (String iso3Language : iso3Languages) {
+          row = sheet.createRow(rownum);
+
+          var j = 0;
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          cell.setCellValue(element.getCategory());
+
+          String[] nameSplited = element.getName().split("\\.");
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          cell.setCellValue(nameSplited[0]);
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 1) {
+            cell.setCellValue(nameSplited[1]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 2) {
+            cell.setCellValue(nameSplited[2]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 3) {
+            cell.setCellValue(nameSplited[3]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 4) {
+            cell.setCellValue(nameSplited[4]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          cell.setCellValue(iso3Language);
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          var elementTrl =elementTrlQueryHandler.getElementTrlByElementIdAndIso3Language( new GetElementTrlByElementIdAndIso3LanguageQuery(element.getId(), iso3Language));
+          if (elementTrl != null && elementTrl.getData() != null && !elementTrl.getData().getValue().equals(element.getName())) {
+            cell.setCellValue(elementTrl.getData().getValue());
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (elementTrl != null && elementTrl.getData() != null && !elementTrl.getData().getValue().equals(element.getName())) {
+            cell.setCellValue(elementTrl.getData().getTooltip());
+          }
+
+          rownum++;
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_g"));
+          cell.setCellFormula(
+                  "B"
+                          + rownum
+                          + "&IF(C"
+                          + rownum
+                          + "<>\"\",\".\"&C"
+                          + rownum
+                          + ",\"\")&IF(D"
+                          + rownum
+                          + "<>\"\",\".\"&D"
+                          + rownum
+                          + ",\"\")&IF(E"
+                          + rownum
+                          + "<>\"\",\".\"&E"
+                          + rownum
+                          + ",\"\")");
+        }
+      }
+      sheet.setColumnWidth(0, 256 * 10);
+      sheet.setColumnWidth(1, 256 * 15);
+      sheet.setColumnWidth(2, 256 * 25);
+      sheet.setColumnWidth(3, 256 * 25);
+      sheet.setColumnWidth(4, 256 * 25);
+      sheet.setColumnWidth(5, 256 * 10);
+      sheet.setColumnWidth(6, 256 * 65);
+      sheet.setColumnWidth(7, 256 * 65);
+      sheet.setColumnWidth(8, 256 * 45);
+    }
+    {
+      var sheet = wb.createSheet("Actions");
+
+      var headerRow = sheet.createRow(0);
+      headerRow.setHeightInPoints(12.75f);
+      for (var i = 0; i < i18nExportHeaders.length; i++) {
+        var cell = headerRow.createCell(i);
+        cell.setCellValue(i18nExportHeaders[i]);
+        cell.setCellStyle(styles.get("header"));
+      }
+
+      sheet.createFreezePane(0, 1);
+
+      Row row;
+      Cell cell;
+      var rownum = 1;
+      List<Action> actionList =
+              actionRepository.findAll(Sort.by(Sort.Order.asc("category"), Sort.Order.asc("name")));
+      List<String> iso3Languages = actionTrlRepository.getDistinctIso3Language();
+
+      for (Action action : actionList) {
+        for (String iso3Language : iso3Languages) {
+          row = sheet.createRow(rownum);
+
+          var j = 0;
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          cell.setCellValue(action.getCategory());
+
+          String[] nameSplited = action.getName().split("\\.");
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          cell.setCellValue(nameSplited[0]);
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 1) {
+            cell.setCellValue(nameSplited[1]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 2) {
+            cell.setCellValue(nameSplited[2]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 3) {
+            cell.setCellValue(nameSplited[3]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 4) {
+            cell.setCellValue(nameSplited[4]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          cell.setCellValue(iso3Language);
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          var actionTrl =actionTrlQueryHandler.getActionTrlByActionIdAndIso3Language(new GetActionTrlByActionIdAndIso3LanguageQuery(action.getId(), iso3Language));
+          if (actionTrl != null && actionTrl.getData() != null && !actionTrl.getData().getValue().equals(action.getName())) {
+            cell.setCellValue(actionTrl.getData().getValue());
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (actionTrl != null && actionTrl.getData() != null &&  !actionTrl.getData().getValue().equals(action.getName())) {
+            cell.setCellValue(actionTrl.getData().getTooltip());
+          }
+
+          rownum++;
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_g"));
+          cell.setCellFormula(
+                  "B"
+                          + rownum
+                          + "&IF(C"
+                          + rownum
+                          + "<>\"\",\".\"&C"
+                          + rownum
+                          + ",\"\")&IF(D"
+                          + rownum
+                          + "<>\"\",\".\"&D"
+                          + rownum
+                          + ",\"\")&IF(E"
+                          + rownum
+                          + "<>\"\",\".\"&E"
+                          + rownum
+                          + ",\"\")");
+        }
+      }
+      sheet.setColumnWidth(0, 256 * 10);
+      sheet.setColumnWidth(1, 256 * 15);
+      sheet.setColumnWidth(2, 256 * 25);
+      sheet.setColumnWidth(3, 256 * 25);
+      sheet.setColumnWidth(4, 256 * 25);
+      sheet.setColumnWidth(5, 256 * 10);
+      sheet.setColumnWidth(6, 256 * 65);
+      sheet.setColumnWidth(7, 256 * 65);
+      sheet.setColumnWidth(8, 256 * 45);
+    }
+    {
+      var sheet = wb.createSheet("Messages");
+
+      var headerRow = sheet.createRow(0);
+      headerRow.setHeightInPoints(12.75f);
+      for (var i = 0; i < i18nExportMessageHeaders.length; i++) {
+        var cell = headerRow.createCell(i);
+        cell.setCellValue(i18nExportMessageHeaders[i]);
+        cell.setCellStyle(styles.get("header"));
+      }
+
+      sheet.createFreezePane(0, 1);
+
+      Row row;
+      Cell cell;
+      var rownum = 1;
+      List<Message> messageList =
+              messageRepository.findAll(Sort.by(Sort.Order.asc("category"), Sort.Order.asc("name")));
+      List<String> iso3Languages = messageTrlRepository.getDistinctIso3Language();
+
+      for (Message message : messageList) {
+        for (String iso3Language : iso3Languages) {
+          row = sheet.createRow(rownum);
+
+          var j = 0;
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          cell.setCellValue(message.getCategory());
+
+          String[] nameSplited = message.getName().split("\\.");
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          cell.setCellValue(nameSplited[0]);
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 1) {
+            cell.setCellValue(nameSplited[1]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 2) {
+            cell.setCellValue(nameSplited[2]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          if (nameSplited.length > 3) {
+            cell.setCellValue(nameSplited[3]);
+          }
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          cell.setCellValue(iso3Language);
+
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_normal"));
+          var messageTrl =
+                  messageTrlQueryHandler.getMessageTrlByMessageIdAndIso3Language(new GetMessageTrlByMessageIdAndIso3LanguageQuery(message.getId(), iso3Language));
+          if (messageTrl != null && messageTrl.getData() != null &&  !messageTrl.getData().getValue().equals(message.getName())) {
+            cell.setCellValue(messageTrl.getData().getValue());
+          }
+          rownum++;
+          cell = row.createCell(j++);
+          cell.setCellStyle(styles.get("cell_g"));
+          cell.setCellFormula(
+                  "B"
+                          + rownum
+                          + "&IF(C"
+                          + rownum
+                          + "<>\"\",\".\"&C"
+                          + rownum
+                          + ",\"\")&IF(D"
+                          + rownum
+                          + "<>\"\",\".\"&D"
+                          + rownum
+                          + ",\"\")&IF(E"
+                          + rownum
+                          + "<>\"\",\".\"&E"
+                          + rownum
+                          + ",\"\")");
+        }
+      }
+      sheet.setColumnWidth(0, 256 * 10);
+      sheet.setColumnWidth(1, 256 * 15);
+      sheet.setColumnWidth(2, 256 * 25);
+      sheet.setColumnWidth(3, 256 * 25);
+      sheet.setColumnWidth(4, 256 * 25);
+      sheet.setColumnWidth(5, 256 * 10);
+      sheet.setColumnWidth(6, 256 * 65);
+      sheet.setColumnWidth(7, 256 * 45);
+    }
+    var outputStream = new ByteArrayOutputStream();
+    try {
+      wb.write(outputStream);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return ArrayUtils.toObject(outputStream.toByteArray());
+  }
+
+  private static Map<String, CellStyle> createStyles(Workbook wb) {
+    Map<String, CellStyle> styles = new HashMap<>();
+
+    CellStyle style;
+    var headerFont = wb.createFont();
+    headerFont.setFontName("Calibri");
+    headerFont.setFontHeightInPoints((short) 12);
+    headerFont.setBold(true);
+    style = wb.createCellStyle();
+    style.setAlignment(HorizontalAlignment.CENTER);
+    style.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
+    style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+    style.setFont(headerFont);
+    styles.put("header", style);
+
+    var defaultFont = wb.createFont();
+    defaultFont.setFontName("Calibri");
+    defaultFont.setFontHeightInPoints((short) 12);
+    style = wb.createCellStyle();
+    style.setFont(defaultFont);
+    style.setAlignment(HorizontalAlignment.LEFT);
+    style.setWrapText(true);
+    styles.put("cell_normal", style);
+
+    return styles;
+  }
 
   @Override
   public UUID uploadFile(String filename, Byte[] fileContent) {

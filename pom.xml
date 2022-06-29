@@ -51,7 +51,7 @@
 
     <mariadb-java-client.version>2.4.4</mariadb-java-client.version>
 
-    <poi.version>4.1.0</poi.version>
+    <poi.version>4.1.1</poi.version>
     <commons-io.version>2.6</commons-io.version>
 
     <logstash-gelf.version>1.13.0</logstash-gelf.version>

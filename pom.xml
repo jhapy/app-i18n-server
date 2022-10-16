@@ -278,6 +278,7 @@
             <artifactId>javers-spring-boot-starter-mongo</artifactId>
             <version>${javers-spring-boot-starter-mongo.version}</version>
         </dependency>
+
     </dependencies>
 
     <dependencyManagement>
